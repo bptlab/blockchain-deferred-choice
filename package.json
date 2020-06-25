@@ -4,9 +4,13 @@
   "version": "0.1.0",
   "scripts": {
     "dev": "parcel index.html",
-    "build": "parcel build index.html"
+    "build": "parcel build index.html",
+    "oracles": "forever oracles/oracles.js"
   },
   "dependencies": {
+    "forever": "^3.0.0",
+    "fs-extra": "^9.0.1",
+    "solc": "^0.6.10",
     "vue": "^2.6.11",
     "vue-hot-reload-api": "^2.3.4",
     "vue-material": "^1.0.0-beta-14",

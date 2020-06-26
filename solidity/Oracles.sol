@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.6.9;
 
 import "./Interfaces.sol";
@@ -13,11 +14,11 @@ contract RequestResponseOracle is Oracle {
 
 contract StorageOracle is Oracle {
     int256 value;
-    
+
     function setValue(int256 newValue) external {
         value = newValue;
     }
-    
+
     function getValue(uint16) external override returns (bool, int256) {
         return (false, value);
     }

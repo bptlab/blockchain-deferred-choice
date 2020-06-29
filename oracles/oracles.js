@@ -46,17 +46,16 @@ const specs = {
 }
 
 class Oracle {
-  constructor(name, spec, log) {
+  constructor(name, log) {
     this.name = name;
-    this.spec = spec;
     this.log = log;
-    this.ready = false;
 
-    this.contract = new web3.eth.Contract(this.spec.abi, undefined, {
+    const spec = this.getSpec();
+    this.contract = new web3.eth.Contract(spec.abi, undefined, {
       from: oraclesAdd,
       gas: 200000,
       gasPrice: web3.utils.toWei('20', 'gwei'),
-      data: this.spec.evm.bytecode.object
+      data: spec.evm.bytecode.object
     });
   }
 
@@ -103,6 +102,10 @@ class Oracle {
     }
   }
 
+  getSpec() {
+    return undefined;
+  }
+
   onValueChange(value) {
     console.log(this.name, 'VALUE_CHANGE', value);
   }
@@ -114,6 +117,10 @@ class Oracle {
 
 class RequestResponseOracle extends Oracle {
   currentValue;
+
+  getSpec() {
+    return specs['RequestResponseOracle'];
+  }
 
   onValueChange(value) {
     super.onValueChange(value);
@@ -145,6 +152,10 @@ class RequestResponseOracle extends Oracle {
 }
 
 class StorageOracle extends Oracle {
+  getSpec() {
+    return specs['StorageOracle'];
+  }
+
   onValueChange(value) {
     super.onValueChange(value);
     this.contract.methods.setValue(value).send({
@@ -161,9 +172,8 @@ class StorageOracle extends Oracle {
 
 // deploy an oracle
 async function deployAndTest() {
-  const someOracle = new StorageOracle(
+  const someOracle = new RequestResponseOracle(
     'TestOracle',
-    specs.StorageOracle,
     [
       { at:    0, value:  5 },
       { at: 1000, value:  8 },

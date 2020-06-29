@@ -1,6 +1,28 @@
 const Web3 = require('web3');
 const fs = require('fs-extra');
 const solc = require('solc');
+const vorpal = require('vorpal')();
+
+/*
+ORACLE TYPES
+- Request/response
+- Request/response with on-chain subscriber mgmt
+- Publish/subscribe
+- Publish/subscribe with on-chain subscriber mgmt
+- Publish/subscribe with condition
+- Publish/subscribe with condition & on-chain subscriber mgmt
+
+- Storage
+- History (send all timestamped data)
+- History with condition (send just evaluation result with timestamp)
+
+FROM A CONSUMER PERSPECTIVE, TIMESTAMP
+- Request/response: imprecise timestamp, find out yourself from tx
+- Publish/subscribe: more precise timestamp, find out yourself from tx
+- Storage: imprecise timestamp, find out yourself from tx
+- History: find timestamp in list of values
+- History with condition: get timestamp from oracle
+*/
 
 // blockchain connection
 const web3 = new Web3(new Web3.providers.WebsocketProvider(
@@ -9,12 +31,9 @@ const web3 = new Web3(new Web3.providers.WebsocketProvider(
 ));
 
 // key and account management
-const deferredKey = fs.readFileSync('./keys/deferred.ppk', { encoding: 'utf8' });
 const oraclesKey = fs.readFileSync('./keys/oracles.ppk', { encoding: 'utf8' });
-web3.eth.accounts.wallet.add(deferredKey);
 web3.eth.accounts.wallet.add(oraclesKey);
-const deferredAdd = web3.eth.accounts.wallet[0].address;
-const oraclesAdd = web3.eth.accounts.wallet[1].address;
+const oraclesAdd = web3.eth.accounts.wallet[0].address;
 
 // contract compilation
 const codeInterfaces = fs.readFileSync('./solidity/Interfaces.sol', { encoding: 'utf8' });
@@ -41,6 +60,7 @@ const compiled = JSON.parse(solc.compile(JSON.stringify(compilerInput)));
 const specs = {
   Oracle: compiled.contracts['Interfaces.sol'].Oracle,
   RequestResponseOracle: compiled.contracts['Oracles.sol'].RequestResponseOracle,
+  PublishSubscribeOracle: compiled.contracts['Oracles.sol'].PublishSubscribeOracle,
   StorageOracle: compiled.contracts['Oracles.sol'].StorageOracle,
   OracleConsumer: compiled.contracts['Interfaces.sol'].OracleConsumer,
 }
@@ -83,23 +103,27 @@ class Oracle {
     })
   }
 
-  startReplay() {
+  replay() {
     this.replayTime = 0;
     this.replayStep = 0;
     this.replayPrev = Date.now();
-    this.stepReplay();
-  }
 
-  stepReplay() {
-    this.onValueChange(this.log[this.replayStep].value);
-    this.replayStep++;
-    if (this.replayStep < this.log.length) {
-      const oldTimer = this.replayPrev;
-      const newTimer = Date.now();
-      this.replayTime += newTimer - oldTimer;
-      setTimeout(this.stepReplay.bind(this), this.log[this.replayStep].at - this.replayTime);
-      this.replayPrev = newTimer;
-    }
+    return new Promise(resolve => {
+      const step = () => {
+        this.onValueChange(this.log[this.replayStep].value);
+        this.replayStep++;
+        if (this.replayStep < this.log.length) {
+          const oldTimer = this.replayPrev;
+          const newTimer = Date.now();
+          this.replayTime += newTimer - oldTimer;
+          setTimeout(step.bind(this), this.log[this.replayStep].at - this.replayTime);
+          this.replayPrev = newTimer;
+        } else {
+          return resolve();
+        }
+      }
+      step.call(this);
+    });
   }
 
   getSpec() {
@@ -115,29 +139,22 @@ class Oracle {
   }
 }
 
-class RequestResponseOracle extends Oracle {
+class OffChainOracle extends Oracle {
   currentValue;
-
-  getSpec() {
-    return specs['RequestResponseOracle'];
-  }
 
   onValueChange(value) {
     super.onValueChange(value);
     this.currentValue = value;
   }
 
-  onContractEvent(event) {
-    super.onContractEvent(event);
-
-    // call the receiver contract
+  notifyConsumer(consumerAddress, correlation) {
     const requester = new web3.eth.Contract(
       specs.OracleConsumer.abi,
-      event.returnValues.requester
+      consumerAddress
     );
     requester.methods.oracleCallback(
       this.contract.options.address,
-      event.returnValues.correlation,
+      correlation,
       this.currentValue
     ).send({
       from: oraclesAdd,
@@ -148,6 +165,51 @@ class RequestResponseOracle extends Oracle {
     }).on('receipt', receipt => {
       console.log(this.name, 'REQUESTER RECEIPT');
     }).on('error', console.error);
+  }
+}
+
+class RequestResponseOracle extends OffChainOracle {
+  getSpec() {
+    return specs['RequestResponseOracle'];
+  }
+
+  onContractEvent(event) {
+    super.onContractEvent(event);
+    if (event.event == 'Request') {
+      this.notifyConsumer(
+        event.returnValues.requester,
+        event.returnValues.correlation
+      );
+    }
+  }
+}
+
+class PublishSubscribeOracle extends OffChainOracle {
+  subscribers = [];
+
+  getSpec() {
+    return specs['PublishSubscribeOracle'];
+  }
+
+  onValueChange(value) {
+    super.onValueChange(value);
+    this.subscribers.forEach(sub => {
+      this.notifyConsumer(
+        sub.subscriber,
+        sub.correlation
+      );
+    });
+  }
+
+  onContractEvent(event) {
+    super.onContractEvent(event);
+    if (event.event == 'Subscription') {
+      this.subscribers.push(event.returnValues);
+      this.notifyConsumer(
+        event.returnValues.subscriber,
+        event.returnValues.correlation
+      );
+    }
   }
 }
 
@@ -170,23 +232,51 @@ class StorageOracle extends Oracle {
   }
 }
 
-// deploy an oracle
-async function deployAndTest() {
-  const someOracle = new RequestResponseOracle(
-    'TestOracle',
-    [
-      { at:    0, value:  5 },
-      { at: 1000, value:  8 },
-      { at: 2000, value: 10 },
-      { at: 4000, value:  5 },
-      { at: 5000, value:  4 }
-    ]
-  );
-  await someOracle.deploy();
-  someOracle.startReplay();
-}
+let someOracle;
 
-deployAndTest();
+vorpal
+  .command('deploy', 'Deploy a new set of oracles.')
+  .action(() => {
+    someOracle = new PublishSubscribeOracle(
+      'TestOracle',
+      [
+        { at:    0, value:  5 },
+        { at: 1000, value:  8 },
+        { at: 2000, value: 10 },
+        { at: 4000, value:  5 },
+        { at: 5000, value:  4 }
+      ]
+    );
+    return someOracle.deploy();
+  });
+
+vorpal
+  .command('replay', 'Start replay of last deployed oracles.')
+  .action(() => {
+    return someOracle.replay();
+  });
+
+vorpal
+  .delimiter('oracles$')
+  .show();
+
+// deploy an oracle
+// async function deployAndTest() {
+//   const someOracle = new RequestResponseOracle(
+//     'TestOracle',
+//     [
+//       { at:    0, value:  5 },
+//       { at: 1000, value:  8 },
+//       { at: 2000, value: 10 },
+//       { at: 4000, value:  5 },
+//       { at: 5000, value:  4 }
+//     ]
+//   );
+//   await someOracle.deploy();
+//   someOracle.startReplay();
+// }
+
+// deployAndTest();
 
 
 

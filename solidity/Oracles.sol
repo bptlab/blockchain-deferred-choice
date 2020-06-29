@@ -12,6 +12,15 @@ contract RequestResponseOracle is Oracle {
     }
 }
 
+contract PublishSubscribeOracle is Oracle {
+    event Subscription(address subscriber, uint16 correlation);
+
+    function getValue(uint16 correlation) external override returns (bool, int256) {
+        emit Subscription(msg.sender, correlation);
+        return (true, 0);
+    }
+}
+
 contract StorageOracle is Oracle {
     int256 value;
 

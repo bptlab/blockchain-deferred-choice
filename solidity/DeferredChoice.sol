@@ -85,7 +85,7 @@ contract DeferredChoice is OracleConsumer {
             EventDefinition.CONDITIONAL,
             EventState.INACTIVE,
             0,
-            Oracle(0x4AB4A096bBfDA3156a7f95c0c8002Bb05f3722D0),
+            Oracle(0x919338c0226eEf2c1C084FdA0Ca0dDdB063BcF0A),
             Comparison(
                 Operator.LESS,
                 10

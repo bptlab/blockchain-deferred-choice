@@ -1,34 +1,68 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.6.9;
+pragma experimental ABIEncoderV2;
 
 import "./Interfaces.sol";
 
-contract RequestResponseOracle is Oracle {
-    event Request(address requester, uint16 correlation);
+contract RequestResponseOracle is AsyncOracle {
+  function specification() external pure override returns (OracleSpecification memory) {
+    return OracleSpecification(
+      OracleMode.ASYNC,
+      OracleTense.PRESENT,
+      OraclePattern.STANDARD
+    );
+  }
 
-    function getValue(uint16 correlation) external override returns (bool, int256) {
-        emit Request(msg.sender, correlation);
-        return (true, 0);
-    }
+  function get(uint256 correlation, bytes calldata params) external override {
+    emit Query(msg.sender, correlation, params);
+  }
 }
 
-contract PublishSubscribeOracle is Oracle {
-    event Subscription(address subscriber, uint16 correlation);
+contract PublishSubscribeOracle is AsyncOracle {
+  function specification() external pure override returns (OracleSpecification memory) {
+    return OracleSpecification(
+      OracleMode.ASYNC,
+      OracleTense.FUTURE,
+      OraclePattern.STANDARD
+    );
+  }
 
-    function getValue(uint16 correlation) external override returns (bool, int256) {
-        emit Subscription(msg.sender, correlation);
-        return (true, 0);
-    }
+  function get(uint256 correlation, bytes calldata params) external override {
+    emit Query(msg.sender, correlation, params);
+  }
 }
 
-contract StorageOracle is Oracle {
-    int256 value;
+contract StorageOracle is SyncOracle {
+  int256 value;
 
-    function setValue(int256 newValue) external {
-        value = newValue;
-    }
+  function specification() external pure override returns (OracleSpecification memory) {
+    return OracleSpecification(
+      OracleMode.SYNC,
+      OracleTense.PRESENT,
+      OraclePattern.STANDARD
+    );
+  }
 
-    function getValue(uint16) external override returns (bool, int256) {
-        return (false, value);
-    }
+  function set(int256 newValue) external {
+    value = newValue;
+  }
+
+  function get(bytes calldata) external override returns (bytes memory results) {
+    results = abi.encode(value);
+  }
 }
+
+// contract HistoryOracle is SyncOracle {
+//   int256[] values;
+
+//   function set(int256 newValue) external {
+//     values.push(block.timestamp);
+//     values.push(newValue);
+//   }
+
+//   function get(bytes calldata) external override returns (bytes memory results) {
+//     //TODO return all values from 'from' given in calldata
+//   }
+// }
+
+

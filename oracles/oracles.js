@@ -59,10 +59,12 @@ const compilerInput = {
 const compiled = JSON.parse(solc.compile(JSON.stringify(compilerInput)));
 const specs = {
   Oracle: compiled.contracts['Interfaces.sol'].Oracle,
+  SyncOracle: compiled.contracts['Interfaces.sol'].SyncOracle,
+  AsyncOracle: compiled.contracts['Interfaces.sol'].AsyncOracle,
+  OracleConsumer: compiled.contracts['Interfaces.sol'].OracleConsumer,
   RequestResponseOracle: compiled.contracts['Oracles.sol'].RequestResponseOracle,
   PublishSubscribeOracle: compiled.contracts['Oracles.sol'].PublishSubscribeOracle,
-  StorageOracle: compiled.contracts['Oracles.sol'].StorageOracle,
-  OracleConsumer: compiled.contracts['Interfaces.sol'].OracleConsumer,
+  StorageOracle: compiled.contracts['Oracles.sol'].StorageOracle
 }
 
 class Oracle {
@@ -139,7 +141,7 @@ class Oracle {
   }
 }
 
-class OffChainOracle extends Oracle {
+class AsyncOracle extends Oracle {
   currentValue;
 
   onValueChange(value) {
@@ -147,7 +149,22 @@ class OffChainOracle extends Oracle {
     this.currentValue = value;
   }
 
-  notifyConsumer(consumerAddress, correlation) {
+  onContractEvent(event) {
+    super.onContractEvent(event);
+    if (event.event == 'Query') {
+      this.onQuery(
+        event.returnValues.sender,
+        event.returnValues.correlation,
+        event.returnValues.params
+      );
+    }
+  }
+
+  onQuery(sender, correlation, params) {
+    console.log(this.name, 'QUERY', sender, correlation, params);
+  }
+
+  doCallback(consumerAddress, correlation, types, values) {
     const requester = new web3.eth.Contract(
       specs.OracleConsumer.abi,
       consumerAddress
@@ -155,7 +172,7 @@ class OffChainOracle extends Oracle {
     requester.methods.oracleCallback(
       this.contract.options.address,
       correlation,
-      this.currentValue
+      web3.eth.abi.encodeParameters(types, values)
     ).send({
       from: oraclesAdd,
       gas: 200000,
@@ -168,23 +185,18 @@ class OffChainOracle extends Oracle {
   }
 }
 
-class RequestResponseOracle extends OffChainOracle {
+class RequestResponseOracle extends AsyncOracle {
   getSpec() {
     return specs['RequestResponseOracle'];
   }
 
-  onContractEvent(event) {
-    super.onContractEvent(event);
-    if (event.event == 'Request') {
-      this.notifyConsumer(
-        event.returnValues.requester,
-        event.returnValues.correlation
-      );
-    }
+  onQuery(sender, correlation, params) {
+    super.onQuery(sender, correlation, params);
+    this.doCallback(sender, correlation, ['int256'], [this.currentValue]);
   }
 }
 
-class PublishSubscribeOracle extends OffChainOracle {
+class PublishSubscribeOracle extends AsyncOracle {
   subscribers = [];
 
   getSpec() {
@@ -194,22 +206,16 @@ class PublishSubscribeOracle extends OffChainOracle {
   onValueChange(value) {
     super.onValueChange(value);
     this.subscribers.forEach(sub => {
-      this.notifyConsumer(
-        sub.subscriber,
-        sub.correlation
-      );
+      this.doCallback(sub.sender, sub.correlation, ['int256'], [this.currentValue]);
     });
   }
 
-  onContractEvent(event) {
-    super.onContractEvent(event);
-    if (event.event == 'Subscription') {
-      this.subscribers.push(event.returnValues);
-      this.notifyConsumer(
-        event.returnValues.subscriber,
-        event.returnValues.correlation
-      );
-    }
+  onQuery(sender, correlation, params) {
+    super.onQuery(sender, correlation, params);
+    this.subscribers.push({
+      sender, correlation, params
+    });
+    this.doCallback(sender, correlation, ['int256'], [this.currentValue]);
   }
 }
 
@@ -220,7 +226,7 @@ class StorageOracle extends Oracle {
 
   onValueChange(value) {
     super.onValueChange(value);
-    this.contract.methods.setValue(value).send({
+    this.contract.methods.set(value).send({
       from: oraclesAdd,
       gas: 200000,
       gasPrice: web3.utils.toWei('20', 'gwei')

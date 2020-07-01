@@ -75,7 +75,7 @@ class Oracle {
     const spec = this.getSpec();
     this.contract = new web3.eth.Contract(spec.abi, undefined, {
       from: oraclesAdd,
-      gas: 200000,
+      gas: 2000000,
       gasPrice: web3.utils.toWei('20', 'gwei'),
       data: spec.evm.bytecode.object
     });

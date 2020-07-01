@@ -4,23 +4,7 @@ pragma experimental ABIEncoderV2;
 
 import "./Interfaces.sol";
 
-contract DeferredChoice is OracleConsumer {
-
-    // Events
-    event StateChanged(
-      uint8 index,
-      EventState newState
-    );
-
-    event Debug(string text);
-
-    // Enumerations
-    enum EventState {
-      INACTIVE,
-      ACTIVE,
-      COMPLETED,
-      ABORTED
-    }
+contract BaseDeferredChoice is DeferredChoice {
 
     enum EventDefinition {
       TIMER_ABSOLUTE,
@@ -38,32 +22,18 @@ contract DeferredChoice is OracleConsumer {
       // Timer specification
       uint256 timer;
       // Conditional specification
-      Oracle oracle;
+      address oracle;
       Base.Condition condition;
     }
 
-    uint256 constant BOTTOM_TIMESTAMP = 1;
-
-    struct Step {
-      uint8 target; // target event
-      uint256 timestamp;
-      mapping(uint8 => uint256) evaluations; // event evaluations
-    }
+    uint256 constant TOP_TIMESTAMP = type(uint256).max;
 
     // Member Variables
     uint256 public activationTime;
     uint16 public stepCounter = 0;
-    mapping(uint16 => Step) public steps;
     Event[] public events;
-
-    modifier hasNotFinished() {
-      for (uint8 i = 0; i < events.length; i++) {
-        if (events[i].state == EventState.COMPLETED) {
-          revert("An event has already completed");
-        }
-      }
-      _;
-    }
+    uint256[] public evaluations; // event evaluations
+    ChoiceState public state = ChoiceState.CREATED;
 
     // Functions
     constructor() public {
@@ -73,96 +43,148 @@ contract DeferredChoice is OracleConsumer {
         EventDefinition.CONDITIONAL,
         EventState.INACTIVE,
         0,
-        Oracle(0x919338c0226eEf2c1C084FdA0Ca0dDdB063BcF0A),
+        0x8B53aA36B046bcA716C3Df4fDE59d57C7F90e5E0,
         Condition(
           Operator.LESS,
           10
         )
       ));
+      events.push(Event(
+        0,
+        EventDefinition.TIMER_RELATIVE,
+        EventState.INACTIVE,
+        100000,
+        address(0x0),
+        Condition(
+          Operator.EQUAL,
+          0
+        )
+      ));
+      evaluations.push(0);
+      evaluations.push(0);
     }
 
-    function activate() external {
-      // TODO get time, maybe with callback
+
+    function activate() external override {
+      if (state != ChoiceState.CREATED) {
+        revert("Choice can only be started once");
+      }
+
+      // start the choice
+      state = ChoiceState.RUNNING;
       activationTime = block.timestamp;
 
+      // activate and initially evaluate all events
       for (uint8 i = 0; i < events.length; i++) {
         changeState(i, EventState.ACTIVE);
+
+        // subscribe to publish/subscribe oracles
+        Event memory e = events[i];
+        if (e.definition == EventDefinition.CONDITIONAL) {
+          if (Oracle(e.oracle).specification().tense == OracleTense.FUTURE) {
+            // set correlation target as this event itself
+            uint256 correlation = uint256(i) | (uint256(i) << 8);
+            AsyncOracle(e.oracle).get(correlation, new bytes(0));
+          }
+        }
+
+        // mark non-implicit events with the top timestamp
+        if (e.definition == EventDefinition.MESSAGE) {
+          evaluations[i] = TOP_TIMESTAMP;
+        }
+
+        evaluateEvent(i, i);
       }
 
       emit Debug("Activated");
     }
 
-    function changeState(uint8 index, EventState newState) internal {
+    function tryTrigger(uint8 target) external override {
+      if (target >= events.length) {
+        revert("Event with target index does not exist");
+      }
+
+      Event memory e = events[target];
+
+      if (events[target].state != EventState.ACTIVE) {
+        revert("Event with target index is not active");
+      }
+
+      // It can happen that triggering a message has been tried before, but not
+      // all oracle values were gathered yet. Thus, we "remember" that timestamp
+      // so the message can be correctly sent afterwards. Otherwise, set the
+      // evaluation timestamp to the current one.
+      if (e.definition == EventDefinition.MESSAGE && evaluations[target] == TOP_TIMESTAMP) {
+        evaluations[target] = block.timestamp;
+      }
+
+      // Evaluate all other events
+      for (uint8 i = 0; i < events.length; i++) {
+        // Reset evaluation of non-FUTURE oracles
+        if (events[i].definition == EventDefinition.CONDITIONAL) {
+          if (Oracle(events[i].oracle).specification().tense != OracleTense.FUTURE) {
+            if (evaluations[i] == TOP_TIMESTAMP) {
+              evaluations[i] = 0;
+            }
+          }
+        }
+        evaluateEvent(i, target);
+      }
+
+      tryCompleteTrigger(target);
+    }
+
+    function oracleCallback(address oracle, uint256 correlation, bytes calldata results) external override {
+      uint8 target = uint8(correlation);
+      uint8 index = uint8(correlation >> 8);
+      //TODO Figure out when and if we have to do this.
+      checkConditionalEvent(index, oracle, results);
+      tryCompleteTrigger(target);
+    }
+
+
+    function changeState(uint8 index, EventState newState) private {
       events[index].state = newState;
       emit StateChanged(index, newState);
     }
 
-
-    function startStep(uint8 index) external hasNotFinished() {
-      if (index >= events.length) {
-        revert("Event index does not exist");
-      }
-
-      uint16 step = stepCounter;
-      stepCounter++;
-      steps[step] = Step(index, 0);
-      Step storage curStep = steps[step];
-
-      // TODO update with other methods of getting the current timestamp
-      curStep.timestamp = block.timestamp;
-
-      // evaluate events
-      for (uint8 i = 0; i < events.length; i++) {
-        Event memory e = events[i];
-        if (e.definition == EventDefinition.CONDITIONAL) {
-          // get the oracle value and evaluate it
-          Oracle oracle = e.oracle;
-          if (oracle.specification().mode == OracleMode.SYNC) {
-            bytes memory result = SyncOracle(address(oracle)).get(new bytes(0));
-            evaluateConditionalEvent(step, e.index, oracle, result);
-          } else {
-            uint256 correlation = uint256(step) | (uint256(i) << 16);
-            AsyncOracle(address(oracle)).get(correlation, new bytes(0));
-          }
-        } else if (e.definition == EventDefinition.TIMER_ABSOLUTE) {
-          // check if deadline has passed
-          if (e.timer <= curStep.timestamp) {
+    function evaluateEvent(uint8 index, uint8 target) internal {
+      Event memory e = events[index];
+      if (e.state == EventState.ACTIVE && (evaluations[index] == 0 || evaluations[index] == TOP_TIMESTAMP)) {
+        if (e.definition == EventDefinition.TIMER_ABSOLUTE) {
+          // Check if deadline has passed
+          if (e.timer <= block.timestamp) {
             if (e.timer < activationTime) {
-              curStep.evaluations[e.index] = activationTime;
+              evaluations[index] = activationTime;
             } else {
-              curStep.evaluations[e.index] = e.timer;
+              evaluations[index] = e.timer;
             }
           } else {
-            curStep.evaluations[e.index] = BOTTOM_TIMESTAMP;
+            evaluations[index] = TOP_TIMESTAMP;
           }
         } else if (e.definition == EventDefinition.TIMER_RELATIVE) {
-          // check if enough time has passed since activation
-          if (activationTime + e.timer <= curStep.timestamp) {
-            curStep.evaluations[e.index] = activationTime + e.timer;
+          // Check if enough time has passed since activation
+          if (activationTime + e.timer <= block.timestamp) {
+            evaluations[index] = activationTime + e.timer;
           } else {
-            curStep.evaluations[e.index] = BOTTOM_TIMESTAMP;
+            evaluations[index] = TOP_TIMESTAMP;
           }
-        } else if (e.definition == EventDefinition.MESSAGE) {
-          // check if the target of the step is this event
-          if (curStep.target == e.index) {
-            curStep.evaluations[e.index] = curStep.timestamp;
-          } else {
-            curStep.evaluations[e.index] = BOTTOM_TIMESTAMP;
+        } else if (e.definition == EventDefinition.CONDITIONAL) {
+          if (Oracle(e.oracle).specification().tense != OracleTense.FUTURE) {
+            // Get the oracle value and evaluate it
+            if (Oracle(e.oracle).specification().mode == OracleMode.SYNC) {
+              bytes memory result = SyncOracle(e.oracle).get(new bytes(0));
+              checkConditionalEvent(index, e.oracle, result);
+            } else {
+              uint256 correlation = uint256(target) | (uint256(index) << 8);
+              AsyncOracle(e.oracle).get(correlation, new bytes(0));
+            }
           }
         }
       }
-
-      tryCompleteStep(step);
     }
 
-    function oracleCallback(Oracle oracle, uint256 correlation, bytes calldata results) external override {
-      uint16 step = uint16(correlation);
-      uint8 index = uint8(correlation >> 16);
-      evaluateConditionalEvent(step, index, oracle, results);
-      tryCompleteStep(step);
-    }
-
-    function evaluateConditionalEvent(uint16 step, uint8 index, Oracle oracle, bytes memory results) private {
+    function checkConditionalEvent(uint8 index, address oracle, bytes memory results) private {
       emit Debug("Oracle evaluated");
 
       //TODO check which oracle we have and how we have to decode the results
@@ -171,47 +193,56 @@ contract DeferredChoice is OracleConsumer {
       bool result = false;
       Condition storage c = events[index].condition;
       if (c.operator == Operator.GREATER) {
-          result = value > c.value;
+        result = value > c.value;
       } else if (c.operator == Operator.GREATER_EQUAL) {
-          result = value >= c.value;
+        result = value >= c.value;
       } else if (c.operator == Operator.EQUAL) {
-          result = value == c.value;
+        result = value == c.value;
       } else if (c.operator == Operator.LESS_EQUAL) {
-          result = value <= c.value;
+        result = value <= c.value;
       } else if (c.operator == Operator.LESS) {
-          result = value < c.value;
+        result = value < c.value;
       }
 
       if (result) {
-          // TODO proper timestamp
-          steps[step].evaluations[index] = block.timestamp;
+        evaluations[index] = block.timestamp;
+      } else {
+        evaluations[index] = TOP_TIMESTAMP;
       }
     }
 
-    function tryCompleteStep(uint16 step) private {
+    function tryCompleteTrigger(uint8 target) private {
       emit Debug("Trying to complete step");
 
-      // We need to have a timestamp
-      if (steps[step].timestamp == 0) {
-        return;
-      }
-
-      // We need to have all oracle evaluation timestamps
+      // Find minimum evaluation timestamp other than 0, which means that
+      // no evaluation has been performed yet
+      bool canComplete = true;
+      uint256 min = TOP_TIMESTAMP;
       for (uint8 i = 0; i < events.length; i++) {
-        if (events[i].definition == EventDefinition.CONDITIONAL) {
-          if (steps[step].evaluations[i] == 0) {
-            return;
+        if (evaluations[i] == 0) {
+          canComplete = false;
+        } else if (evaluations[i] < min) {
+          min = evaluations[i];
+        }
+      }
+      canComplete = canComplete && (evaluations[target] == min);
+
+      // Change the states of events according to the observations
+      for (uint8 i = 0; i < events.length; i++) {
+        if (canComplete) {
+          if (target == i) {
+            changeState(i, EventState.COMPLETED);
+          } else {
+            changeState(i, EventState.ABORTED);
+          }
+        } else {
+          if (min < evaluations[i]) {
+            // This event can not win the race anymore, since there is already
+            // one with an earlier evaluation. So even though we can not complete
+            // yet, we still do not have to check this one anymore.
+            changeState(i, EventState.ABORTED);
           }
         }
       }
-
-      // Good to go!
-      completeStep(step);
-    }
-
-    function completeStep(uint16 step) private {
-      emit Debug("Completing step");
-      // TODO find set of events with lowest timestamp and check if the target is one of them
-      changeState(steps[step].target, EventState.COMPLETED);
     }
 }

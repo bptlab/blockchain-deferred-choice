@@ -58,7 +58,34 @@ interface AsyncOracle is Oracle {
 
 // Consumer interfaces
 interface OracleConsumer is Base {
-  function oracleCallback(Oracle oracle, uint256 correlation, bytes calldata results) external;
+  function oracleCallback(address oracle, uint256 correlation, bytes calldata results) external;
+}
+
+interface DeferredChoice is OracleConsumer {
+  // Events
+  event StateChanged(
+    uint8 index,
+    EventState newState
+  );
+
+  event Debug(string text);
+
+  enum ChoiceState {
+    CREATED,
+    RUNNING,
+    FINISHED
+  }
+
+  // Enumerations
+  enum EventState {
+    INACTIVE,
+    ACTIVE,
+    COMPLETED,
+    ABORTED
+  }
+
+  function activate() external;
+  function tryTrigger(uint8 target) external;
 }
 
 // // Present oracles

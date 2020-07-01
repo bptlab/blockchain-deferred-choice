@@ -30,7 +30,6 @@ contract BaseDeferredChoice is DeferredChoice {
 
     // Member Variables
     uint256 public activationTime;
-    uint16 public stepCounter = 0;
     Event[] public events;
     uint256[] public evaluations; // event evaluations
     ChoiceState public state = ChoiceState.CREATED;
@@ -43,9 +42,9 @@ contract BaseDeferredChoice is DeferredChoice {
         EventDefinition.CONDITIONAL,
         EventState.INACTIVE,
         0,
-        0x8B53aA36B046bcA716C3Df4fDE59d57C7F90e5E0,
+        0xcBa7af7EE37DD792123b05C1472935E9577EaC6A,
         Condition(
-          Operator.LESS,
+          Operator.EQUAL,
           10
         )
       ));
@@ -53,7 +52,7 @@ contract BaseDeferredChoice is DeferredChoice {
         0,
         EventDefinition.TIMER_RELATIVE,
         EventState.INACTIVE,
-        100000,
+        10,
         address(0x0),
         Condition(
           Operator.EQUAL,
@@ -225,7 +224,10 @@ contract BaseDeferredChoice is DeferredChoice {
           min = evaluations[i];
         }
       }
-      canComplete = canComplete && (evaluations[target] == min);
+      if (min == TOP_TIMESTAMP) {
+        return;
+      }
+      canComplete = canComplete && evaluations[target] == min;
 
       // Change the states of events according to the observations
       for (uint8 i = 0; i < events.length; i++) {

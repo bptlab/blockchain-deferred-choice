@@ -4,18 +4,6 @@ const solc = require('solc');
 const vorpal = require('vorpal')();
 
 /*
-ORACLE TYPES
-- Request/response
-- Request/response with on-chain subscriber mgmt
-- Publish/subscribe
-- Publish/subscribe with on-chain subscriber mgmt
-- Publish/subscribe with condition
-- Publish/subscribe with condition & on-chain subscriber mgmt
-
-- Storage
-- History (send all timestamped data)
-- History with condition (send just evaluation result with timestamp)
-
 FROM A CONSUMER PERSPECTIVE, TIMESTAMP
 - Request/response: imprecise timestamp, find out yourself from tx
 - Publish/subscribe: more precise timestamp, find out yourself from tx

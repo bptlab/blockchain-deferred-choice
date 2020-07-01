@@ -37,17 +37,18 @@ const compilerInput = {
 const compiled = JSON.parse(solc.compile(JSON.stringify(compilerInput)));
 const specs = {
   Oracle: compiled.contracts['Interfaces.sol'].Oracle,
-  DeferredChoice: compiled.contracts['DeferredChoice.sol'].DeferredChoice,
   OracleConsumer: compiled.contracts['Interfaces.sol'].OracleConsumer,
+  DeferredChoice: compiled.contracts['Interfaces.sol'].DeferredChoice,
+  BaseDeferredChoice: compiled.contracts['DeferredChoice.sol'].BaseDeferredChoice,
 }
 
 // deploy an oracle
 async function deployAndTest() {
-  const contract = new web3.eth.Contract(specs.DeferredChoice.abi, undefined, {
+  const contract = new web3.eth.Contract(specs.BaseDeferredChoice.abi, undefined, {
     from: deferredAdd,
-    gas: 2000000,
+    gas: 5000000,
     gasPrice: web3.utils.toWei('20', 'gwei'),
-    data: specs.DeferredChoice.evm.bytecode.object
+    data: specs.BaseDeferredChoice.evm.bytecode.object
   });
 
   const instance = await contract.deploy().send().on('transactionHash', hash => {

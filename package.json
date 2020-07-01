@@ -6,7 +6,7 @@
     "dev": "parcel index.html",
     "build": "parcel build index.html",
     "oracles": "node oracles/oracles.js",
-    "test": "forever oracles/test.js"
+    "test": "forever -m 1 oracles/test.js"
   },
   "dependencies": {
     "forever": "^3.0.0",

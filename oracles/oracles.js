@@ -19,8 +19,7 @@ class Oracle {
     const spec = this.getSpec();
     this.contract = new web3.eth.Contract(spec.abi, undefined, {
       from: account,
-      gas: 2000000,
-      gasPrice: web3.utils.toWei('20', 'gwei'),
+      ...util.defaultOptions,
       data: spec.evm.bytecode.object
     });
   }
@@ -119,8 +118,7 @@ class AsyncOracle extends Oracle {
       web3.eth.abi.encodeParameters(types, values)
     ).send({
       from: account,
-      gas: 200000,
-      gasPrice: web3.utils.toWei('20', 'gwei')
+      ...util.defaultOptions
     }).on('transactionHash', hash => {
       console.log(this.name, 'REQUESTER HASH', hash);
     }).on('receipt', receipt => {
@@ -172,8 +170,7 @@ class StorageOracle extends Oracle {
     super.onValueChange(value);
     this.contract.methods.set(value).send({
       from: account,
-      gas: 200000,
-      gasPrice: web3.utils.toWei('20', 'gwei')
+      ...util.defaultOptions
     }).on('transactionHash', hash => {
       console.log(this.name, 'UPDATE HASH', hash);
     }).on('receipt', receipt => {

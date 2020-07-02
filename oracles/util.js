@@ -1,6 +1,11 @@
 const fs = require('fs-extra');
 const solc = require('solc');
 
+exports.defaultOptions = {
+  gas: 5000000,
+  gasPrice: '20000000000' // 20 gwei
+}
+
 exports.registerPrivateKey = function(web3, path) {
   const key = fs.readFileSync(path, { encoding: 'utf8' });
   return web3.eth.accounts.wallet.add(key).address;

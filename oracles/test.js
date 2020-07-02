@@ -14,8 +14,7 @@ const specs = util.compileContracts('Interfaces.sol', 'DeferredChoice.sol');
 async function deployAndTest() {
   const contract = new web3.eth.Contract(specs.BaseDeferredChoice.abi, undefined, {
     from: account,
-    gas: 5000000,
-    gasPrice: web3.utils.toWei('20', 'gwei'),
+    ...util.defaultOptions,
     data: specs.BaseDeferredChoice.evm.bytecode.object
   });
 

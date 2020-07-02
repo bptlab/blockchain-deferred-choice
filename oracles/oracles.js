@@ -1,59 +1,15 @@
 const Web3 = require('web3');
-const fs = require('fs-extra');
-const solc = require('solc');
 const vorpal = require('vorpal')();
 
-/*
-FROM A CONSUMER PERSPECTIVE, TIMESTAMP
-- Request/response: imprecise timestamp, find out yourself from tx
-- Publish/subscribe: more precise timestamp, find out yourself from tx
-- Storage: imprecise timestamp, find out yourself from tx
-- History: find timestamp in list of values
-- History with condition: get timestamp from oracle
-*/
+const util = require('./util.js');
 
-// blockchain connection
+// Connect to blockchain and prepare environment
 const web3 = new Web3(new Web3.providers.WebsocketProvider(
   //'wss://ropsten.infura.io/ws/v3/ac8b7480996843d18ee89a61c6d0d673'
   'ws://localhost:8545'
 ));
-
-// key and account management
-const oraclesKey = fs.readFileSync('./keys/oracles.ppk', { encoding: 'utf8' });
-web3.eth.accounts.wallet.add(oraclesKey);
-const oraclesAdd = web3.eth.accounts.wallet[0].address;
-
-// contract compilation
-const codeInterfaces = fs.readFileSync('./solidity/Interfaces.sol', { encoding: 'utf8' });
-const codeOracles = fs.readFileSync('./solidity/Oracles.sol', { encoding: 'utf8' });
-const compilerInput = {
-  language: 'Solidity',
-  sources: {
-    'Interfaces.sol': {
-      content: codeInterfaces
-    },
-    'Oracles.sol': {
-      content: codeOracles
-    }
-  },
-  settings: {
-    outputSelection: {
-      '*': {
-        '*': ['*']
-      }
-    }
-  }
-};
-const compiled = JSON.parse(solc.compile(JSON.stringify(compilerInput)));
-const specs = {
-  Oracle: compiled.contracts['Interfaces.sol'].Oracle,
-  SyncOracle: compiled.contracts['Interfaces.sol'].SyncOracle,
-  AsyncOracle: compiled.contracts['Interfaces.sol'].AsyncOracle,
-  OracleConsumer: compiled.contracts['Interfaces.sol'].OracleConsumer,
-  RequestResponseOracle: compiled.contracts['Oracles.sol'].RequestResponseOracle,
-  PublishSubscribeOracle: compiled.contracts['Oracles.sol'].PublishSubscribeOracle,
-  StorageOracle: compiled.contracts['Oracles.sol'].StorageOracle
-}
+const account = util.registerPrivateKey(web3, './keys/oracles.ppk');
+const specs = util.compileContracts('Interfaces.sol', 'Oracles.sol');
 
 class Oracle {
   constructor(name, log) {
@@ -62,7 +18,7 @@ class Oracle {
 
     const spec = this.getSpec();
     this.contract = new web3.eth.Contract(spec.abi, undefined, {
-      from: oraclesAdd,
+      from: account,
       gas: 2000000,
       gasPrice: web3.utils.toWei('20', 'gwei'),
       data: spec.evm.bytecode.object
@@ -162,7 +118,7 @@ class AsyncOracle extends Oracle {
       correlation,
       web3.eth.abi.encodeParameters(types, values)
     ).send({
-      from: oraclesAdd,
+      from: account,
       gas: 200000,
       gasPrice: web3.utils.toWei('20', 'gwei')
     }).on('transactionHash', hash => {
@@ -215,7 +171,7 @@ class StorageOracle extends Oracle {
   onValueChange(value) {
     super.onValueChange(value);
     this.contract.methods.set(value).send({
-      from: oraclesAdd,
+      from: account,
       gas: 200000,
       gasPrice: web3.utils.toWei('20', 'gwei')
     }).on('transactionHash', hash => {

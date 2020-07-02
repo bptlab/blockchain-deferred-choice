@@ -1,51 +1,19 @@
 const Web3 = require('web3');
-const fs = require('fs-extra');
-const solc = require('solc');
 
-// blockchain connection
+const util = require('./util.js');
+
+// Connect to blockchain and prepare environment
 const web3 = new Web3(new Web3.providers.WebsocketProvider(
   //'wss://ropsten.infura.io/ws/v3/ac8b7480996843d18ee89a61c6d0d673'
   'ws://localhost:8545'
 ));
+const account = util.registerPrivateKey(web3, './keys/deferred.ppk');
+const specs = util.compileContracts('Interfaces.sol', 'DeferredChoice.sol');
 
-// key and account management
-const deferredKey = fs.readFileSync('./keys/deferred.ppk', { encoding: 'utf8' });
-web3.eth.accounts.wallet.add(deferredKey);
-const deferredAdd = web3.eth.accounts.wallet[0].address;
-
-// contract compilation
-const codeInterfaces = fs.readFileSync('./solidity/Interfaces.sol', { encoding: 'utf8' });
-const codeDeferred = fs.readFileSync('./solidity/DeferredChoice.sol', { encoding: 'utf8' });
-const compilerInput = {
-  language: 'Solidity',
-  sources: {
-    'Interfaces.sol': {
-      content: codeInterfaces
-    },
-    'DeferredChoice.sol': {
-      content: codeDeferred
-    }
-  },
-  settings: {
-    outputSelection: {
-      '*': {
-        '*': ['*']
-      }
-    }
-  }
-};
-const compiled = JSON.parse(solc.compile(JSON.stringify(compilerInput)));
-const specs = {
-  Oracle: compiled.contracts['Interfaces.sol'].Oracle,
-  OracleConsumer: compiled.contracts['Interfaces.sol'].OracleConsumer,
-  DeferredChoice: compiled.contracts['Interfaces.sol'].DeferredChoice,
-  BaseDeferredChoice: compiled.contracts['DeferredChoice.sol'].BaseDeferredChoice,
-}
-
-// deploy an oracle
+// Deploy an oracle
 async function deployAndTest() {
   const contract = new web3.eth.Contract(specs.BaseDeferredChoice.abi, undefined, {
-    from: deferredAdd,
+    from: account,
     gas: 5000000,
     gasPrice: web3.utils.toWei('20', 'gwei'),
     data: specs.BaseDeferredChoice.evm.bytecode.object

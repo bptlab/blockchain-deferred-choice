@@ -84,6 +84,30 @@ interface DeferredChoice is OracleConsumer {
     ABORTED
   }
 
+  enum EventDefinition {
+    TIMER_ABSOLUTE,
+    TIMER_RELATIVE,
+    CONDITIONAL,
+    MESSAGE,
+    SIGNAL
+  }
+
+  struct EventSpecification {
+    EventDefinition definition;
+    // Timer specification
+    uint256 timer;
+    // Conditional specification
+    address oracle;
+    Base.Condition condition;
+  }
+
+  // Structures
+  struct Event {
+    EventSpecification spec;
+    EventState state;
+    uint256 evaluation;
+  }
+
   function activate() external;
   function tryTrigger(uint8 target) external;
 }

@@ -51,7 +51,11 @@ async function deployAndTest() {
     data: specs.BaseDeferredChoice.evm.bytecode.object
   });
 
-  const instance = await contract.deploy().send().on('transactionHash', hash => {
+  const instance = await contract.deploy({
+    arguments: [[
+      [0, 0, "0xedE70852D4BfF71bAfa519C21F4d9C05fC863874", [0, 1337]]
+    ]]
+  }).send().on('transactionHash', hash => {
     console.log(this.name, 'HASH', hash);
   }).on('receipt', receipt => {
     console.log(this.name, 'RECEIPT', receipt.contractAddress);

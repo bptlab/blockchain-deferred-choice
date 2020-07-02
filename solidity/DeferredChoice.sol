@@ -5,64 +5,24 @@ pragma experimental ABIEncoderV2;
 import "./Interfaces.sol";
 
 contract BaseDeferredChoice is DeferredChoice {
-
-    enum EventDefinition {
-      TIMER_ABSOLUTE,
-      TIMER_RELATIVE,
-      CONDITIONAL,
-      MESSAGE,
-      SIGNAL
-    }
-
-    // Structures
-    struct Event {
-      uint8 index;
-      EventDefinition definition;
-      EventState state;
-      // Timer specification
-      uint256 timer;
-      // Conditional specification
-      address oracle;
-      Base.Condition condition;
-    }
-
     uint256 constant TOP_TIMESTAMP = type(uint256).max;
 
     // Member Variables
     uint256 public activationTime;
     Event[] public events;
-    uint256[] public evaluations; // event evaluations
     ChoiceState public state = ChoiceState.CREATED;
 
     // Functions
-    constructor() public {
-      // static debug configuration
-      events.push(Event(
-        0,
-        EventDefinition.CONDITIONAL,
-        EventState.INACTIVE,
-        0,
-        0xcBa7af7EE37DD792123b05C1472935E9577EaC6A,
-        Condition(
-          Operator.EQUAL,
-          10
-        )
-      ));
-      events.push(Event(
-        0,
-        EventDefinition.TIMER_RELATIVE,
-        EventState.INACTIVE,
-        10,
-        address(0x0),
-        Condition(
-          Operator.EQUAL,
+    constructor(EventSpecification[] memory specs) public {
+      for (uint8 i = 0; i < specs.length; i++) {
+        EventSpecification memory spec = specs[i];
+        events.push(Event(
+          spec,
+          EventState.INACTIVE,
           0
-        )
-      ));
-      evaluations.push(0);
-      evaluations.push(0);
+        ));
+      }
     }
-
 
     function activate() external override {
       if (state != ChoiceState.CREATED) {
@@ -79,17 +39,17 @@ contract BaseDeferredChoice is DeferredChoice {
 
         // subscribe to publish/subscribe oracles
         Event memory e = events[i];
-        if (e.definition == EventDefinition.CONDITIONAL) {
-          if (Oracle(e.oracle).specification().tense == OracleTense.FUTURE) {
+        if (e.spec.definition == EventDefinition.CONDITIONAL) {
+          if (Oracle(e.spec.oracle).specification().tense == OracleTense.FUTURE) {
             // set correlation target as this event itself
             uint256 correlation = uint256(i) | (uint256(i) << 8);
-            AsyncOracle(e.oracle).get(correlation, new bytes(0));
+            AsyncOracle(e.spec.oracle).get(correlation, new bytes(0));
           }
         }
 
         // mark non-implicit events with the top timestamp
-        if (e.definition == EventDefinition.MESSAGE) {
-          evaluations[i] = TOP_TIMESTAMP;
+        if (e.spec.definition == EventDefinition.MESSAGE) {
+          events[i].evaluation = TOP_TIMESTAMP;
         }
 
         evaluateEvent(i, i);
@@ -113,17 +73,17 @@ contract BaseDeferredChoice is DeferredChoice {
       // all oracle values were gathered yet. Thus, we "remember" that timestamp
       // so the message can be correctly sent afterwards. Otherwise, set the
       // evaluation timestamp to the current one.
-      if (e.definition == EventDefinition.MESSAGE && evaluations[target] == TOP_TIMESTAMP) {
-        evaluations[target] = block.timestamp;
+      if (e.spec.definition == EventDefinition.MESSAGE && events[target].evaluation == TOP_TIMESTAMP) {
+        events[target].evaluation = block.timestamp;
       }
 
       // Evaluate all other events
       for (uint8 i = 0; i < events.length; i++) {
         // Reset evaluation of non-FUTURE oracles
-        if (events[i].definition == EventDefinition.CONDITIONAL) {
-          if (Oracle(events[i].oracle).specification().tense != OracleTense.FUTURE) {
-            if (evaluations[i] == TOP_TIMESTAMP) {
-              evaluations[i] = 0;
+        if (events[i].spec.definition == EventDefinition.CONDITIONAL) {
+          if (Oracle(events[i].spec.oracle).specification().tense != OracleTense.FUTURE) {
+            if (events[i].evaluation == TOP_TIMESTAMP) {
+              events[i].evaluation = 0;
             }
           }
         }
@@ -149,34 +109,34 @@ contract BaseDeferredChoice is DeferredChoice {
 
     function evaluateEvent(uint8 index, uint8 target) internal {
       Event memory e = events[index];
-      if (e.state == EventState.ACTIVE && (evaluations[index] == 0 || evaluations[index] == TOP_TIMESTAMP)) {
-        if (e.definition == EventDefinition.TIMER_ABSOLUTE) {
+      if (e.state == EventState.ACTIVE && (events[index].evaluation == 0 || events[index].evaluation == TOP_TIMESTAMP)) {
+        if (e.spec.definition == EventDefinition.TIMER_ABSOLUTE) {
           // Check if deadline has passed
-          if (e.timer <= block.timestamp) {
-            if (e.timer < activationTime) {
-              evaluations[index] = activationTime;
+          if (e.spec.timer <= block.timestamp) {
+            if (e.spec.timer < activationTime) {
+              events[index].evaluation = activationTime;
             } else {
-              evaluations[index] = e.timer;
+              events[index].evaluation = e.spec.timer;
             }
           } else {
-            evaluations[index] = TOP_TIMESTAMP;
+            events[index].evaluation = TOP_TIMESTAMP;
           }
-        } else if (e.definition == EventDefinition.TIMER_RELATIVE) {
+        } else if (e.spec.definition == EventDefinition.TIMER_RELATIVE) {
           // Check if enough time has passed since activation
-          if (activationTime + e.timer <= block.timestamp) {
-            evaluations[index] = activationTime + e.timer;
+          if (activationTime + e.spec.timer <= block.timestamp) {
+            events[index].evaluation = activationTime + e.spec.timer;
           } else {
-            evaluations[index] = TOP_TIMESTAMP;
+            events[index].evaluation = TOP_TIMESTAMP;
           }
-        } else if (e.definition == EventDefinition.CONDITIONAL) {
-          if (Oracle(e.oracle).specification().tense != OracleTense.FUTURE) {
+        } else if (e.spec.definition == EventDefinition.CONDITIONAL) {
+          if (Oracle(e.spec.oracle).specification().tense != OracleTense.FUTURE) {
             // Get the oracle value and evaluate it
-            if (Oracle(e.oracle).specification().mode == OracleMode.SYNC) {
-              bytes memory result = SyncOracle(e.oracle).get(new bytes(0));
-              checkConditionalEvent(index, e.oracle, result);
+            if (Oracle(e.spec.oracle).specification().mode == OracleMode.SYNC) {
+              bytes memory result = SyncOracle(e.spec.oracle).get(new bytes(0));
+              checkConditionalEvent(index, e.spec.oracle, result);
             } else {
               uint256 correlation = uint256(target) | (uint256(index) << 8);
-              AsyncOracle(e.oracle).get(correlation, new bytes(0));
+              AsyncOracle(e.spec.oracle).get(correlation, new bytes(0));
             }
           }
         }
@@ -190,7 +150,7 @@ contract BaseDeferredChoice is DeferredChoice {
       int256 value = abi.decode(results, (int256));
 
       bool result = false;
-      Condition storage c = events[index].condition;
+      Condition storage c = events[index].spec.condition;
       if (c.operator == Operator.GREATER) {
         result = value > c.value;
       } else if (c.operator == Operator.GREATER_EQUAL) {
@@ -204,9 +164,9 @@ contract BaseDeferredChoice is DeferredChoice {
       }
 
       if (result) {
-        evaluations[index] = block.timestamp;
+        events[index].evaluation = block.timestamp;
       } else {
-        evaluations[index] = TOP_TIMESTAMP;
+        events[index].evaluation = TOP_TIMESTAMP;
       }
     }
 
@@ -218,16 +178,16 @@ contract BaseDeferredChoice is DeferredChoice {
       bool canComplete = true;
       uint256 min = TOP_TIMESTAMP;
       for (uint8 i = 0; i < events.length; i++) {
-        if (evaluations[i] == 0) {
+        if (events[i].evaluation == 0) {
           canComplete = false;
-        } else if (evaluations[i] < min) {
-          min = evaluations[i];
+        } else if (events[i].evaluation < min) {
+          min = events[i].evaluation;
         }
       }
       if (min == TOP_TIMESTAMP) {
         return;
       }
-      canComplete = canComplete && evaluations[target] == min;
+      canComplete = canComplete && events[target].evaluation == min;
 
       // Change the states of events according to the observations
       for (uint8 i = 0; i < events.length; i++) {
@@ -238,7 +198,7 @@ contract BaseDeferredChoice is DeferredChoice {
             changeState(i, EventState.ABORTED);
           }
         } else {
-          if (min < evaluations[i]) {
+          if (min < events[i].evaluation) {
             // This event can not win the race anymore, since there is already
             // one with an earlier evaluation. So even though we can not complete
             // yet, we still do not have to check this one anymore.

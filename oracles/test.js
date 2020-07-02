@@ -20,7 +20,24 @@ async function deployAndTest() {
 
   const instance = await contract.deploy({
     arguments: [[
-      [0, 0, "0xedE70852D4BfF71bAfa519C21F4d9C05fC863874", [0, 1337]]
+      [
+        util.enums.EventDefinition.TIMER_RELATIVE,
+        100,
+        '0x0000000000000000000000000000000000000000',
+        [
+          0,
+          0
+        ]
+      ],
+      [
+        util.enums.EventDefinition.CONDITIONAL,
+        0,
+        '0x03EB3549788426c2bA1ff8E44a147Aa1d16f3363',
+        [
+          util.enums.Operator.EQUAL,
+          4
+        ]
+      ]
     ]]
   }).send().on('transactionHash', hash => {
     console.log(this.name, 'HASH', hash);

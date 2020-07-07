@@ -3,13 +3,6 @@ const BaseProvider = require('./BaseProvider.js');
 const util = require('./../util.js');
 
 class BaseAsyncProvider extends BaseProvider {
-  currentValue;
-
-  onValueChange(value) {
-    super.onValueChange(value);
-    this.currentValue = value;
-  }
-
   onContractEvent(event) {
     super.onContractEvent(event);
     if (event.event == 'Query') {

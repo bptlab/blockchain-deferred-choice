@@ -2,15 +2,16 @@ const BaseAsyncProvider = require('./BaseAsyncProvider.js');
 
 class FutureAsyncProvider extends BaseAsyncProvider {
   subscribers = [];
+  currentValue;
 
   getSpec(specs) {
     return specs['FutureAsyncOracle'];
   }
 
   onValueChange(value) {
-    super.onValueChange(value);
+    this.currentValue = value;
     this.subscribers.forEach(sub => {
-      this.doCallback(sub.sender, sub.correlation, ['int256'], [this.currentValue]);
+      this.doCallback(sub.sender, sub.correlation, ['uint256'], [this.currentValue]);
     });
   }
 
@@ -19,7 +20,7 @@ class FutureAsyncProvider extends BaseAsyncProvider {
     this.subscribers.push({
       sender, correlation, params
     });
-    this.doCallback(sender, correlation, ['int256'], [this.currentValue]);
+    this.doCallback(sender, correlation, ['uint256'], [this.currentValue]);
   }
 }
 

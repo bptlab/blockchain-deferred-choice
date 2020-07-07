@@ -5,7 +5,7 @@ pragma experimental ABIEncoderV2;
 interface Base {
   struct Condition {
     Operator operator;
-    int256 value;
+    uint256 value;
   }
 
   enum Operator {
@@ -43,17 +43,20 @@ interface Oracle is Base {
   function specification() external pure returns (OracleSpecification memory);
 }
 
-interface SyncOracle is Oracle {
-  function get(bytes calldata params) external returns (bytes memory results);
+abstract contract SyncOracle is Oracle {
+  function get(bytes calldata params) external virtual returns (bytes memory results);
 }
 
-interface AsyncOracle is Oracle {
+abstract contract AsyncOracle is Oracle {
   event Query(
     address sender,
     uint256 correlation,
     bytes params
   );
-  function get(uint256 correlation, bytes calldata params) external;
+
+  function get(uint256 correlation, bytes calldata params) external {
+    emit Query(msg.sender, correlation, params);
+  }
 }
 
 // Consumer interfaces

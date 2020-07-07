@@ -4,6 +4,27 @@ pragma experimental ABIEncoderV2;
 
 import "./Interfaces.sol";
 
+// Storage oracle
+contract PresentSyncOracle is SyncOracle {
+  uint256 value;
+
+  function specification() external pure override returns (OracleSpecification memory) {
+    return OracleSpecification(
+      OracleMode.SYNC,
+      OracleTense.PRESENT,
+      OraclePattern.STANDARD
+    );
+  }
+
+  function set(uint256 newValue) external {
+    value = newValue;
+  }
+
+  function get(bytes calldata) external override returns (bytes memory results) {
+    results = abi.encode(value);
+  }
+}
+
 // Request-response oracle
 contract PresentAsyncOracle is AsyncOracle {
   function specification() external pure override returns (OracleSpecification memory) {
@@ -13,9 +34,40 @@ contract PresentAsyncOracle is AsyncOracle {
       OraclePattern.STANDARD
     );
   }
+}
 
-  function get(uint256 correlation, bytes calldata params) external override {
-    emit Query(msg.sender, correlation, params);
+// On-chain history oracle
+contract PastSyncOracle is SyncOracle {
+  uint256[] timedValues;
+
+  function specification() external pure override returns (OracleSpecification memory) {
+    return OracleSpecification(
+      OracleMode.SYNC,
+      OracleTense.PAST,
+      OraclePattern.STANDARD
+    );
+  }
+
+  function set(uint256 newValue) external {
+    timedValues.push() = block.timestamp;
+    timedValues.push() = newValue;
+  }
+
+  function get(bytes calldata /* payload */) external override returns (bytes memory results) {
+    //uint256 from = abi.decode(payload, (uint256));
+    //TODO only from the given timestamp
+    results = abi.encode(timedValues);
+  }
+}
+
+// Request-response oracle
+contract PastAsyncOracle is AsyncOracle {
+  function specification() external pure override returns (OracleSpecification memory) {
+    return OracleSpecification(
+      OracleMode.ASYNC,
+      OracleTense.PAST,
+      OraclePattern.STANDARD
+    );
   }
 }
 
@@ -28,44 +80,4 @@ contract FutureAsyncOracle is AsyncOracle {
       OraclePattern.STANDARD
     );
   }
-
-  function get(uint256 correlation, bytes calldata params) external override {
-    emit Query(msg.sender, correlation, params);
-  }
 }
-
-// Storage oracle
-contract PresentSyncOracle is SyncOracle {
-  int256 value;
-
-  function specification() external pure override returns (OracleSpecification memory) {
-    return OracleSpecification(
-      OracleMode.SYNC,
-      OracleTense.PRESENT,
-      OraclePattern.STANDARD
-    );
-  }
-
-  function set(int256 newValue) external {
-    value = newValue;
-  }
-
-  function get(bytes calldata) external override returns (bytes memory results) {
-    results = abi.encode(value);
-  }
-}
-
-// contract HistoryOracle is SyncOracle {
-//   int256[] values;
-
-//   function set(int256 newValue) external {
-//     values.push(block.timestamp);
-//     values.push(newValue);
-//   }
-
-//   function get(bytes calldata) external override returns (bytes memory results) {
-//     //TODO return all values from 'from' given in calldata
-//   }
-// }
-
-

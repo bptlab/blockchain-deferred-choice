@@ -1,10 +1,10 @@
 const BaseAsyncProvider = require('./BaseAsyncProvider.js');
 
-class FutureProvider extends BaseAsyncProvider {
+class FutureAsyncProvider extends BaseAsyncProvider {
   subscribers = [];
 
   getSpec(specs) {
-    return specs['PublishSubscribeOracle'];
+    return specs['FutureAsyncOracle'];
   }
 
   onValueChange(value) {
@@ -23,4 +23,4 @@ class FutureProvider extends BaseAsyncProvider {
   }
 }
 
-module.exports = FutureProvider;
+module.exports = FutureAsyncProvider;

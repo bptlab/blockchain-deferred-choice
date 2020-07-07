@@ -2,7 +2,7 @@ const Web3 = require('web3');
 const vorpal = require('vorpal')();
 
 const util = require('./util.js');
-const Provider = require('./providers/FutureProvider.js');
+const Provider = require('./providers/FutureAsyncProvider.js');
 
 // Connect to blockchain and prepare environment
 const web3 = new Web3(new Web3.providers.WebsocketProvider(

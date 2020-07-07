@@ -2,7 +2,7 @@ const BaseProvider = require('./BaseProvider.js');
 
 class PresentSyncProvider extends BaseProvider {
   getSpec(specs) {
-    return specs['StorageOracle'];
+    return specs['PresentSyncOracle'];
   }
 
   onValueChange(value) {

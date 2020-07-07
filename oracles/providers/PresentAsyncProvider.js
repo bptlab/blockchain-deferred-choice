@@ -2,7 +2,7 @@ const BaseAsyncProvider = require('./BaseAsyncProvider.js');
 
 class PresentAsyncProvider extends BaseAsyncProvider {
   getSpec(specs) {
-    return specs['RequestResponseOracle'];
+    return specs['PresentAsyncOracle'];
   }
 
   onQuery(sender, correlation, params) {

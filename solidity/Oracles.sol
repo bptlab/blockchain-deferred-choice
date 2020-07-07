@@ -4,7 +4,8 @@ pragma experimental ABIEncoderV2;
 
 import "./Interfaces.sol";
 
-contract RequestResponseOracle is AsyncOracle {
+// Request-response oracle
+contract PresentAsyncOracle is AsyncOracle {
   function specification() external pure override returns (OracleSpecification memory) {
     return OracleSpecification(
       OracleMode.ASYNC,
@@ -18,7 +19,8 @@ contract RequestResponseOracle is AsyncOracle {
   }
 }
 
-contract PublishSubscribeOracle is AsyncOracle {
+// Publish-subscribe oracle
+contract FutureAsyncOracle is AsyncOracle {
   function specification() external pure override returns (OracleSpecification memory) {
     return OracleSpecification(
       OracleMode.ASYNC,
@@ -32,7 +34,8 @@ contract PublishSubscribeOracle is AsyncOracle {
   }
 }
 
-contract StorageOracle is SyncOracle {
+// Storage oracle
+contract PresentSyncOracle is SyncOracle {
   int256 value;
 
   function specification() external pure override returns (OracleSpecification memory) {

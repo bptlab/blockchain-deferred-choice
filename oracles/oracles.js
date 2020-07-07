@@ -2,6 +2,7 @@ const Web3 = require('web3');
 const vorpal = require('vorpal')();
 
 const util = require('./util.js');
+const Provider = require('./providers/FutureProvider.js');
 
 // Connect to blockchain and prepare environment
 const web3 = new Web3(new Web3.providers.WebsocketProvider(
@@ -11,196 +12,31 @@ const web3 = new Web3(new Web3.providers.WebsocketProvider(
 const account = util.registerPrivateKey(web3, './keys/oracles.ppk');
 const specs = util.compileContracts('Interfaces.sol', 'Oracles.sol');
 
-class Oracle {
-  constructor(name, log) {
-    this.name = name;
-    this.log = log;
-
-    const spec = this.getSpec();
-    this.contract = new web3.eth.Contract(spec.abi, undefined, {
-      from: account,
-      ...util.defaultOptions,
-      data: spec.evm.bytecode.object
-    });
-  }
-
-  async deploy() {
-    await this.contract.deploy().send().on('transactionHash', hash => {
-      console.log(this.name, 'HASH', hash);
-    }).on('receipt', receipt => {
-      console.log(this.name, 'RECEIPT', receipt.contractAddress);
-    }).on('error', error => {
-      console.error(this.name, 'ERROR', error);
-    }).then(instance => {
-      this.setup(instance.options.address)
-    });
-  }
-
-  setup(address) {
-    this.contract.options.address = address;
-    this.contract.events.allEvents({
-      fromBlock: 'latest'
-    }).on('data', data => {
-      console.log(this.name, 'EVENT', data);
-      this.onContractEvent(data);
-    }).on('error', error => {
-      console.error(this.name, 'ERROR', error);
-    })
-  }
-
-  replay() {
-    this.replayTime = 0;
-    this.replayStep = 0;
-    this.replayPrev = Date.now();
-
-    return new Promise(resolve => {
-      const step = () => {
-        this.onValueChange(this.log[this.replayStep].value);
-        this.replayStep++;
-        if (this.replayStep < this.log.length) {
-          const oldTimer = this.replayPrev;
-          const newTimer = Date.now();
-          this.replayTime += newTimer - oldTimer;
-          setTimeout(step.bind(this), this.log[this.replayStep].at - this.replayTime);
-          this.replayPrev = newTimer;
-        } else {
-          return resolve();
-        }
-      }
-      step.call(this);
-    });
-  }
-
-  getSpec() {
-    return undefined;
-  }
-
-  onValueChange(value) {
-    console.log(this.name, 'VALUE_CHANGE', value);
-  }
-
-  onContractEvent(event) {
-    console.log(this.name, 'EVENT', event.event);
-  }
-}
-
-class AsyncOracle extends Oracle {
-  currentValue;
-
-  onValueChange(value) {
-    super.onValueChange(value);
-    this.currentValue = value;
-  }
-
-  onContractEvent(event) {
-    super.onContractEvent(event);
-    if (event.event == 'Query') {
-      this.onQuery(
-        event.returnValues.sender,
-        event.returnValues.correlation,
-        event.returnValues.params
-      );
-    }
-  }
-
-  onQuery(sender, correlation, params) {
-    console.log(this.name, 'QUERY', sender, correlation, params);
-  }
-
-  doCallback(consumerAddress, correlation, types, values) {
-    const requester = new web3.eth.Contract(
-      specs.OracleConsumer.abi,
-      consumerAddress
-    );
-    requester.methods.oracleCallback(
-      this.contract.options.address,
-      correlation,
-      web3.eth.abi.encodeParameters(types, values)
-    ).send({
-      from: account,
-      ...util.defaultOptions
-    }).on('transactionHash', hash => {
-      console.log(this.name, 'REQUESTER HASH', hash);
-    }).on('receipt', receipt => {
-      console.log(this.name, 'REQUESTER RECEIPT');
-    }).on('error', console.error);
-  }
-}
-
-class RequestResponseOracle extends AsyncOracle {
-  getSpec() {
-    return specs['RequestResponseOracle'];
-  }
-
-  onQuery(sender, correlation, params) {
-    super.onQuery(sender, correlation, params);
-    this.doCallback(sender, correlation, ['int256'], [this.currentValue]);
-  }
-}
-
-class PublishSubscribeOracle extends AsyncOracle {
-  subscribers = [];
-
-  getSpec() {
-    return specs['PublishSubscribeOracle'];
-  }
-
-  onValueChange(value) {
-    super.onValueChange(value);
-    this.subscribers.forEach(sub => {
-      this.doCallback(sub.sender, sub.correlation, ['int256'], [this.currentValue]);
-    });
-  }
-
-  onQuery(sender, correlation, params) {
-    super.onQuery(sender, correlation, params);
-    this.subscribers.push({
-      sender, correlation, params
-    });
-    this.doCallback(sender, correlation, ['int256'], [this.currentValue]);
-  }
-}
-
-class StorageOracle extends Oracle {
-  getSpec() {
-    return specs['StorageOracle'];
-  }
-
-  onValueChange(value) {
-    super.onValueChange(value);
-    this.contract.methods.set(value).send({
-      from: account,
-      ...util.defaultOptions
-    }).on('transactionHash', hash => {
-      console.log(this.name, 'UPDATE HASH', hash);
-    }).on('receipt', receipt => {
-      console.log(this.name, 'UPDATE RECEIPT');
-    }).on('error', console.error);
-  }
-}
-
-let someOracle;
+let provider;
 
 vorpal
   .command('deploy', 'Deploy a new set of oracles.')
   .action(() => {
-    someOracle = new PublishSubscribeOracle(
+    provider = new Provider(
       'TestOracle',
+      account,
       [
         { at:    0, value:  5 },
         { at: 1000, value:  8 },
         { at: 2000, value: 10 },
         { at: 4000, value:  5 },
         { at: 5000, value:  4 }
-      ]
+      ],
+      specs,
+      web3
     );
-    return someOracle.deploy();
+    return provider.deploy();
   });
 
 vorpal
   .command('replay', 'Start replay of last deployed oracles.')
   .action(() => {
-    return someOracle.replay();
+    return provider.replay();
   });
 
 vorpal

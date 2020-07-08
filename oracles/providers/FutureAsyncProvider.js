@@ -21,7 +21,9 @@ class FutureAsyncProvider extends BaseAsyncProvider {
     this.subscribers.push({
       sender, correlation, params
     });
-    this.doCallback(sender, correlation, ['uint256'], [this.currentValue]);
+    if (this.currentValue) {
+      this.doCallback(sender, correlation, ['uint256'], [this.currentValue]);
+    }
   }
 }
 

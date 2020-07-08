@@ -73,12 +73,6 @@ interface DeferredChoice is OracleConsumer {
 
   event Debug(string text);
 
-  enum ChoiceState {
-    CREATED,
-    RUNNING,
-    FINISHED
-  }
-
   // Enumerations
   enum EventState {
     INACTIVE,
@@ -91,8 +85,7 @@ interface DeferredChoice is OracleConsumer {
     TIMER_ABSOLUTE,
     TIMER_RELATIVE,
     CONDITIONAL,
-    MESSAGE,
-    SIGNAL
+    EXPLICIT
   }
 
   struct EventSpecification {

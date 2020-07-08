@@ -17,8 +17,7 @@ exports.enums = {
     TIMER_ABSOLUTE: 0,
     TIMER_RELATIVE: 1,
     CONDITIONAL: 2,
-    MESSAGE: 3,
-    SIGNAL: 4
+    EXPLICIT: 3
   },
   ChoiceState: {
     CREATED: 0,

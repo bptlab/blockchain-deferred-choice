@@ -22,7 +22,7 @@ async function deployAndTest() {
     arguments: [[
       [
         util.enums.EventDefinition.TIMER_RELATIVE,
-        100,
+        600,
         '0x0000000000000000000000000000000000000000',
         [
           0,
@@ -32,10 +32,19 @@ async function deployAndTest() {
       [
         util.enums.EventDefinition.CONDITIONAL,
         0,
-        '0x03EB3549788426c2bA1ff8E44a147Aa1d16f3363',
+        '0x6Fd16C314159D1173069EcEC535c6Cd3c2369BAB',
         [
-          util.enums.Operator.EQUAL,
-          4
+          util.enums.Operator.GREATER_EQUAL,
+          50
+        ]
+      ],
+      [
+        util.enums.EventDefinition.EXPLICIT,
+        0,
+        '0x0000000000000000000000000000000000000000',
+        [
+          0,
+          0
         ]
       ]
     ]]

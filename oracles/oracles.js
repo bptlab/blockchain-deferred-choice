@@ -21,11 +21,11 @@ vorpal
       'TestOracle',
       account,
       [
-        { at:    0, value:  5 },
-        { at: 1000, value:  8 },
-        { at: 2000, value: 10 },
-        { at: 4000, value:  5 },
-        { at: 5000, value:  4 }
+        { at:    0, value:   5 },
+        { at: 1000, value:   8 },
+        { at: 2000, value: 100 },
+        { at: 4000, value:   5 },
+        { at: 5000, value:   4 }
       ],
       specs,
       web3

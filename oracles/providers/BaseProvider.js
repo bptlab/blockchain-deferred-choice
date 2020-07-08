@@ -5,9 +5,10 @@ class BaseProvider {
     this.name = name;
     this.account = account;
     this.log = log;
+    this.specs = specs;
     this.web3 = web3;
 
-    const spec = this.getSpec(specs);
+    const spec = this.getSpec();
     this.contract = new this.web3.eth.Contract(spec.abi, undefined, {
       from: this.account,
       ...util.defaultOptions,

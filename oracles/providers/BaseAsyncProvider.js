@@ -20,7 +20,7 @@ class BaseAsyncProvider extends BaseProvider {
 
   doCallback(consumerAddress, correlation, types, values) {
     const requester = new this.web3.eth.Contract(
-      specs.OracleConsumer.abi,
+      this.specs.OracleConsumer.abi,
       consumerAddress
     );
     requester.methods.oracleCallback(

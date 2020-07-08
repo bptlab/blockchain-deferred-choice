@@ -3,8 +3,8 @@ const BaseAsyncProvider = require('./BaseAsyncProvider.js');
 class PresentAsyncProvider extends BaseAsyncProvider {
   currentValue;
 
-  getSpec(specs) {
-    return specs['PresentAsyncOracle'];
+  getSpec() {
+    return this.specs['PresentAsyncOracle'];
   }
 
   onValueChange(value) {

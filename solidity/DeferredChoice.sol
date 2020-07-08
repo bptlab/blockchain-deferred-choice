@@ -146,11 +146,30 @@ contract BaseDeferredChoice is DeferredChoice {
   function checkConditionalEvent(uint8 index, address oracle, bytes memory results) private {
     emit Debug("Oracle evaluated");
 
-    //TODO check which oracle we have and how we have to decode the results
-    int256 value = abi.decode(results, (int256));
+    if (events[index].evaluation == 0 || events[index].evaluation == TOP_TIMESTAMP) {
+      uint256 evaluation = TOP_TIMESTAMP;
+      OracleTense tense = Oracle(oracle).specification().tense;
+      Condition memory c = events[index].spec.condition;
+      if (tense == OracleTense.PAST) {
+        uint256[] memory values = abi.decode(results, (uint256[]));
+        for (uint16 i = 0; i < values.length; i += 2) {
+          if (checkCondition(c, values[i+1])) {
+            evaluation = values[i];
+            break;
+          }
+        }
+      } else { // if (tense == OracleTense.PRESENT || tense == OracleTense.FUTURE) {
+        uint256 value = abi.decode(results, (uint256));
+        if (checkCondition(c, value)) {
+          evaluation = block.timestamp;
+        }
+      }
 
-    bool result = false;
-    Condition storage c = events[index].spec.condition;
+      events[index].evaluation = evaluation;
+    }
+  }
+
+  function checkCondition(Condition memory c, uint256 value) private pure returns (bool result) {
     if (c.operator == Operator.GREATER) {
       result = value > c.value;
     } else if (c.operator == Operator.GREATER_EQUAL) {
@@ -161,12 +180,6 @@ contract BaseDeferredChoice is DeferredChoice {
       result = value <= c.value;
     } else if (c.operator == Operator.LESS) {
       result = value < c.value;
-    }
-
-    if (result) {
-      events[index].evaluation = block.timestamp;
-    } else {
-      events[index].evaluation = TOP_TIMESTAMP;
     }
   }
 

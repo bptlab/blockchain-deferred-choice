@@ -3,11 +3,12 @@ const BaseAsyncProvider = require('./BaseAsyncProvider.js');
 class PastAsyncProvider extends BaseAsyncProvider {
   values = [];
 
-  getSpec(specs) {
-    return specs['PastAsyncOracle'];
+  getSpec() {
+    return this.specs['PastAsyncOracle'];
   }
 
   onValueChange(value) {
+    super.onValueChange(value);
     this.values.push({
       value,
       timestamp: Date.now()

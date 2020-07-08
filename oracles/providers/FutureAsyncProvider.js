@@ -4,11 +4,12 @@ class FutureAsyncProvider extends BaseAsyncProvider {
   subscribers = [];
   currentValue;
 
-  getSpec(specs) {
-    return specs['FutureAsyncOracle'];
+  getSpec() {
+    return this.specs['FutureAsyncOracle'];
   }
 
   onValueChange(value) {
+    super.onValueChange(value);
     this.currentValue = value;
     this.subscribers.forEach(sub => {
       this.doCallback(sub.sender, sub.correlation, ['uint256'], [this.currentValue]);

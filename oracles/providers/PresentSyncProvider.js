@@ -1,8 +1,10 @@
 const BaseProvider = require('./BaseProvider.js');
 
+const util = require('./../util.js');
+
 class PresentSyncProvider extends BaseProvider {
-  getSpec(specs) {
-    return specs['PresentSyncOracle'];
+  getSpec() {
+    return this.specs['PresentSyncOracle'];
   }
 
   onValueChange(value) {

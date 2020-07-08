@@ -38,7 +38,7 @@ contract PresentAsyncOracle is AsyncOracle {
 
 // On-chain history oracle
 contract PastSyncOracle is SyncOracle {
-  uint256[] timedValues;
+  uint256[] public timedValues;
 
   function specification() external pure override returns (OracleSpecification memory) {
     return OracleSpecification(
@@ -53,10 +53,19 @@ contract PastSyncOracle is SyncOracle {
     timedValues.push() = newValue;
   }
 
-  function get(bytes calldata /* payload */) external override returns (bytes memory results) {
-    //uint256 from = abi.decode(payload, (uint256));
-    //TODO only from the given timestamp
-    results = abi.encode(timedValues);
+  function get(bytes calldata params) external override returns (bytes memory results) {
+    uint256 from = abi.decode(params, (uint256));
+    uint16 first = 0;
+
+    while (first + 2 < timedValues.length && timedValues[first + 2] < from) {
+      first += 2;
+    }
+
+    uint256[] memory output = new uint256[](timedValues.length - first);
+    for (uint16 i = first; i < timedValues.length; i++) {
+      output[i - first] = timedValues[i];
+    }
+    results = abi.encode(output);
   }
 }
 

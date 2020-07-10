@@ -9,7 +9,7 @@ const SOURCES = [
 ];
 
 const KEYS = {
-  Customer: 'deferred.ppk',
+  Consumer: 'deferred.ppk',
   Oracle: 'oracles.ppk'
 };
 
@@ -56,7 +56,7 @@ exports.enums = {
   }
 };
 
-exports.getAcc = function(acc) {
+exports.getAccount = function(name) {
   // Register accounts if not yet done
   if (!accounts) {
     accounts = {};
@@ -67,7 +67,7 @@ exports.getAcc = function(acc) {
   }
 
   // Return the desired account address
-  return accounts[acc];
+  return accounts[name];
 }
 
 exports.getSpec = function(spec) {

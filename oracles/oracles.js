@@ -1,16 +1,7 @@
-const Web3 = require('web3');
 const vorpal = require('vorpal')();
 
 const util = require('./util.js');
 const Provider = require('./providers/FutureAsyncProvider.js');
-
-// Connect to blockchain and prepare environment
-const web3 = new Web3(new Web3.providers.WebsocketProvider(
-  //'wss://ropsten.infura.io/ws/v3/ac8b7480996843d18ee89a61c6d0d673'
-  'ws://localhost:8545'
-));
-const account = util.registerPrivateKey(web3, './keys/oracles.ppk');
-const specs = util.compileContracts('Interfaces.sol', 'Oracles.sol');
 
 let provider;
 
@@ -19,16 +10,14 @@ vorpal
   .action(() => {
     provider = new Provider(
       'TestOracle',
-      account,
+      util.getAcc('Oracle'),
       [
         { at:    0, value:   5 },
         { at: 1000, value:   8 },
         { at: 2000, value: 100 },
         { at: 4000, value:   5 },
         { at: 5000, value:   4 }
-      ],
-      specs,
-      web3
+      ]
     );
     return provider.deploy();
   });

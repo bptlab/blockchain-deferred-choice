@@ -1,21 +1,12 @@
-const Web3 = require('web3');
-
 const util = require('./util.js');
-
-// Connect to blockchain and prepare environment
-const web3 = new Web3(new Web3.providers.WebsocketProvider(
-  //'wss://ropsten.infura.io/ws/v3/ac8b7480996843d18ee89a61c6d0d673'
-  'ws://localhost:8545'
-));
-const account = util.registerPrivateKey(web3, './keys/deferred.ppk');
-const specs = util.compileContracts('Interfaces.sol', 'DeferredChoice.sol');
 
 // Deploy an oracle
 async function deployAndTest() {
-  const contract = new web3.eth.Contract(specs.BaseDeferredChoice.abi, undefined, {
-    from: account,
+  const spec = util.getSpec('BaseDeferredChoice');
+  const contract = new util.web3.eth.Contract(spec.abi, undefined, {
+    from: util.getAcc('Oracle'),
     ...util.defaultOptions,
-    data: specs.BaseDeferredChoice.evm.bytecode.object
+    data: spec.evm.bytecode.object
   });
 
   const instance = await contract.deploy({

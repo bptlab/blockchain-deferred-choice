@@ -1,15 +1,13 @@
 const util = require('./../util.js');
 
 class BaseProvider {
-  constructor(name, account, log, specs, web3) {
+  constructor(name, account, log) {
     this.name = name;
     this.account = account;
     this.log = log;
-    this.specs = specs;
-    this.web3 = web3;
 
     const spec = this.getSpec();
-    this.contract = new this.web3.eth.Contract(spec.abi, undefined, {
+    this.contract = new util.web3.eth.Contract(spec.abi, undefined, {
       from: this.account,
       ...util.defaultOptions,
       data: spec.evm.bytecode.object

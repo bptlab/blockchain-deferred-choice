@@ -8,17 +8,15 @@
 class InstanceBatch {
   oracles = {};
 
-  constructor(instanceSpecs, oracleSpecs) {
-    this.instanceSpecs = instanceSpecs;
-    this.oracleSpecs = oracleSpecs;
+  constructor(specNames) {
   }
 
-  async deploy(web3) {
+  async deploy() {
     // deploy oracles
     // deploy instances with linked oracles
   }
 
-  async replay(web3) {
+  async replay() {
     // start instances (with delay)
     // start oracles (with delay)
   }

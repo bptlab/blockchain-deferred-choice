@@ -1,5 +1,28 @@
 const fs = require('fs-extra');
 const solc = require('solc');
+const Web3 = require('web3');
+
+const SOURCES = [
+  'Interfaces.sol',
+  'DeferredChoice.sol',
+  'Oracles.sol'
+];
+
+const KEYS = {
+  Customer: 'deferred.ppk',
+  Oracle: 'oracles.ppk'
+};
+
+// Connect to blockchain
+const web3 = new Web3(new Web3.providers.WebsocketProvider(
+  //'wss://ropsten.infura.io/ws/v3/ac8b7480996843d18ee89a61c6d0d673'
+  'ws://localhost:8545'
+));
+
+let specs;
+let accounts;
+
+exports.web3 = web3;
 
 exports.defaultOptions = {
   gas: 5000000,
@@ -33,35 +56,50 @@ exports.enums = {
   }
 };
 
-exports.registerPrivateKey = function(web3, path) {
-  const key = fs.readFileSync(path, { encoding: 'utf8' });
-  return web3.eth.accounts.wallet.add(key).address;
+exports.getAcc = function(acc) {
+  // Register accounts if not yet done
+  if (!accounts) {
+    accounts = {};
+    Object.keys(KEYS).forEach(key => {
+      const ppk = fs.readFileSync('./keys/' + KEYS[key], { encoding: 'utf8' });
+      accounts[key] = web3.eth.accounts.wallet.add(ppk).address;
+    })
+  }
+
+  // Return the desired account address
+  return accounts[acc];
 }
 
-exports.compileContracts = function(...files) {
-  const sources = Object.assign({}, ...files.map(file => {
-    return {
-      [file]: {
-        content: fs.readFileSync('./solidity/' + file, { encoding: 'utf8' })
-      }
-    };
-  }));
+exports.getSpec = function(spec) {
+  // Compile contracts if this has not yet been done
+  if (!specs) {
+    const sources = Object.assign({}, ...SOURCES.map(file => {
+      return {
+        [file]: {
+          content: fs.readFileSync('./solidity/' + file, { encoding: 'utf8' })
+        }
+      };
+    }));
 
-  const compilerIn = {
-    language: 'Solidity',
-    sources,
-    settings: {
-      outputSelection: {
-        '*': {
-          '*': [
-            'metadata', 'abi', 'evm.bytecode'
-          ],
-          '': []
+    const compilerIn = {
+      language: 'Solidity',
+      sources,
+      settings: {
+        outputSelection: {
+          '*': {
+            '*': [
+              'metadata', 'abi', 'evm.bytecode'
+            ],
+            '': []
+          }
         }
       }
-    }
-  };
-  const compilerOut = JSON.parse(solc.compile(JSON.stringify(compilerIn)));
+    };
+    const compilerOut = JSON.parse(solc.compile(JSON.stringify(compilerIn)));
 
-  return Object.assign({}, ...Object.values(compilerOut.contracts));
+    specs = Object.assign({}, ...Object.values(compilerOut.contracts));
+  }
+
+  // Return the contract specification specified
+  return specs[spec];
 }

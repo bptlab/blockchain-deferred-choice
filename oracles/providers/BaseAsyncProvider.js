@@ -19,14 +19,14 @@ class BaseAsyncProvider extends BaseProvider {
   }
 
   doCallback(consumerAddress, correlation, types, values) {
-    const requester = new this.web3.eth.Contract(
-      this.specs.OracleConsumer.abi,
+    const requester = new util.web3.eth.Contract(
+      util.getSpec('OracleConsumer').abi,
       consumerAddress
     );
     requester.methods.oracleCallback(
       this.contract.options.address,
       correlation,
-      this.web3.eth.abi.encodeParameters(types, values)
+      util.web3.eth.abi.encodeParameters(types, values)
     ).send({
       from: this.account,
       ...util.defaultOptions

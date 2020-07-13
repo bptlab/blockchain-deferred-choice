@@ -20,7 +20,7 @@ class OracleInstance {
     // Create contract
     const spec = this.provider.getSpec();
     this.contract = await new util.web3.eth.Contract(spec.abi, undefined, {
-      from: this.account,
+      from: this.config.account,
       ...util.defaultOptions,
       data: spec.evm.bytecode.object
     }).deploy().send().on('transactionHash', hash => {

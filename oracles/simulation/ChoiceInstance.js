@@ -8,14 +8,14 @@ class ChoiceInstance {
     this.config = config;
   }
 
-  async deploy(oracleInstances) {
+  async deploy(oracleAddresses) {
     const spec = util.getSpec('BaseDeferredChoice');
     this.contract = await new util.web3.eth.Contract(spec.abi, undefined, {
       from: this.config.account,
       ...util.defaultOptions,
       data: spec.evm.bytecode.object
     }).deploy({
-      arguments: [ this.config.convertToEthereum(oracleInstances) ]
+      arguments: [ this.config.convertToEthereum(oracleAddresses) ]
     }).send().on('transactionHash', hash => {
       console.log('HASH', hash);
     }).on('receipt', receipt => {
@@ -42,7 +42,7 @@ class ChoiceInstance {
     return new Promise(resolve => {
       const step = () => {
         const curStep = this.config.timeline[this.replayStep];
-        if (!curStep.target) {
+        if (this.replayStep == 0) {
           // Activate the choice
           this.contract.methods.activate().send({
             from: this.config.account,

@@ -18,7 +18,7 @@ class InstanceBatch {
       const instance = new OracleInstance(config);
       await instance.deploy();
       this.oracles.push(instance);
-      oracleMap[config.name] = instance;
+      oracleMap[config.name] = instance.getAddress();
     }
 
     // Deploy all choices
@@ -33,7 +33,7 @@ class InstanceBatch {
   async replay() {
     // Wait for all oracles' and choices' replay promises to resolve
     return await Promise.all(
-      oracles.concat(choices).map(inst => inst.replay())
+      this.oracles.concat(this.choices).map(inst => inst.replay())
     );
   }
 }

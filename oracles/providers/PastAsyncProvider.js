@@ -19,9 +19,18 @@ class PastAsyncProvider extends BaseAsyncProvider {
 
   onQuery(sender, correlation, params) {
     super.onQuery(sender, correlation, params);
-    // TODO get 'from' from params and return only those values
+
+    // Extract from timestamp from parameters and find the index at which
+    // we have to start returning values
+    const from = web3.eth.abi.decodeParameter('uint256', params);
+    let first = 0;
+
+    while (first + 2 < this.values.length && this.values[first + 2] < from) {
+      first += 2;
+    }
+
     this.doCallback(sender, correlation, ['uint256[]'], [
-      this.values.map(v => [v.timestamp, v.value]).flat()
+      this.values.slice(first).map(v => [v.timestamp, v.value]).flat()
     ]);
   }
 }

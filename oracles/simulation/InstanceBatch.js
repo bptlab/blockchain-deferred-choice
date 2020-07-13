@@ -31,7 +31,10 @@ class InstanceBatch {
   }
 
   async replay() {
-    // Promise.all.replay...
+    // Wait for all oracles' and choices' replay promises to resolve
+    return await Promise.all(
+      oracles.concat(choices).map(inst => inst.replay())
+    );
   }
 }
 

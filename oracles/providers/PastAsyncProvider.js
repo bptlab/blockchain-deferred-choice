@@ -22,7 +22,7 @@ class PastAsyncProvider extends BaseAsyncProvider {
 
     // Extract from timestamp from parameters and find the index at which
     // we have to start returning values
-    const from = web3.eth.abi.decodeParameter('uint256', params);
+    const from = util.web3.eth.abi.decodeParameter('uint256', params);
     let first = 0;
 
     while (first + 2 < this.values.length && this.values[first + 2] < from) {

@@ -1,10 +1,13 @@
+const Replayer = require('./Replayer.js');
+
 const util = require('../util.js');
 
-class ChoiceInstance {
+class ChoiceInstance extends Replayer {
   config;
   contract;
 
   constructor(config) {
+    super(config.timeline);
     this.config = config;
   }
 
@@ -34,51 +37,30 @@ class ChoiceInstance {
     });
   }
 
-  async replay() {
-    this.replayTime = 0;
-    this.replayStep = 0;
-    this.replayPrev = Date.now();
-
-    return new Promise(resolve => {
-      const step = () => {
-        const curStep = this.config.timeline[this.replayStep];
-        if (this.replayStep == 0) {
-          // Activate the choice
-          this.contract.methods.activate().send({
-            from: this.config.account,
-            ...util.defaultOptions
-          }).on('transactionHash', hash => {
-            console.log('UPDATE HASH', hash);
-          }).on('receipt', receipt => {
-            console.log('UPDATE RECEIPT');
-          }).on('error', console.error);
-        } else {
-          // Trigger the specific target event
-          this.contract.methods.tryTrigger(curStep.target).send({
-            from: this.config.account,
-            ...util.defaultOptions
-          }).on('transactionHash', hash => {
-            console.log('UPDATE HASH', hash);
-          }).on('receipt', receipt => {
-            console.log('UPDATE RECEIPT');
-          }).on('error', console.error);
-        }
-
-        this.replayStep++;
-        if (this.replayStep < this.config.timeline.length) {
-          const oldTimer = this.replayPrev;
-          const newTimer = Date.now();
-          this.replayTime += newTimer - oldTimer;
-          setTimeout(step.bind(this), this.config.timeline[this.replayStep].at - this.replayTime);
-          this.replayPrev = newTimer;
-        } else {
-          return resolve();
-        }
-      }
-      step.call(this);
-    });
+  onReplayStep(index, context) {
+    super.onReplayStep(index, context);
+    if (index == 0) {
+      // Activate the choice
+      this.contract.methods.activate().send({
+        from: this.config.account,
+        ...util.defaultOptions
+      }).on('transactionHash', hash => {
+        console.log('UPDATE HASH', hash);
+      }).on('receipt', receipt => {
+        console.log('UPDATE RECEIPT');
+      }).on('error', console.error);
+    } else {
+      // Trigger the specific target event
+      this.contract.methods.tryTrigger(context.target).send({
+        from: this.config.account,
+        ...util.defaultOptions
+      }).on('transactionHash', hash => {
+        console.log('UPDATE HASH', hash);
+      }).on('receipt', receipt => {
+        console.log('UPDATE RECEIPT');
+      }).on('error', console.error);
+    }
   }
-
 }
 
 module.exports = ChoiceInstance;

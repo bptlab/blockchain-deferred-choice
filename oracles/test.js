@@ -1,7 +1,7 @@
 const ChoiceConfig = require('./simulation/ChoiceConfig.js');
 const OracleConfig = require('./simulation/OracleConfig.js');
 const InstanceBatch = require('./simulation/InstanceBatch.js');
-const Provider = require('./providers/FutureAsyncProvider.js');
+const Provider = require('./providers/PresentAsyncProvider.js');
 
 const util = require('./util.js');
 
@@ -14,19 +14,19 @@ async function deployAndTest() {
     .addExplicitEvent()
     .setTimeline([
       { at:    0 }, // activation
-      { at: 1000, target: 0 },
-      { at: 2000, target: 1 }
+      { at: 1000, context: { target: 0 }},
+      { at: 2000, context: { target: 1 }}
     ]);
   
   const o1 = new OracleConfig()
     .setName('WEATHER_WARNING')
     .setAccount(util.getAccount('Oracle'))
     .setTimeline([
-      { at:    0, value:   5 },
-      { at: 1000, value:   8 },
-      { at: 2000, value: 100 },
-      { at: 4000, value:   5 },
-      { at: 5000, value:   4 }
+      { at:    0, context: { value:   5 }},
+      { at: 1000, context: { value:   8 }},
+      { at: 2000, context: { value: 100 }},
+      { at: 4000, context: { value:   5 }},
+      { at: 5000, context: { value:   4 }}
     ])
     .setClass(Provider);
   

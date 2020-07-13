@@ -1,11 +1,14 @@
+const Replayer = require('./Replayer.js');
+
 const util = require('../util.js');
 
-class OracleInstance {
+class OracleInstance extends Replayer {
   config;
   contract;
   provider;
 
   constructor(config) {
+    super(config.timeline);
     this.config = config;
   }
 
@@ -33,27 +36,9 @@ class OracleInstance {
     this.provider.link(this.contract);
   }
 
-  async replay() {
-    this.replayTime = 0;
-    this.replayStep = 0;
-    this.replayPrev = Date.now();
-
-    return new Promise(resolve => {
-      const step = () => {
-        this.provider.onValueChange(this.config.timeline[this.replayStep].value);
-        this.replayStep++;
-        if (this.replayStep < this.config.timeline.length) {
-          const oldTimer = this.replayPrev;
-          const newTimer = Date.now();
-          this.replayTime += newTimer - oldTimer;
-          setTimeout(step.bind(this), this.config.timeline[this.replayStep].at - this.replayTime);
-          this.replayPrev = newTimer;
-        } else {
-          return resolve();
-        }
-      }
-      step.call(this);
-    });
+  onReplayStep(index, context) {
+    super.onReplayStep(index, context);
+    this.provider.onValueChange(context.value);
   }
 }
 

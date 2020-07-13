@@ -26,6 +26,7 @@ class ChoiceInstance extends Replayer {
     }).on('error', error => {
       console.error('ERROR', error);
     })
+    this.contract.defaultAccount = this.config.account;
   
     // Subscribe to events for logging purposes
     this.contract.events.allEvents({
@@ -42,7 +43,6 @@ class ChoiceInstance extends Replayer {
     if (index == 0) {
       // Activate the choice
       this.contract.methods.activate().send({
-        from: this.config.account,
         ...util.defaultOptions
       }).on('transactionHash', hash => {
         console.log('UPDATE HASH', hash);
@@ -52,7 +52,6 @@ class ChoiceInstance extends Replayer {
     } else {
       // Trigger the specific target event
       this.contract.methods.tryTrigger(context.target).send({
-        from: this.config.account,
         ...util.defaultOptions
       }).on('transactionHash', hash => {
         console.log('UPDATE HASH', hash);

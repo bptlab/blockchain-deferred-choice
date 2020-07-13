@@ -3,6 +3,7 @@ const util = require('../util.js');
 class ChoiceConfig {
   account;
   timeline;
+  winner;
   events = [];
   
   oracleNames = new Set();
@@ -48,6 +49,11 @@ class ChoiceConfig {
     this.events.push({
       type: util.enums.EventDefinition.EXPLICIT
     });
+    return this;
+  }
+
+  setExpectedWinner(winner) {
+    this.winner = winner;
     return this;
   }
 

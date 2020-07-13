@@ -6,7 +6,7 @@ class FutureAsyncProvider extends BaseAsyncProvider {
   subscribers = [];
   currentValue;
 
-  getSpec() {
+  static getSpec() {
     return util.getSpec('FutureAsyncOracle');
   }
 

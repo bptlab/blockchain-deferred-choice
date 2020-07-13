@@ -5,7 +5,7 @@ const util = require('./../util.js');
 class PastAsyncProvider extends BaseAsyncProvider {
   values = [];
 
-  getSpec() {
+  static getSpec() {
     return util.getSpec('PastAsyncOracle');
   }
 

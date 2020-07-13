@@ -17,11 +17,8 @@ class OracleInstance extends Replayer {
   }
 
   async deploy() {
-    // Create provider
-    this.provider = new this.config.clazz(this.config.name, this.config.account);
-
     // Create contract
-    const spec = this.provider.getSpec();
+    const spec = this.config.clazz.getSpec();
     this.contract = await new util.web3.eth.Contract(spec.abi, undefined, {
       from: this.config.account,
       ...util.defaultOptions,
@@ -33,7 +30,10 @@ class OracleInstance extends Replayer {
     }).on('error', error => {
       console.error(this.config.name, 'ERROR', error);
     });
-    this.provider.link(this.contract);
+    this.contract.defaultAccount = this.config.account;
+
+    // Wrap contract in provider
+    this.provider = new this.config.clazz(this.config.name, this.contract);
   }
 
   onReplayStep(index, context) {

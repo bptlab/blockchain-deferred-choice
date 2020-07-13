@@ -5,7 +5,7 @@ const util = require('./../util.js');
 class PresentAsyncProvider extends BaseAsyncProvider {
   currentValue;
 
-  getSpec() {
+  static getSpec() {
     return util.getSpec('PresentAsyncOracle');
   }
 

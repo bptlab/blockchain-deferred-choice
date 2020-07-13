@@ -32,9 +32,18 @@ class InstanceBatch {
 
   async replay() {
     // Wait for all oracles' and choices' replay promises to resolve
-    return await Promise.all(
+    await Promise.all(
       this.oracles.concat(this.choices).map(inst => inst.replay())
     );
+
+    // Check whether the right events "won"
+    await new Promise(resolve => setTimeout(resolve, 5000));
+    await Promise.all(this.choices.map(async choice => {
+      const results = await Promise.all(choice.config.events.map(
+        (_, i) => choice.contract.methods.getState(i).call()
+      ));
+      console.log('RESULTS', results, 'EXPECTED', choice.config.winner);
+    }));
   }
 }
 

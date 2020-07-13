@@ -3,14 +3,13 @@ const BaseProvider = require('./BaseProvider.js');
 const util = require('./../util.js');
 
 class PresentSyncProvider extends BaseProvider {
-  getSpec() {
+  static getSpec() {
     return util.getSpec('PresentSyncOracle');
   }
 
   onValueChange(value) {
     super.onValueChange(value);
     this.contract.methods.set(value).send({
-      from: this.account,
       ...util.defaultOptions
     }).on('transactionHash', hash => {
       console.log(this.name, 'UPDATE HASH', hash);

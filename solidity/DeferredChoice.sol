@@ -123,6 +123,13 @@ contract BaseDeferredChoice is DeferredChoice {
   }
 
   /*
+   * Get the state of the event with the given index.
+   */
+  function getState(uint8 index) external view returns (EventState) {
+    return events[index].state;
+  }
+
+  /*
    * Change the state of the event with the given index.
    */
   function changeState(uint8 index, EventState newState) private {
@@ -295,6 +302,7 @@ contract BaseDeferredChoice is DeferredChoice {
           changeState(i, EventState.ABORTED);
         }
       }
+      hasFinished = true;
     }
   }
 }

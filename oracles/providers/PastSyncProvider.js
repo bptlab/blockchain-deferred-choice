@@ -5,7 +5,7 @@ const util = require('./../util.js');
 // For now, the PastSyncProvider works exactly the same as the PresentSyncProvider.
 // The difference is in the smart contract on-chain.
 class PastSyncProvider extends PresentSyncProvider {
-  getSpec() {
+  static getSpec() {
     return util.getSpec('PastSyncOracle');
   }
 }

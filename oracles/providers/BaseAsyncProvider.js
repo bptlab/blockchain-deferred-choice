@@ -28,7 +28,7 @@ class BaseAsyncProvider extends BaseProvider {
       correlation,
       util.web3.eth.abi.encodeParameters(types, values)
     ).send({
-      from: this.account,
+      from: this.contract.defaultAccount,
       ...util.defaultOptions
     }).on('transactionHash', hash => {
       console.log(this.name, 'REQUESTER HASH', hash);

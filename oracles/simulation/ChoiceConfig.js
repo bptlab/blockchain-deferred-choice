@@ -54,7 +54,11 @@ class ChoiceConfig {
   convertToEthereum(oracleAddresses) {
     return this.events.map(event => [
       event.type,
-      event.timer || 0,
+      // For absolute timers, we regard the given timer value as an offset
+      // to the current timestamp. Otherwise, configs would be rather static
+      event.type == util.enums.EventDefinition.TIMER_ABSOLUTE
+                  ? event.timer + Date.now()
+                  : (event.timer || 0),
       event.oracleName ? oracleAddresses[event.oracleName] :
                          '0x0000000000000000000000000000000000000000',
       [

@@ -9,8 +9,9 @@ const SOURCES = [
 ];
 
 const KEYS = {
-  Consumer: 'deferred.ppk',
-  Oracle: 'oracles.ppk'
+  Consumer: '9756b00ca92badafd4d9ce3b6f02134b4de13cbb9dceaf9db61eda3724bd3a30',
+  Oracle: '68ea7c2f6d68a6cecb02009e0767e11546d276abb607c3a910b4d07ef4d3a2a5',
+  Oracle2: '22ceb0fc8deaa76b6c96be6cd7b63c3154bc67f2b4332d2895aa123e2988fb76'
 };
 
 // Connect to blockchain
@@ -61,8 +62,7 @@ exports.getAccount = function(name) {
   if (!accounts) {
     accounts = {};
     Object.keys(KEYS).forEach(key => {
-      const ppk = fs.readFileSync('./keys/' + KEYS[key], { encoding: 'utf8' });
-      accounts[key] = web3.eth.accounts.wallet.add(ppk).address;
+      accounts[key] = web3.eth.accounts.wallet.add(KEYS[key]).address;
     })
   }
 

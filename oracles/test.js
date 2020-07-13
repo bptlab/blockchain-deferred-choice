@@ -11,14 +11,15 @@ async function deployAndTest() {
     .setAccount(util.getAccount('Consumer'))
     .addRelativeTimerEvent(60)
     .addConditionalEvent('WEATHER_WARNING', util.enums.Operator.EQUAL, 4)
+    .addConditionalEvent('INTERRUPTION', util.enums.Operator.EQUAL, 1)
     .addExplicitEvent()
     .setTimeline([
-      { at:    0 }, // activation
-      { at: 1000, context: { target: 0 }},
-      { at: 2000, context: { target: 1 }}
+      { at:     0 }, // activation
+      { at:  1000, context: { target: 0 }},
+      { at: 10000, context: { target: 1 }}
     ]);
   
-  const o1 = new OracleConfig()
+    const o1 = new OracleConfig()
     .setName('WEATHER_WARNING')
     .setAccount(util.getAccount('Oracle'))
     .setTimeline([
@@ -29,8 +30,18 @@ async function deployAndTest() {
       { at: 5000, context: { value:   4 }}
     ])
     .setClass(Provider);
+
+  const o2 = new OracleConfig()
+    .setName('INTERRUPTION')
+    .setAccount(util.getAccount('Oracle'))
+    .setTimeline([
+      { at:    0, context: { value: 0 }},
+      { at: 2000, context: { value: 1 }},
+      { at: 4000, context: { value: 0 }}
+    ])
+    .setClass(Provider);
   
-  const batch = new InstanceBatch([c1], [o1]);
+  const batch = new InstanceBatch([c1], [o1, o2]);
   await batch.deploy();
   await batch.replay();
 }

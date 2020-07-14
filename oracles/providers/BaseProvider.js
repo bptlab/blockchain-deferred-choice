@@ -30,7 +30,7 @@ const util = require('./../util.js');
   }
 
   onContractEvent(event) {
-    console.log('O[', this.name, ']', 'Event:', event.event);
+    console.log('O[', this.name, ']', 'Event:', event.event, '|', 'RESULT', event.returnValues);
   }
 }
 

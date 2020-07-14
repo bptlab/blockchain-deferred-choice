@@ -174,7 +174,7 @@ contract BaseDeferredChoice is DeferredChoice {
           // Get the oracle value and evaluate it
           bytes memory params;
           if (Oracle(spec.oracle).specification().tense == OracleTense.PAST) {
-            params = abi.encode(this.activationTime);
+            params = abi.encode(activationTime);
           } else {
             params = new bytes(0);
           }

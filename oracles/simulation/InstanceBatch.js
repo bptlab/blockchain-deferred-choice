@@ -44,6 +44,8 @@ class InstanceBatch {
       ));
       console.log('RESULTS', results, 'EXPECTED', choice.config.winner);
     }));
+    console.log('Oracles gas used: ', this.oracles.map(oracle => oracle.getGasUsed()));
+    console.log('Choices gas used: ', this.choices.map(choice => choice.getGasUsed()));
   }
 }
 

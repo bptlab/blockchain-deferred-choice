@@ -34,6 +34,7 @@ class BaseAsyncProvider extends BaseProvider {
       console.log('O[', this.name, ']', 'Callback:', consumerAddress, '|', 'HASH', hash);
     }).on('receipt', receipt => {
       console.log('O[', this.name, ']', 'Callback:', consumerAddress, '|', 'RECEIPT');
+      this.gasUsed += receipt.gasUsed;
     }).on('error', error => {
       console.log('O[', this.name, ']', 'Callback:', consumerAddress, '|', 'FAILED');
     });

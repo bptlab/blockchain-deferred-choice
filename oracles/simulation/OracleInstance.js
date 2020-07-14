@@ -6,6 +6,7 @@ class OracleInstance extends Replayer {
   config;
   contract;
   provider;
+  gasUsed = 0;
 
   constructor(config) {
     super(config.timeline);
@@ -14,6 +15,10 @@ class OracleInstance extends Replayer {
 
   getAddress() {
     return this.contract.options.address;
+  }
+
+  getGasUsed() {
+    return this.gasUsed + this.provider.getGasUsed();
   }
 
   async deploy() {
@@ -27,6 +32,7 @@ class OracleInstance extends Replayer {
       console.log('O[', this.config.name, ']', 'Deployment', '|', 'HASH', hash);
     }).on('receipt', receipt => {
       console.log('O[', this.config.name, ']', 'Deployment', '|', 'RECEIPT', receipt.contractAddress);
+      this.gasUsed += receipt.gasUsed;
     }).on('error', console.error);
     this.contract.defaultAccount = this.config.account;
 

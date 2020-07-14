@@ -15,6 +15,7 @@ class PresentSyncProvider extends BaseProvider {
       console.log('O[', this.name, ']', 'Change tx', '|', 'HASH', hash);
     }).on('receipt', receipt => {
       console.log('O[', this.name, ']', 'Change tx', '|', 'RECEIPT');
+      this.gasUsed += receipt.gasUsed;
     }).on('error', console.error);
   }
 }

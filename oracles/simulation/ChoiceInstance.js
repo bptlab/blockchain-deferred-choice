@@ -5,10 +5,15 @@ const util = require('../util.js');
 class ChoiceInstance extends Replayer {
   config;
   contract;
+  gasUsed = 0;
 
   constructor(config) {
     super(config.timeline);
     this.config = config;
+  }
+
+  getGasUsed() {
+    return this.gasUsed;
   }
 
   async deploy(oracleAddresses) {
@@ -23,6 +28,7 @@ class ChoiceInstance extends Replayer {
       console.log('C[]', 'Deployment', '|', 'HASH', hash);
     }).on('receipt', receipt => {
       console.log('C[]', 'Deployment', '|', 'RECEIPT', receipt.contractAddress);
+      this.gasUsed += receipt.gasUsed;
     }).on('error', console.error);
     this.contract.defaultAccount = this.config.account;
   
@@ -44,6 +50,7 @@ class ChoiceInstance extends Replayer {
         console.log('C[]', 'Activation', '|', 'HASH', hash);
       }).on('receipt', receipt => {
         console.log('C[]', 'Activation', '|', 'RECEIPT');
+        this.gasUsed += receipt.gasUsed;
       }).on('error', console.error);
     } else {
       // Trigger the specific target event
@@ -53,6 +60,7 @@ class ChoiceInstance extends Replayer {
         console.log('C[]', 'Trigger:', context.target, '|', 'HASH', hash);
       }).on('receipt', receipt => {
         console.log('C[]', 'Trigger:', context.target, '|', 'RECEIPT');
+        this.gasUsed += receipt.gasUsed;
       }).on('error', console.error);
     }
   }

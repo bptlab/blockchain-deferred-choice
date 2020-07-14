@@ -12,11 +12,8 @@ const util = require('./../util.js');
     this.contract.events.allEvents({
       fromBlock: 'latest'
     }).on('data', data => {
-      console.log(this.name, 'EVENT', data.event);
       this.onContractEvent(data);
-    }).on('error', error => {
-      console.error(this.name, 'ERROR', error);
-    })
+    }).on('error', console.error);
   }
 
   static getSpec() {
@@ -24,11 +21,11 @@ const util = require('./../util.js');
   }
 
   onValueChange(value) {
-    console.log(this.name, 'VALUE_CHANGE', value);
+    console.log('O[', this.name, ']', 'Value change:', value);
   }
 
   onContractEvent(event) {
-    console.log(this.name, 'EVENT', event.event);
+    console.log('O[', this.name, ']', 'Event:', event.event);
   }
 }
 

@@ -12,9 +12,9 @@ class PresentSyncProvider extends BaseProvider {
     this.contract.methods.set(value).send({
       ...util.defaultOptions
     }).on('transactionHash', hash => {
-      console.log(this.name, 'UPDATE HASH', hash);
+      console.log('O[', this.name, ']', 'Change tx', '|', 'HASH', hash);
     }).on('receipt', receipt => {
-      console.log(this.name, 'UPDATE RECEIPT');
+      console.log('O[', this.name, ']', 'Change tx', '|', 'RECEIPT');
     }).on('error', console.error);
   }
 }

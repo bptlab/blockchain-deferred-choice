@@ -1,3 +1,5 @@
+const util = require('../util.js');
+
 class OracleConfig {
   name;
   account;
@@ -6,6 +8,11 @@ class OracleConfig {
 
   setName(name) {
     this.name = name;
+    return this;
+  }
+
+  setAccountByName(name) {
+    this.account = util.getAccount(name);
     return this;
   }
 

@@ -24,12 +24,10 @@ class OracleInstance extends Replayer {
       ...util.defaultOptions,
       data: spec.evm.bytecode.object
     }).deploy().send().on('transactionHash', hash => {
-      console.log(this.config.name, 'HASH', hash);
+      console.log('O[', this.config.name, ']', 'Deployment', '|', 'HASH', hash);
     }).on('receipt', receipt => {
-      console.log(this.config.name, 'RECEIPT', receipt.contractAddress);
-    }).on('error', error => {
-      console.error(this.config.name, 'ERROR', error);
-    });
+      console.log('O[', this.config.name, ']', 'Deployment', '|', 'RECEIPT', receipt.contractAddress);
+    }).on('error', console.error);
     this.contract.defaultAccount = this.config.account;
 
     // Wrap contract in provider

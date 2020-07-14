@@ -20,22 +20,18 @@ class ChoiceInstance extends Replayer {
     }).deploy({
       arguments: [ this.config.convertToEthereum(oracleAddresses) ]
     }).send().on('transactionHash', hash => {
-      console.log('HASH', hash);
+      console.log('C[]', 'Deployment', '|', 'HASH', hash);
     }).on('receipt', receipt => {
-      console.log('RECEIPT', receipt.contractAddress);
-    }).on('error', error => {
-      console.error('ERROR', error);
-    })
+      console.log('C[]', 'Deployment', '|', 'RECEIPT', receipt.contractAddress);
+    }).on('error', console.error);
     this.contract.defaultAccount = this.config.account;
   
     // Subscribe to events for logging purposes
     this.contract.events.allEvents({
       fromBlock: 'latest'
     }).on('data', data => {
-      console.log('EVENT', data.event, data.returnValues);
-    }).on('error', error => {
-      console.error('ERROR', error);
-    });
+      console.log('C[]', 'Event:', data.event, '|', 'RESULT', data.returnValues);
+    }).on('error', console.error);
   }
 
   onReplayStep(index, context) {
@@ -45,18 +41,18 @@ class ChoiceInstance extends Replayer {
       this.contract.methods.activate().send({
         ...util.defaultOptions
       }).on('transactionHash', hash => {
-        console.log('UPDATE HASH', hash);
+        console.log('C[]', 'Activation', '|', 'HASH', hash);
       }).on('receipt', receipt => {
-        console.log('UPDATE RECEIPT');
+        console.log('C[]', 'Activation', '|', 'RECEIPT');
       }).on('error', console.error);
     } else {
       // Trigger the specific target event
       this.contract.methods.tryTrigger(context.target).send({
         ...util.defaultOptions
       }).on('transactionHash', hash => {
-        console.log('UPDATE HASH', hash);
+        console.log('C[]', 'Trigger:', context.target, '|', 'HASH', hash);
       }).on('receipt', receipt => {
-        console.log('UPDATE RECEIPT');
+        console.log('C[]', 'Trigger:', context.target, '|', 'RECEIPT');
       }).on('error', console.error);
     }
   }

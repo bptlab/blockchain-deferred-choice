@@ -15,7 +15,7 @@ class BaseAsyncProvider extends BaseProvider {
   }
 
   onQuery(sender, correlation, params) {
-    console.log(this.name, 'QUERY', sender, correlation, params);
+    console.log('O[', this.name, ']', 'Query:', sender, correlation, params);
   }
 
   doCallback(consumerAddress, correlation, types, values) {
@@ -31,10 +31,12 @@ class BaseAsyncProvider extends BaseProvider {
       from: this.contract.defaultAccount,
       ...util.defaultOptions
     }).on('transactionHash', hash => {
-      console.log(this.name, 'REQUESTER HASH', hash);
+      console.log('O[', this.name, ']', 'Callback:', consumerAddress, '|', 'HASH', hash);
     }).on('receipt', receipt => {
-      console.log(this.name, 'REQUESTER RECEIPT');
-    }).on('error', console.error);
+      console.log('O[', this.name, ']', 'Callback:', consumerAddress, '|', 'RECEIPT');
+    }).on('error', error => {
+      console.log('O[', this.name, ']', 'Callback:', consumerAddress, '|', 'FAILED');
+    });
   }
 }
 

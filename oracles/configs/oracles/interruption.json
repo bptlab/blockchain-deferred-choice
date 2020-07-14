@@ -1,0 +1,9 @@
+{
+  "name": "INTERRUPTION",
+  "account": "Oracle2",
+  "timeline": [
+    { "at":    0, "context": { "value": 0 }},
+    { "at": 2000, "context": { "value": 1 }},
+    { "at": 4000, "context": { "value": 0 }}
+  ]
+}

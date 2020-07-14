@@ -5,22 +5,22 @@ const util = require('../util.js');
 class OracleInstance extends Replayer {
   contract;
   provider;
-  name;
+  config;
   gasUsed = 0;
   ProviderClazz;
 
   constructor(config, ProviderClazz) {
     super(config.timeline);
-    this.name = config.name;
+    this.config = config;
     this.ProviderClazz = ProviderClazz;
 
     const spec = ProviderClazz.getSpec();
     this.contract = new util.web3.eth.Contract(spec.abi, undefined, {
-      from: config.account,
+      from: util.getAccount(this.config.account),
       ...util.defaultOptions,
       data: spec.evm.bytecode.object
     })
-    this.contract.defaultAccount = config.account;
+    this.contract.defaultAccount = util.getAccount(this.config.account);
   }
 
   getGasUsed() {
@@ -31,15 +31,15 @@ class OracleInstance extends Replayer {
     // Create contract
     await this.contract.deploy().send(
     ).on('transactionHash', hash => {
-      console.log('O[', this.name, ']', 'Deployment', '|', 'HASH', hash);
+      console.log('O[', this.config.name, ']', 'Deployment', '|', 'HASH', hash);
     }).on('receipt', receipt => {
-      console.log('O[', this.name, ']', 'Deployment', '|', 'RECEIPT', receipt.contractAddress);
+      console.log('O[', this.config.name, ']', 'Deployment', '|', 'RECEIPT', receipt.contractAddress);
       this.gasUsed += receipt.gasUsed;
       this.contract.options.address = receipt.contractAddress;
     }).on('error', console.error);
 
     // Wrap contract in provider
-    this.provider = new this.ProviderClazz(this.name, this.contract);
+    this.provider = new this.ProviderClazz(this.config.name, this.contract);
 
     return this.contract.options.address;
   }

@@ -4,20 +4,20 @@ const util = require('../util.js');
 
 class ChoiceInstance extends Replayer {
   contract;
+  config;
   gasUsed = 0;
-  events;
 
   constructor(config) {
     super(config.timeline);
-    this.events = config.events.slice(0);
+    this.config = config;
 
     const spec = util.getSpec('BaseDeferredChoice');
     this.contract = new util.web3.eth.Contract(spec.abi, undefined, {
-      from: config.account,
+      from: util.getAccount(this.config.account),
       ...util.defaultOptions,
       data: spec.evm.bytecode.object
     });
-    this.contract.defaultAccount = config.account;
+    this.contract.defaultAccount = util.getAccount(this.config.account);
   }
 
   getGasUsed() {
@@ -26,17 +26,17 @@ class ChoiceInstance extends Replayer {
 
   async deploy(oracleAddresses) {
     // Convert the events to Ethereum struct encoding
-    const payload = this.events.map(event => [
-      event.type,
+    const payload = this.config.events.map(event => [
+      util.enums.EventDefinition[event.type],
       // For absolute timers, we regard the given timer value as an offset
       // to the current timestamp. Otherwise, configs would be rather static
-      event.type == util.enums.EventDefinition.TIMER_ABSOLUTE
+      event.type == 'TIMER_ABSOLUTE'
                   ? event.timer + Math.ceil(Date.now() / 1000)
                   : (event.timer || 0),
       event.oracleName ? oracleAddresses[event.oracleName] :
                          '0x0000000000000000000000000000000000000000',
       [
-        event.operator || 0,
+        event.operator ? util.enums.Operator[event.operator] : 0,
         event.value || 0
       ]
     ]);

@@ -14,23 +14,24 @@ class InstanceBatch {
     await this.deploy();
     await this.replay();
 
-    // Output some statistics
-    await new Promise(resolve => setTimeout(resolve, 5000));
-    await Promise.all(this.choices.map(async choice => {
-      const results = await Promise.all(choice.events.map(
+    // Output some statistics after a while
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    let output = {};
+    output.eventStates = await Promise.all(this.choices.map(async choice => {
+      return await Promise.all(choice.config.events.map(
         (_, i) => choice.contract.methods.getState(i).call()
       ));
-      console.log('RESULTS', results);
     }));
-    console.log('Oracles gas used: ', this.oracles.map(oracle => oracle.getGasUsed()));
-    console.log('Choices gas used: ', this.choices.map(choice => choice.getGasUsed()));
+    output.oraclesGasUsed = this.oracles.map(oracle => oracle.getGasUsed());
+    output.choicesGasUsed = this.choices.map(choice => choice.getGasUsed());
+    return output;
   }
 
   async deploy() {
     // Deploy all oracles
     let oracleAddresses = {};
     for (let i = 0; i < this.oracles.length; i++) {
-      oracleAddresses[this.oracles[i].name] = await this.oracles[i].deploy();
+      oracleAddresses[this.oracles[i].config.name] = await this.oracles[i].deploy();
     }
 
     // Deploy all choices

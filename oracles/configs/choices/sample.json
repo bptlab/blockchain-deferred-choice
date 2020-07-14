@@ -1,0 +1,24 @@
+{
+  "account": "Consumer",
+  "events": [{
+    "type": "TIMER_RELATIVE",
+    "timer": 60
+  }, {
+    "type": "CONDITIONAL",
+    "oracleName": "WEATHER_WARNING",
+    "operator": "EQUAL",
+    "value": 4
+  }, {
+    "type": "CONDITIONAL",
+    "oracleName": "INTERRUPTION",
+    "operator": "EQUAL",
+    "value": 1
+  }, {
+    "type": "EXPLICIT"
+  }],
+  "timeline": [
+    { "at":     0 },
+    { "at":  1000, "context": { "target": 0 }},
+    { "at": 10000, "context": { "target": 1 }}
+  ]
+}

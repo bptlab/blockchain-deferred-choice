@@ -8,6 +8,11 @@ class ChoiceConfig {
   
   oracleNames = new Set();
 
+  setAccountByName(name) {
+    this.account = util.getAccount(name);
+    return this;
+  }
+
   setAccount(account) {
     this.account = account;
     return this;

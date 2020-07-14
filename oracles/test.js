@@ -1,14 +1,14 @@
 const ChoiceConfig = require('./simulation/ChoiceConfig.js');
 const OracleConfig = require('./simulation/OracleConfig.js');
 const InstanceBatch = require('./simulation/InstanceBatch.js');
-const Provider = require('./providers/FutureAsyncProvider.js');
+const Provider = require('./providers/PresentSyncProvider.js');
 
 const util = require('./util.js');
 
 // Deploy an oracle
 async function deployAndTest() {
   const c1 = new ChoiceConfig()
-    .setAccount(util.getAccount('Consumer'))
+    .setAccountByName('Consumer')
     .addRelativeTimerEvent(60)
     .addConditionalEvent('WEATHER_WARNING', util.enums.Operator.EQUAL, 4)
     .addConditionalEvent('INTERRUPTION', util.enums.Operator.EQUAL, 1)
@@ -22,7 +22,7 @@ async function deployAndTest() {
   
     const o1 = new OracleConfig()
     .setName('WEATHER_WARNING')
-    .setAccount(util.getAccount('Oracle'))
+    .setAccountByName('Oracle')
     .setTimeline([
       { at:    0, context: { value:   5 }},
       { at: 1000, context: { value:   8 }},
@@ -34,7 +34,7 @@ async function deployAndTest() {
 
   const o2 = new OracleConfig()
     .setName('INTERRUPTION')
-    .setAccount(util.getAccount('Oracle2'))
+    .setAccountByName('Oracle2')
     .setTimeline([
       { at:    0, context: { value: 0 }},
       { at: 2000, context: { value: 1 }},

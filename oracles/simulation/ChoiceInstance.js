@@ -3,13 +3,21 @@ const Replayer = require('./Replayer.js');
 const util = require('../util.js');
 
 class ChoiceInstance extends Replayer {
-  config;
   contract;
   gasUsed = 0;
+  events;
 
   constructor(config) {
     super(config.timeline);
-    this.config = config;
+    this.events = config.events.slice(0);
+
+    const spec = util.getSpec('BaseDeferredChoice');
+    this.contract = new util.web3.eth.Contract(spec.abi, undefined, {
+      from: config.account,
+      ...util.defaultOptions,
+      data: spec.evm.bytecode.object
+    });
+    this.contract.defaultAccount = config.account;
   }
 
   getGasUsed() {
@@ -17,20 +25,32 @@ class ChoiceInstance extends Replayer {
   }
 
   async deploy(oracleAddresses) {
-    const spec = util.getSpec('BaseDeferredChoice');
-    this.contract = await new util.web3.eth.Contract(spec.abi, undefined, {
-      from: this.config.account,
-      ...util.defaultOptions,
-      data: spec.evm.bytecode.object
-    }).deploy({
-      arguments: [ this.config.convertToEthereum(oracleAddresses) ]
+    // Convert the events to Ethereum struct encoding
+    const payload = this.events.map(event => [
+      event.type,
+      // For absolute timers, we regard the given timer value as an offset
+      // to the current timestamp. Otherwise, configs would be rather static
+      event.type == util.enums.EventDefinition.TIMER_ABSOLUTE
+                  ? event.timer + Math.ceil(Date.now() / 1000)
+                  : (event.timer || 0),
+      event.oracleName ? oracleAddresses[event.oracleName] :
+                         '0x0000000000000000000000000000000000000000',
+      [
+        event.operator || 0,
+        event.value || 0
+      ]
+    ]);
+
+    await this.contract.deploy({
+      arguments: [ payload ]
     }).send().on('transactionHash', hash => {
       console.log('C[]', 'Deployment', '|', 'HASH', hash);
     }).on('receipt', receipt => {
       console.log('C[]', 'Deployment', '|', 'RECEIPT', receipt.contractAddress);
       this.gasUsed += receipt.gasUsed;
+      this.contract.options.address = receipt.contractAddress;
     }).on('error', console.error);
-    this.contract.defaultAccount = this.config.account;
+    
   
     // Subscribe to events for logging purposes
     this.contract.events.allEvents({
@@ -38,6 +58,8 @@ class ChoiceInstance extends Replayer {
     }).on('data', data => {
       console.log('C[]', 'Event:', data.event, '|', 'RESULT', data.returnValues);
     }).on('error', console.error);
+
+    return this.contract.options.address;
   }
 
   onReplayStep(index, context) {

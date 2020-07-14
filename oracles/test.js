@@ -1,7 +1,12 @@
 const ChoiceConfig = require('./simulation/ChoiceConfig.js');
 const OracleConfig = require('./simulation/OracleConfig.js');
 const InstanceBatch = require('./simulation/InstanceBatch.js');
-const Provider = require('./providers/PresentSyncProvider.js');
+
+const PastAsyncProvider = require('./providers/PastAsyncProvider.js');
+const PastSyncProvider = require('./providers/PastSyncProvider.js');
+const PresentAsyncProvider = require('./providers/PresentAsyncProvider.js');
+const PresentSyncProvider = require('./providers/PresentSyncProvider.js');
+const FutureAsyncProvider = require('./providers/FutureAsyncProvider.js');
 
 const util = require('./util.js');
 
@@ -29,8 +34,7 @@ async function deployAndTest() {
       { at: 2000, context: { value: 100 }},
       { at: 4000, context: { value:   5 }},
       { at: 5000, context: { value:   4 }}
-    ])
-    .setClass(Provider);
+    ]);
 
   const o2 = new OracleConfig()
     .setName('INTERRUPTION')
@@ -39,12 +43,24 @@ async function deployAndTest() {
       { at:    0, context: { value: 0 }},
       { at: 2000, context: { value: 1 }},
       { at: 4000, context: { value: 0 }}
-    ])
-    .setClass(Provider);
+    ]);
   
-  const batch = new InstanceBatch([c1], [o1, o2]);
-  await batch.deploy();
-  await batch.replay();
+  let batch;
+
+  batch = new InstanceBatch([c1], [o1, o2], PastAsyncProvider);
+  await batch.simulate();
+
+  batch = new InstanceBatch([c1], [o1, o2], PastSyncProvider);
+  await batch.simulate();
+
+  batch = new InstanceBatch([c1], [o1, o2], PresentAsyncProvider);
+  await batch.simulate();
+
+  batch = new InstanceBatch([c1], [o1, o2], PresentSyncProvider);
+  await batch.simulate();
+
+  batch = new InstanceBatch([c1], [o1, o2], FutureAsyncProvider);
+  await batch.simulate();
 }
 
 deployAndTest();

@@ -61,23 +61,6 @@ class ChoiceConfig {
     this.winner = winner;
     return this;
   }
-
-  convertToEthereum(oracleAddresses) {
-    return this.events.map(event => [
-      event.type,
-      // For absolute timers, we regard the given timer value as an offset
-      // to the current timestamp. Otherwise, configs would be rather static
-      event.type == util.enums.EventDefinition.TIMER_ABSOLUTE
-                  ? event.timer + Math.ceil(Date.now() / 1000)
-                  : (event.timer || 0),
-      event.oracleName ? oracleAddresses[event.oracleName] :
-                         '0x0000000000000000000000000000000000000000',
-      [
-        event.operator || 0,
-        event.value || 0
-      ]
-    ]);
-  }
 }
 
 module.exports = ChoiceConfig;

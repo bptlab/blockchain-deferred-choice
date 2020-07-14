@@ -3,18 +3,24 @@ const Replayer = require('./Replayer.js');
 const util = require('../util.js');
 
 class OracleInstance extends Replayer {
-  config;
   contract;
   provider;
+  name;
   gasUsed = 0;
+  ProviderClazz;
 
-  constructor(config) {
+  constructor(config, ProviderClazz) {
     super(config.timeline);
-    this.config = config;
-  }
+    this.name = config.name;
+    this.ProviderClazz = ProviderClazz;
 
-  getAddress() {
-    return this.contract.options.address;
+    const spec = ProviderClazz.getSpec();
+    this.contract = new util.web3.eth.Contract(spec.abi, undefined, {
+      from: config.account,
+      ...util.defaultOptions,
+      data: spec.evm.bytecode.object
+    })
+    this.contract.defaultAccount = config.account;
   }
 
   getGasUsed() {
@@ -23,21 +29,19 @@ class OracleInstance extends Replayer {
 
   async deploy() {
     // Create contract
-    const spec = this.config.clazz.getSpec();
-    this.contract = await new util.web3.eth.Contract(spec.abi, undefined, {
-      from: this.config.account,
-      ...util.defaultOptions,
-      data: spec.evm.bytecode.object
-    }).deploy().send().on('transactionHash', hash => {
-      console.log('O[', this.config.name, ']', 'Deployment', '|', 'HASH', hash);
+    await this.contract.deploy().send(
+    ).on('transactionHash', hash => {
+      console.log('O[', this.name, ']', 'Deployment', '|', 'HASH', hash);
     }).on('receipt', receipt => {
-      console.log('O[', this.config.name, ']', 'Deployment', '|', 'RECEIPT', receipt.contractAddress);
+      console.log('O[', this.name, ']', 'Deployment', '|', 'RECEIPT', receipt.contractAddress);
       this.gasUsed += receipt.gasUsed;
+      this.contract.options.address = receipt.contractAddress;
     }).on('error', console.error);
-    this.contract.defaultAccount = this.config.account;
 
     // Wrap contract in provider
-    this.provider = new this.config.clazz(this.config.name, this.contract);
+    this.provider = new this.ProviderClazz(this.name, this.contract);
+
+    return this.contract.options.address;
   }
 
   onReplayStep(index, context) {

@@ -77,4 +77,5 @@ interface DeferredChoice {
 
   function activate() external;
   function tryTrigger(uint8 target) external;
+  function getState(uint8 index) external view returns (EventState);
 }

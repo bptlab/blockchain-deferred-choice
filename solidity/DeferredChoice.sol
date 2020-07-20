@@ -141,7 +141,7 @@ contract BaseDeferredChoice is DeferredChoice
   /*
    * Get the state of the event with the given index.
    */
-  function getState(uint8 index) external view returns (EventState) {
+  function getState(uint8 index) external view override returns (EventState) {
     return events[index].state;
   }
 

@@ -3,8 +3,15 @@ const BaseProvider = require('./BaseProvider.js');
 const util = require('./../util.js');
 
 class PastSyncProvider extends BaseProvider {
-  static getSpec() {
-    return util.getSpec('PastSyncOracle');
+  static getContractName() {
+    return 'PastSyncOracle';
+  }
+
+  static getTemplateOptions() {
+    return {
+      PAST: true,
+      SYNC: true
+    };
   }
 
   onValueChange(value) {

@@ -14,7 +14,7 @@ class OracleInstance extends Replayer {
     this.config = config;
     this.ProviderClazz = ProviderClazz;
 
-    const spec = ProviderClazz.getSpec();
+    const spec = util.getSpec(ProviderClazz.getContractName());
     this.contract = new util.web3.eth.Contract(spec.abi, undefined, {
       from: util.getAccount(this.config.account),
       ...util.defaultOptions,

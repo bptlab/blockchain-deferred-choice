@@ -5,8 +5,15 @@ const util = require('./../util.js');
 class PresentAsyncProvider extends BaseAsyncProvider {
   currentValue;
 
-  static getSpec() {
-    return util.getSpec('PresentAsyncOracle');
+  static getContractName() {
+    return 'PresentAsyncOracle';
+  }
+
+  static getTemplateOptions() {
+    return {
+      PRESENT: true,
+      ASYNC: true
+    };
   }
 
   onValueChange(value) {

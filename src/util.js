@@ -1,12 +1,7 @@
 const fs = require('fs-extra');
 const solc = require('solc');
+const ejs = require('ejs');
 const Web3 = require('web3');
-
-const SOURCES = [
-  'Interfaces.sol',
-  'DeferredChoice.sol',
-  'Oracles.sol'
-];
 
 const KEYS = {
   Consumer: '9756b00ca92badafd4d9ce3b6f02134b4de13cbb9dceaf9db61eda3724bd3a30',
@@ -20,7 +15,7 @@ const web3 = new Web3(new Web3.providers.WebsocketProvider(
   'ws://localhost:8545'
 ));
 
-let specs;
+let contracts;
 let accounts;
 
 exports.web3 = web3;
@@ -70,9 +65,29 @@ exports.getAccount = function(name) {
   return accounts[name];
 }
 
-exports.getSpec = function(spec) {
+let staticContracts;
+exports.getStaticContract = function(name) {
+
+}
+
+exports.getChoiceContract = function(options) {
+
+}
+
+exports.getContract = function(name, templateOptions = {}) {
   // Compile contracts if this has not yet been done
-  if (!specs) {
+  if (!contracts) {
+    const sources = {
+      'Interfaces.sol': {
+        content: fs.readFileSync('./solidity/Interfaces.sol', { encoding: 'utf8' })
+      },
+      'Oracles.sol': {
+        content: fs.readFileSync('./solidity/Oracles.sol', { encoding: 'utf8' })
+      },
+      'DeferredChoice.sol': {
+        content: ejs.renderFile('./solidity/DeferredChoice.sol', templateOptions)
+      }
+    }
     const sources = Object.assign({}, ...SOURCES.map(file => {
       return {
         [file]: {
@@ -97,9 +112,9 @@ exports.getSpec = function(spec) {
     };
     const compilerOut = JSON.parse(solc.compile(JSON.stringify(compilerIn)));
 
-    specs = Object.assign({}, ...Object.values(compilerOut.contracts));
+    contracts = Object.assign({}, ...Object.values(compilerOut.contracts));
   }
 
   // Return the contract specification specified
-  return specs[spec];
+  return contracts[spec];
 }

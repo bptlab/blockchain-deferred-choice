@@ -3,15 +3,24 @@ pragma solidity ^0.6.9;
 pragma experimental ABIEncoderV2;
 
 import "./Interfaces.sol";
+import "./Oracles.sol";
 
-contract BaseDeferredChoice is DeferredChoice {
+contract BaseDeferredChoice is DeferredChoice
+// <%- if (PAST) { _%>
+  , OracleValueArrayConsumer
+// <%- } else { _%>
+  , OracleValueConsumer
+// <%- } _%>
+{
   uint256 constant TOP_TIMESTAMP = type(uint256).max;
 
   // Member Variables
   uint256 public activationTime = 0;
   Event[] public events;
   bool public hasFinished = false;
+// <%- if (ASYNC && !FUTURE) { _%>
   uint8 public callbackCount = 0;
+// <%- } _%>
 
   // Functions
   constructor(EventSpecification[] memory specs) public {
@@ -40,26 +49,29 @@ contract BaseDeferredChoice is DeferredChoice {
 
     // Activate and initially evaluate all events
     for (uint8 i = 0; i < events.length; i++) {
+      Event storage e = events[i];
       changeState(i, EventState.ACTIVE);
 
-      // For some events, we have to do some initialization once
-      Event storage e = events[i];
+// <%- if (ASYNC && FUTURE) { _%>
       if (e.spec.definition == EventDefinition.CONDITIONAL) {
-        // Subscribe to publish/subscribe oracles
-        if (Oracle(e.spec.oracle).specification().tense == OracleTense.FUTURE) {
-          // Set correlation target as this event itself, since we never call pub/
-          // sub oracles again later during the triggering of a concrete other event.
-          uint256 correlation = uint256(i) | (uint256(i) << 8);
-          AsyncOracle(e.spec.oracle).get(correlation, new bytes(0));
-        }
-      } else if (e.spec.definition == EventDefinition.EXPLICIT) {
+        // Subscribe to publish/subscribe oracles.
+        // Set correlation target as this event itself, since we never call pub/
+        // sub oracles again later during the triggering of a concrete other event.
+        uint256 correlation = uint256(i) | (uint256(i) << 8);
+        FutureAsyncOracle(e.spec.oracle).get(correlation);
+        continue;
+      }
+// <%- } _%>
+      
+      if (e.spec.definition == EventDefinition.EXPLICIT) {
         // Explicit (message and signal) events, by default, evaluate to "the future" until
         // their concrete transaction is sent
         e.evaluation = TOP_TIMESTAMP;
-      } else {
-        // Otherwise, just evaluate them through the regular interfaces
-        evaluateEvent(i, i);
+        continue;
       }
+
+      // Otherwise, just evaluate them through the regular interfaces
+      evaluateEvent(i, i);
     }
 
     emit Debug("Activated");
@@ -75,12 +87,14 @@ contract BaseDeferredChoice is DeferredChoice {
     if (hasFinished) {
       revert("Choice has already finished");
     }
-    if (callbackCount > 0) {
-      revert("Another event is currently being tried");
-    }
     if (target >= events.length) {
       revert("Event with target index does not exist");
     }
+// <%- if (ASYNC) { _%>
+    if (callbackCount > 0) {
+      revert("Another event is currently being tried");
+    }
+// <%- } _%>
 
     // Evaluate all events if necessary, including the target one
     for (uint8 i = 0; i < events.length; i++) {
@@ -91,11 +105,12 @@ contract BaseDeferredChoice is DeferredChoice {
     tryCompleteTrigger(target);
   }
 
-  /*
-   * This function will be called by async oracles to provide the result of the
-   * query. Depending on the concrete oracle type, different formats will be given.
-   */
-  function oracleCallback(address oracle, uint256 correlation, bytes calldata results) external override {
+// <%- if (ASYNC) { _%>
+// <%- if (PAST) { _%>
+  function oracleCallback(address oracle, uint256 correlation, uint256[] calldata results) external override {
+// <%- } else { _%>
+  function oracleCallback(address oracle, uint256 correlation, uint256 results) external override {
+// <%- } _%>
     uint8 target = uint8(correlation);
     uint8 index = uint8(correlation >> 8);
 
@@ -113,14 +128,15 @@ contract BaseDeferredChoice is DeferredChoice {
     // Check the conditional event this oracle belongs to
     checkConditionalEvent(index, oracle, results);
 
+// <%- if (!FUTURE) { _%>
     // Reduce the callback count so we know when we have all the data we need
-    if (Oracle(oracle).specification().tense != OracleTense.FUTURE) {
-      callbackCount--;
-    }
+    callbackCount--;
+// <%- } _%>
 
     // Try to trigger the correlated original target of this trigger attempt
     tryCompleteTrigger(target);
   }
+// <%- } _%>
 
   /*
    * Get the state of the event with the given index.
@@ -170,62 +186,58 @@ contract BaseDeferredChoice is DeferredChoice {
           events[index].evaluation = TOP_TIMESTAMP;
         }
       } else if (spec.definition == EventDefinition.CONDITIONAL) {
-        if (Oracle(spec.oracle).specification().tense != OracleTense.FUTURE) {
-          // Get the oracle value and evaluate it
-          bytes memory params;
-          if (Oracle(spec.oracle).specification().tense == OracleTense.PAST) {
-            params = abi.encode(activationTime);
-          } else {
-            params = new bytes(0);
-          }
-          if (Oracle(spec.oracle).specification().mode == OracleMode.SYNC) {
-            bytes memory result = SyncOracle(spec.oracle).get(params);
-            checkConditionalEvent(index, spec.oracle, result);
-          } else {
-            uint256 correlation = uint256(target) | (uint256(index) << 8);
-            AsyncOracle(spec.oracle).get(correlation, params);
-            callbackCount++;
-          }
-        }
+// <%- if (ASYNC) { _%>
+        uint256 correlation = uint256(target) | (uint256(index) << 8);
+// <%- } _%>
+// <%- if (ASYNC && PAST) { _%>
+        PastAsyncOracle(spec.oracle).get(correlation, activationTime);
+        callbackCount++;
+// <%- } else if (ASYNC && PRESENT) { _%>
+        PresentAsyncOracle(spec.oracle).get(correlation);
+        callbackCount++;
+// <%- } else if (ASYNC && FUTURE) { _%>
+        // For FutureAsyncOracles, we do not have to query them again here
+// <%- } else if (SYNC && PAST) { _%>
+        uint256[] memory values = PastSyncOracle(spec.oracle).get(activationTime);
+        checkConditionalEvent(index, spec.oracle, values);
+// <%- } else if (SYNC && PRESENT) { _%>
+        uint256 value = PresentSyncOracle(spec.oracle).get();
+        checkConditionalEvent(index, spec.oracle, value);
+// <%- } _%>
       }
     }
   }
 
-  /*
-   * Check the conditional event at the given index using the results returned from the given
-   * oracle. We need the oracle information to properly decode the results.
-   */
-  function checkConditionalEvent(uint8 index, address oracle, bytes memory results) private {
-    // By default, we assume the condition has not been fulfilled and set the evaluation time
-    // to "the future"
+// <%- if (!PAST) { _%>
+  function checkConditionalEvent(uint8 index, address oracle, uint256 value) private {
     uint256 evaluation = TOP_TIMESTAMP;
 
-    if (Oracle(oracle).specification().tense == OracleTense.PAST) {
-      // For PAST oracles, the results are an array of historical values
-      uint256[] memory values = abi.decode(results, (uint256[]));
+    // For PRESENT and FUTURE oracles, we just get a single value to check
+    if (checkCondition(events[index].spec.condition, value)) {
+      evaluation = block.timestamp;
+    }
 
-      // Find the first of those values which fulfilled the condition
-      for (uint16 i = 0; i < values.length; i += 2) {
-        if (checkCondition(events[index].spec.condition, values[i+1])) {
-          if (values[i] < activationTime) {
-            evaluation = activationTime;
-          } else {
-            evaluation = values[i];
-          }
-          break;
+    events[index].evaluation = evaluation;
+}
+// <%- } else { _%>
+  function checkConditionalEvent(uint8 index, address oracle, uint256[] memory values) private {
+    uint256 evaluation = TOP_TIMESTAMP;
+
+    // Find the first of those values which fulfilled the condition
+    for (uint16 i = 0; i < values.length; i += 2) {
+      if (checkCondition(events[index].spec.condition, values[i+1])) {
+        if (values[i] < activationTime) {
+          evaluation = activationTime;
+        } else {
+          evaluation = values[i];
         }
-      }
-    } else {
-      // For PRESENT and FUTURE oracles, we just get a single value to check
-      uint256 value = abi.decode(results, (uint256));
-      if (checkCondition(events[index].spec.condition, value)) {
-        evaluation = block.timestamp;
+        break;
       }
     }
 
     events[index].evaluation = evaluation;
-    emit Debug("Oracle evaluated");
   }
+// <%- } _%>
 
   /*
    * Helper function that returns true if the given condition is satisfied by the value.
@@ -249,11 +261,13 @@ contract BaseDeferredChoice is DeferredChoice {
    * or aborting the target event.
    */
   function tryCompleteTrigger(uint8 target) private {
+// <%- if (ASYNC && !FUTURE) { _%>
     // We can only complete the trigger if there are no oracle values left to receive
     if (callbackCount > 0) {
       emit Debug("Missing required oracle evaluations");
       return;
     }
+// <%- } _%>
     for (uint8 i = 0; i < events.length; i++) {
       if (events[i].evaluation == 0) {
         emit Debug("Missing initial oracle evaluations");

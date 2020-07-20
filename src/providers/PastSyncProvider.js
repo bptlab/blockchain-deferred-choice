@@ -1,12 +1,22 @@
-const PresentSyncProvider = require('./PresentSyncProvider.js');
+const BaseProvider = require('./BaseProvider.js');
 
 const util = require('./../util.js');
 
-// For now, the PastSyncProvider works exactly the same as the PresentSyncProvider.
-// The difference is in the smart contract on-chain.
-class PastSyncProvider extends PresentSyncProvider {
+class PastSyncProvider extends BaseProvider {
   static getSpec() {
     return util.getSpec('PastSyncOracle');
+  }
+
+  onValueChange(value) {
+    super.onValueChange(value);
+    this.contract.methods.set(value).send({
+      ...util.defaultOptions
+    }).on('transactionHash', hash => {
+      console.log('O[', this.name, ']', 'Change tx', '|', 'HASH', hash);
+    }).on('receipt', receipt => {
+      console.log('O[', this.name, ']', 'Change tx', '|', 'RECEIPT');
+      this.gasUsed += receipt.gasUsed;
+    }).on('error', console.error);
   }
 }
 

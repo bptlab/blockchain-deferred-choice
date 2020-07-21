@@ -7,11 +7,11 @@ class ChoiceInstance extends Replayer {
   config;
   gasUsed = 0;
 
-  constructor(config) {
+  constructor(config, ProviderClazz) {
     super(config.timeline);
     this.config = config;
 
-    const spec = util.getSpec('BaseDeferredChoice');
+    const spec = util.getSpec(ProviderClazz.getContractPrefix() + 'Choice');
     this.contract = new util.web3.eth.Contract(spec.abi, undefined, {
       from: util.getAccount(this.config.account),
       ...util.defaultOptions,

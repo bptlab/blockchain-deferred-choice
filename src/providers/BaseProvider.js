@@ -17,11 +17,7 @@ const util = require('./../util.js');
     }).on('error', console.error);
   }
 
-  static getContractName() {
-    return undefined;
-  }
-
-  static getTemplateOptions() {
+  static getContractPrefix() {
     return undefined;
   }
 

@@ -3,15 +3,8 @@ const BaseProvider = require('./BaseProvider.js');
 const util = require('./../util.js');
 
 class PresentSyncProvider extends BaseProvider {
-  static getContractName() {
-    return 'PresentSyncOracle';
-  }
-
-  static getTemplateOptions() {
-    return {
-      PRESENT: true,
-      SYNC: true
-    };
+  static getContractPrefix() {
+    return 'PresentSync';
   }
 
   onValueChange(value) {

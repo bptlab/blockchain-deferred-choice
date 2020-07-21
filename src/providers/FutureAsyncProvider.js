@@ -6,15 +6,8 @@ class FutureAsyncProvider extends BaseAsyncProvider {
   subscribers = [];
   currentValue;
 
-  static getContractName() {
-    return 'FutureAsyncOracle';
-  }
-
-  static getTemplateOptions() {
-    return {
-      FUTURE: true,
-      ASYNC: true
-    };
+  static getContractPrefix() {
+    return 'FutureAsync';
   }
 
   doCallback(subscriber) {

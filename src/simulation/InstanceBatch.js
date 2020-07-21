@@ -7,7 +7,7 @@ class InstanceBatch {
 
   constructor(choiceConfigs, oracleConfigs, ProviderClazz) {
     this.oracles = oracleConfigs.map(config => new OracleInstance(config, ProviderClazz));
-    this.choices = choiceConfigs.map(config => new ChoiceInstance(config))
+    this.choices = choiceConfigs.map(config => new ChoiceInstance(config, ProviderClazz));
   }
 
   async simulate() {

@@ -28,19 +28,15 @@ contract PastAsyncChoice is AbstractChoice, OracleValueArrayConsumer {
   }
 
   function oracleCallback(address oracle, uint256 correlation, uint256[] calldata values) external override {
-    uint8 target = uint8(correlation);
-    uint8 index = uint8(correlation >> 8);
+    callbackCount--;
 
     // Do nothing if we have already finished
     if (hasFinished) {
       return;
     }
 
-    // Do nothing if the event this oracle belongs to has been evaluated already
-    // (this filters out duplicate callbacks, or late pub/sub calls)
-    if (events[index].evaluation > 0 && events[index].evaluation < TOP_TIMESTAMP) {
-      return;
-    }
+    uint8 target = uint8(correlation);
+    uint8 index = uint8(correlation >> 8);
 
     // Find the first of those values which fulfilled the condition
     for (uint16 i = 0; i < values.length; i += 2) {
@@ -51,13 +47,11 @@ contract PastAsyncChoice is AbstractChoice, OracleValueArrayConsumer {
           events[index].evaluation = values[i];
         }
         break;
-      } else {
+      }
+      if (events[index].evaluation == 0) {
         events[index].evaluation = TOP_TIMESTAMP;
       }
     }
-
-    // Reduce the callback count so we know when we have all the data we need
-    callbackCount--;
 
     // Try to trigger the correlated original target of this trigger attempt
     tryCompleteTrigger(target);

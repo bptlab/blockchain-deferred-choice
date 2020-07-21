@@ -12,6 +12,7 @@ abstract contract AbstractChoice is Base {
   );
 
   event Debug(string text);
+  event DebugUint(uint256 value);
 
   // Enumerations
   enum EventState {
@@ -166,7 +167,7 @@ abstract contract AbstractChoice is Base {
 
     // Evaluate all events if necessary
     for (uint8 i = 0; i < events.length; i++) {
-      if (events[i].evaluation > 0 && events[i].evaluation < TOP_TIMESTAMP) {
+      if (events[i].evaluation == 0 || events[i].evaluation == TOP_TIMESTAMP) {
         evaluateEvent(i, target);
       }
     }
@@ -197,12 +198,6 @@ abstract contract AbstractChoice is Base {
    * or aborting the target event.
    */
   function tryCompleteTrigger(uint8 target) internal virtual {
-    for (uint8 i = 0; i < events.length; i++) {
-      if (events[i].evaluation == 0) {
-        emit Debug("Missing initial oracle evaluations");
-      }
-    }
-
     // Find minimum evaluation timestamp of any implicit event
     uint256 min = TOP_TIMESTAMP;
     uint8 minIndex = 0;
@@ -214,6 +209,10 @@ abstract contract AbstractChoice is Base {
         }
       }
     }
+
+    // At this point, we should have an evaluation (maybe TOP_TIMESTAMP) for
+    // each implicit event. If not, something internal went wrong.
+    assert(min > 0);
 
     bool canTrigger = false;
     uint8 toTrigger = 0;

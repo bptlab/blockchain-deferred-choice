@@ -15,20 +15,20 @@ async function deployAndTest() {
   const o1 = require('./configs/oracles/weatherWarning.json');
   const o2 = require('./configs/oracles/interruption.json');
 
-  batch = new InstanceBatch([c1], [o1, o2], PastAsyncProvider);
-  outputs.push(await batch.simulate());
+  // batch = new InstanceBatch([c1], [o1, o2], PastAsyncProvider);
+  // outputs.push(await batch.simulate());
 
-  batch = new InstanceBatch([c1], [o1, o2], PastSyncProvider);
-  outputs.push(await batch.simulate());
+  // batch = new InstanceBatch([c1], [o1, o2], PastSyncProvider);
+  // outputs.push(await batch.simulate());
 
   batch = new InstanceBatch([c1], [o1, o2], PresentAsyncProvider);
   outputs.push(await batch.simulate());
 
-  batch = new InstanceBatch([c1], [o1, o2], PresentSyncProvider);
-  outputs.push(await batch.simulate());
+  // batch = new InstanceBatch([c1], [o1, o2], PresentSyncProvider);
+  // outputs.push(await batch.simulate());
 
-  batch = new InstanceBatch([c1], [o1, o2], FutureAsyncProvider);
-  outputs.push(await batch.simulate());
+  // batch = new InstanceBatch([c1], [o1, o2], FutureAsyncProvider);
+  // outputs.push(await batch.simulate());
 
   console.log('FINAL RESULT');
   console.log(JSON.stringify(outputs, null, 2));

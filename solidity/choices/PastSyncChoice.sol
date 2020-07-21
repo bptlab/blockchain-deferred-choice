@@ -22,9 +22,10 @@ contract PastSyncChoice is AbstractChoice {
             events[index].evaluation = values[i];
           }
           break;
-        } else {
-          events[index].evaluation = TOP_TIMESTAMP;
         }
+      }
+      if (events[index].evaluation == 0) {
+        events[index].evaluation = TOP_TIMESTAMP;
       }
       return;
     }

@@ -22,14 +22,24 @@ contract FutureAsyncChoice is AbstractChoice, OracleValueConsumer {
     super.activateEvent(index);
   }
 
-  function oracleCallback(address oracle, uint256 correlation, uint256 value) external override {
-    uint8 target = uint8(correlation);
-    uint8 index = uint8(correlation >> 8);
+  function tryCompleteTrigger(uint8 target) internal override {
+    for (uint8 i = 0; i < events.length; i++) {
+      if (events[i].evaluation == 0) {
+        emit Debug("Missing initial oracle evaluations");
+        return;
+      }
+    }
+    super.tryCompleteTrigger(target);
+  }
 
+  function oracleCallback(address oracle, uint256 correlation, uint256 value) external override {
     // Do nothing if we have already finished
     if (hasFinished) {
       return;
     }
+    
+    uint8 target = uint8(correlation);
+    uint8 index = uint8(correlation >> 8);
 
     // Do nothing if the event this oracle belongs to has been evaluated already
     // (this filters out duplicate callbacks, or late pub/sub calls)

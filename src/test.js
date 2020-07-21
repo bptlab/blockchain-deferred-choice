@@ -12,22 +12,23 @@ async function deployAndTest() {
   let outputs = [];
 
   const c1 = require('./configs/choices/sample.json');
+  const c2 = require('./configs/choices/timerWins.json');
   const o1 = require('./configs/oracles/weatherWarning.json');
   const o2 = require('./configs/oracles/interruption.json');
 
-  batch = new InstanceBatch([c1], [o1, o2], PastAsyncProvider);
+  batch = new InstanceBatch([c1, c2], [o1, o2], PastAsyncProvider);
   outputs.push(await batch.simulate());
 
-  batch = new InstanceBatch([c1], [o1, o2], PastSyncProvider);
+  batch = new InstanceBatch([c1, c2], [o1, o2], PastSyncProvider);
   outputs.push(await batch.simulate());
 
-  batch = new InstanceBatch([c1], [o1, o2], PresentAsyncProvider);
+  batch = new InstanceBatch([c1, c2], [o1, o2], PresentAsyncProvider);
   outputs.push(await batch.simulate());
 
-  batch = new InstanceBatch([c1], [o1, o2], PresentSyncProvider);
+  batch = new InstanceBatch([c1, c2], [o1, o2], PresentSyncProvider);
   outputs.push(await batch.simulate());
 
-  batch = new InstanceBatch([c1], [o1, o2], FutureAsyncProvider);
+  batch = new InstanceBatch([c1, c2], [o1, o2], FutureAsyncProvider);
   outputs.push(await batch.simulate());
 
   console.log('FINAL RESULT');

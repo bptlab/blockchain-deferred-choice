@@ -33,7 +33,6 @@ class PastAsyncProvider extends BaseProvider {
         util.getSpec('OracleValueArrayConsumer').abi,
         event.returnValues.sender
       ).methods.oracleCallback(
-        this.contract.options.address,
         event.returnValues.correlation,
         this.values.slice(first).map(v => [v.timestamp, v.value]).flat()
       ).send({

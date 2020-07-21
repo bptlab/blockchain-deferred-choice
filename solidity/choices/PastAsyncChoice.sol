@@ -27,7 +27,7 @@ contract PastAsyncChoice is AbstractChoice, OracleValueArrayConsumer {
     super.tryCompleteTrigger(target);
   }
 
-  function oracleCallback(address oracle, uint256 correlation, uint256[] calldata values) external override {
+  function oracleCallback(uint256 correlation, uint256[] calldata values) external override {
     callbackCount--;
 
     // Do nothing if we have already finished

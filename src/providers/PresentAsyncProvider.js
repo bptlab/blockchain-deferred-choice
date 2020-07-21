@@ -20,7 +20,6 @@ class PresentAsyncProvider extends BaseProvider {
         util.getSpec('OracleValueConsumer').abi,
         event.returnValues.sender
       ).methods.oracleCallback(
-        this.contract.options.address,
         event.returnValues.correlation,
         this.currentValue
       ).send({

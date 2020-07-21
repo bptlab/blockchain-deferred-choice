@@ -25,9 +25,9 @@ interface Oracle is Base {
 }
 
 interface OracleValueConsumer {
-  function oracleCallback(address oracle, uint256 correlation, uint256 value) external;
+  function oracleCallback(uint256 correlation, uint256 value) external;
 }
 
 interface OracleValueArrayConsumer {
-  function oracleCallback(address oracle, uint256 correlation, uint256[] calldata values) external;
+  function oracleCallback(uint256 correlation, uint256[] calldata values) external;
 }

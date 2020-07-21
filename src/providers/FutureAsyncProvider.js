@@ -15,7 +15,6 @@ class FutureAsyncProvider extends BaseProvider {
       util.getSpec('OracleValueConsumer').abi,
       subscriber.sender
     ).methods.oracleCallback(
-      this.contract.options.address,
       subscriber.correlation,
       this.currentValue
     ).send({

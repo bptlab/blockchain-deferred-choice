@@ -100,9 +100,11 @@ exports.getSpec = function(spec) {
         }
       }
     };
-    const compilerOut = JSON.parse(solc.compile(JSON.stringify(compilerIn)));
 
+    const compilerOut = JSON.parse(solc.compile(JSON.stringify(compilerIn)));
+    console.log(compilerOut);
     specs = Object.assign({}, ...Object.values(compilerOut.contracts));
+    console.log('Successfully compiled', Object.keys(specs).length, 'contracts/interfaces');
   }
 
   // Return the contract specification specified

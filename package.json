@@ -3,7 +3,7 @@
   "description": "",
   "version": "0.1.0",
   "scripts": {
-    "test": "forever -m 1 oracles/test.js"
+    "test": "forever -m 1 src/test.js"
   },
   "dependencies": {
     "forever": "^3.0.0",

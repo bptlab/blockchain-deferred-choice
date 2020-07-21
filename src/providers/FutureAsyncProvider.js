@@ -1,8 +1,8 @@
-const BaseAsyncProvider = require('./BaseAsyncProvider.js');
+const BaseProvider = require('./BaseProvider.js');
 
 const util = require('./../util.js');
 
-class FutureAsyncProvider extends BaseAsyncProvider {
+class FutureAsyncProvider extends BaseProvider {
   subscribers = [];
   currentValue;
 
@@ -22,12 +22,12 @@ class FutureAsyncProvider extends BaseAsyncProvider {
       from: this.contract.defaultAccount,
       ...util.defaultOptions
     }).on('transactionHash', hash => {
-      console.log('O[', this.name, ']', 'Callback:', consumerAddress, '|', 'HASH', hash);
+      console.log('O[', this.name, ']', 'Callback:', subscriber.sender, '|', 'HASH', hash);
     }).on('receipt', receipt => {
-      console.log('O[', this.name, ']', 'Callback:', consumerAddress, '|', 'RECEIPT');
+      console.log('O[', this.name, ']', 'Callback:', subscriber.sender, '|', 'RECEIPT');
       this.gasUsed += receipt.gasUsed;
     }).on('error', error => {
-      console.log('O[', this.name, ']', 'Callback:', consumerAddress, '|', 'FAILED');
+      console.log('O[', this.name, ']', 'Callback:', subscriber.sender, '|', 'FAILED');
     });
   }
 

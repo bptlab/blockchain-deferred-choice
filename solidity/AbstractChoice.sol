@@ -99,7 +99,7 @@ abstract contract AbstractChoice is Base {
     emit StateChanged(index, newState);
   }
 
-  function activateEvent(uint8 index) internal {
+  function activateEvent(uint8 index) internal virtual {
     if (events[index].spec.definition == EventDefinition.EXPLICIT) {
       // Explicit (message and signal) events, by default, evaluate to "the future" until
       // their concrete transaction is sent
@@ -115,7 +115,7 @@ abstract contract AbstractChoice is Base {
    * Evaluate the event with the given index, under the circumstance that the event at the target
    * index is currently attempting to trigger.
    */
-  function evaluateEvent(uint8 index, uint8 target) internal {
+  function evaluateEvent(uint8 index, uint8 target) internal virtual {
     EventSpecification memory spec = events[index].spec;
 
     // For explicit events, we just "evaluate" them if they are the target
@@ -155,7 +155,7 @@ abstract contract AbstractChoice is Base {
    * other events are evaluated as well and the function only proceeds (potentially
    * asynchronously) when we can be sure that this event has "won" the race.
    */
-  function tryTrigger(uint8 target) public {
+  function tryTrigger(uint8 target) public virtual {
     // Check if the call is valid
     if (hasFinished) {
       revert("Choice has already finished");
@@ -196,7 +196,7 @@ abstract contract AbstractChoice is Base {
    * This function completes the current trigger attempt if possible by either completing
    * or aborting the target event.
    */
-  function tryCompleteTrigger(uint8 target) internal {
+  function tryCompleteTrigger(uint8 target) internal virtual {
     for (uint8 i = 0; i < events.length; i++) {
       if (events[i].evaluation == 0) {
         emit Debug("Missing initial oracle evaluations");

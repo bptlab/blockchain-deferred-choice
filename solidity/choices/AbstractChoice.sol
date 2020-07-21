@@ -2,7 +2,7 @@
 pragma solidity ^0.6.9;
 pragma experimental ABIEncoderV2;
 
-import "./Interfaces.sol";
+import "./../Interfaces.sol";
 
 abstract contract AbstractChoice is Base {
   // Events

@@ -4,13 +4,17 @@ const Web3 = require('web3');
 
 const SOURCES = [
   'Interfaces.sol',
-  'AbstractChoice.sol',
-  'Oracles.sol',
+  'choices/AbstractChoice.sol',
   'choices/FutureAsyncChoice.sol',
   'choices/PastAsyncChoice.sol',
   'choices/PastSyncChoice.sol',
   'choices/PresentAsyncChoice.sol',
-  'choices/PresentSyncChoice.sol'
+  'choices/PresentSyncChoice.sol',
+  'oracles/FutureAsyncOracle.sol',
+  'oracles/PastAsyncOracle.sol',
+  'oracles/PastSyncOracle.sol',
+  'oracles/PresentAsyncOracle.sol',
+  'oracles/PresentSyncOracle.sol'
 ];
 
 const KEYS = {

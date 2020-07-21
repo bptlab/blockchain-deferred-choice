@@ -2,8 +2,8 @@
 pragma solidity ^0.6.9;
 pragma experimental ABIEncoderV2;
 
-import "./../AbstractChoice.sol";
-import "./../Oracles.sol";
+import "./AbstractChoice.sol";
+import "./../oracles/PastSyncOracle.sol";
 
 contract PastSyncChoice is AbstractChoice {
   constructor(EventSpecification[] memory specs) AbstractChoice(specs) public {

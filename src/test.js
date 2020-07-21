@@ -24,21 +24,22 @@ async function deployAndTest() {
   const o1 = require('./configs/oracles/interruption.json');
   const choices = [c0, c1]; //[c0, c1];
   const oracles = [o0, o1];
+  const scaling = 5;
 
   batch = new InstanceBatch(choices, oracles, PastAsyncProvider);
-  outputs.push(await batch.simulate());
+  outputs.push(await batch.simulate(scaling));
 
   batch = new InstanceBatch(choices, oracles, PastSyncProvider);
-  outputs.push(await batch.simulate());
+  outputs.push(await batch.simulate(scaling));
 
   batch = new InstanceBatch(choices, oracles, PresentAsyncProvider);
-  outputs.push(await batch.simulate());
+  outputs.push(await batch.simulate(scaling));
 
   batch = new InstanceBatch(choices, oracles, PresentSyncProvider);
-  outputs.push(await batch.simulate());
+  outputs.push(await batch.simulate(scaling));
 
   batch = new InstanceBatch(choices, oracles, FutureAsyncProvider);
-  outputs.push(await batch.simulate());
+  outputs.push(await batch.simulate(scaling));
 
   console.log('FINAL RESULT');
   console.log(JSON.stringify(outputs, null, 2));

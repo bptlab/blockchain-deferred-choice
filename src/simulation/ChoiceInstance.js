@@ -24,15 +24,15 @@ class ChoiceInstance extends Replayer {
     return this.gasUsed;
   }
 
-  async deploy(oracleAddresses) {
+  async deploy(oracleAddresses, scaling) {
     // Convert the events to Ethereum struct encoding
     const payload = this.config.events.map(event => [
       util.enums.EventDefinition[event.type],
       // For absolute timers, we regard the given timer value as an offset
       // to the current timestamp. Otherwise, configs would be rather static
       event.type == 'TIMER_ABSOLUTE'
-                  ? event.timer + Math.ceil(Date.now() / 1000)
-                  : (event.timer || 0),
+                  ? event.timer * scaling + Math.ceil(Date.now() / 1000)
+                  : (event.timer * scaling || 0),
       event.oracleName ? oracleAddresses[event.oracleName] :
                          '0x0000000000000000000000000000000000000000',
       [

@@ -2,10 +2,10 @@
   "name": "WEATHER_WARNING",
   "account": "Oracle",
   "timeline": [
-    { "at":    0, "context": { "value":   5 }},
-    { "at": 1000, "context": { "value":   8 }},
-    { "at": 2000, "context": { "value": 100 }},
-    { "at": 4000, "context": { "value":   5 }},
-    { "at": 5000, "context": { "value":   4 }}
+    { "at": 0, "context": { "value":   5 }},
+    { "at": 1, "context": { "value":   8 }},
+    { "at": 2, "context": { "value": 100 }},
+    { "at": 4, "context": { "value":   5 }},
+    { "at": 5, "context": { "value":   4 }}
   ]
 }

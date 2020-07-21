@@ -18,8 +18,8 @@
     "type": "EXPLICIT"
   }],
   "timeline": [
-    { "at":     0 },
-    { "at":  1000, "context": { "target": 0 }},
-    { "at": 10000, "context": { "target": 1 }}
+    { "at":  0 },
+    { "at":  1, "context": { "target": 0 }},
+    { "at": 10, "context": { "target": 1 }}
   ]
 }

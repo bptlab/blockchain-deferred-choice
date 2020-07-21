@@ -16,7 +16,7 @@
     "value": 1
   }],
   "timeline": [
-    { "at":    0 },
-    { "at": 6000, "context": { "target": 0 }}
+    { "at": 0 },
+    { "at": 6, "context": { "target": 0 }}
   ]
 }

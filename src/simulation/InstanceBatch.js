@@ -12,12 +12,12 @@ class InstanceBatch {
     this.ProviderClazz = ProviderClazz;
   }
 
-  async simulate() {
-    await this.deploy();
-    await this.replay();
+  async simulate(scaling) {
+    await this.deploy(scaling);
+    await this.replay(scaling);
 
     // Output some statistics after a while
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    await new Promise(resolve => setTimeout(resolve, 3000 * scaling));
     let output = {
       clazz: this.ProviderClazz.getContractPrefix()
     };
@@ -38,7 +38,7 @@ class InstanceBatch {
     return output;
   }
 
-  async deploy() {
+  async deploy(scaling) {
     // Deploy all oracles
     let oracleAddresses = {};
     for (let i = 0; i < this.oracles.length; i++) {
@@ -47,14 +47,14 @@ class InstanceBatch {
 
     // Deploy all choices
     for (let i = 0; i < this.choices.length; i++) {
-      await this.choices[i].deploy(oracleAddresses);
+      await this.choices[i].deploy(oracleAddresses, scaling);
     }
   }
 
-  async replay() {
+  async replay(scaling) {
     // Wait for all oracles' and choices' replay promises to resolve
     await Promise.all(
-      this.oracles.concat(this.choices).map(inst => inst.replay())
+      this.oracles.concat(this.choices).map(inst => inst.replay(scaling))
     );
   }
 }

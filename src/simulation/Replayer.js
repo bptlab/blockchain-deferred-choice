@@ -3,7 +3,7 @@ class Replayer {
     this.timeline = timeline;
   }
 
-  async replay() {
+  async replay(scaling) {
     this.index = 0;
     this.start = Date.now();
 
@@ -12,13 +12,13 @@ class Replayer {
         this.onReplayStep(this.index, this.timeline[this.index].context);
         this.index++;
         if (this.index < this.timeline.length) {
-          const delay = this.timeline[this.index].at - (Date.now() - this.start);
+          const delay = this.timeline[this.index].at * 1000 * scaling - (Date.now() - this.start);
           setTimeout(step.bind(this), delay);
         } else {
           return resolve();
         }
       }
-      setTimeout(step.bind(this), this.timeline[0].at);
+      setTimeout(step.bind(this), this.timeline[0].at * 1000 * scaling);
     });
   }
 

@@ -37,6 +37,7 @@ class PastAsyncProvider extends BaseProvider {
         this.values.slice(first).map(v => [v.timestamp, v.value]).flat()
       ).send({
         from: this.contract.defaultAccount,
+        nonce: util.getNonce(this.contract.defaultAccount),
         ...util.defaultOptions
       }).on('transactionHash', hash => {
         console.log('O[', this.name, ']', 'Callback:', event.returnValues.sender, '|', 'HASH', hash);
@@ -44,7 +45,7 @@ class PastAsyncProvider extends BaseProvider {
         console.log('O[', this.name, ']', 'Callback:', event.returnValues.sender, '|', 'RECEIPT');
         this.gasUsed += receipt.gasUsed;
       }).on('error', error => {
-        console.log('O[', this.name, ']', 'Callback:', event.returnValues.sender, '|', 'FAILED');
+        console.log('O[', this.name, ']', 'Callback:', event.returnValues.sender, '|', 'FAILED', error);
       });
     }
   }

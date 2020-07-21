@@ -19,6 +19,7 @@ class FutureAsyncProvider extends BaseProvider {
       this.currentValue
     ).send({
       from: this.contract.defaultAccount,
+      nonce: util.getNonce(this.contract.defaultAccount),
       ...util.defaultOptions
     }).on('transactionHash', hash => {
       console.log('O[', this.name, ']', 'Callback:', subscriber.sender, '|', 'HASH', hash);
@@ -26,7 +27,7 @@ class FutureAsyncProvider extends BaseProvider {
       console.log('O[', this.name, ']', 'Callback:', subscriber.sender, '|', 'RECEIPT');
       this.gasUsed += receipt.gasUsed;
     }).on('error', error => {
-      console.log('O[', this.name, ']', 'Callback:', subscriber.sender, '|', 'FAILED');
+      console.log('O[', this.name, ']', 'Callback:', subscriber.sender, '|', 'FAILED', error);
     });
   }
 

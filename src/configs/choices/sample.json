@@ -1,4 +1,5 @@
 {
+  "name": "SAMPLE",
   "account": "Consumer",
   "events": [{
     "type": "TIMER_RELATIVE",

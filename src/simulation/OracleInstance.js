@@ -29,8 +29,9 @@ class OracleInstance extends Replayer {
 
   async deploy() {
     // Create contract
-    await this.contract.deploy().send(
-    ).on('transactionHash', hash => {
+    await this.contract.deploy().send({
+      nonce: util.getNonce(this.contract.defaultAccount)
+    }).on('transactionHash', hash => {
       console.log('O[', this.config.name, ']', 'Deployment', '|', 'HASH', hash);
     }).on('receipt', receipt => {
       console.log('O[', this.config.name, ']', 'Deployment', '|', 'RECEIPT', receipt.contractAddress);

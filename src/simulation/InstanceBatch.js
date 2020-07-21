@@ -4,10 +4,12 @@ const ChoiceInstance = require('./ChoiceInstance.js');
 class InstanceBatch {
   oracles;
   choices;
+  ProviderClazz;
 
   constructor(choiceConfigs, oracleConfigs, ProviderClazz) {
     this.oracles = oracleConfigs.map(config => new OracleInstance(config, ProviderClazz));
     this.choices = choiceConfigs.map(config => new ChoiceInstance(config, ProviderClazz));
+    this.ProviderClazz = ProviderClazz;
   }
 
   async simulate() {
@@ -16,14 +18,23 @@ class InstanceBatch {
 
     // Output some statistics after a while
     await new Promise(resolve => setTimeout(resolve, 3000));
-    let output = {};
-    output.eventStates = await Promise.all(this.choices.map(async choice => {
-      return await Promise.all(choice.config.events.map(
+    let output = {
+      clazz: this.ProviderClazz.getContractPrefix()
+    };
+    const choiceStates = await Promise.all(this.choices.map(async choice => {
+      const states = await Promise.all(choice.config.events.map(
         (_, i) => choice.contract.methods.getState(i).call()
       ));
-    }));
-    output.oraclesGasUsed = this.oracles.map(oracle => oracle.getGasUsed());
-    output.choicesGasUsed = this.choices.map(choice => choice.getGasUsed());
+      return Object.assign({}, ...states.map((state, i) => ({ ['e' + i]: state })));
+    }))
+    output.s = Object.assign({}, ...choiceStates.map(
+      (choiceState, i) => ({ ['c' + i]: choiceState })
+    ));
+    output.g = Object.assign(
+      {},
+      ...this.oracles.map((oracle, i) => ({ ['o' + i]: oracle.getGasUsed() })),
+      ...this.choices.map((choice, i) => ({ ['c' + i]: choice.getGasUsed() }))
+    );
     return output;
   }
 

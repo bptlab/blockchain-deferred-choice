@@ -32,8 +32,54 @@ const web3 = new Web3(new Web3.providers.WebsocketProvider(
 
 let specs;
 let accounts;
+let nonces;
 
 exports.web3 = web3;
+
+exports.init = async function() {
+  // Compile contracts
+  const sources = Object.assign({}, ...SOURCES.map(file => {
+    return {
+      [file]: {
+        content: fs.readFileSync('./solidity/' + file, { encoding: 'utf8' })
+      }
+    };
+  }));
+
+  const compilerIn = {
+    language: 'Solidity',
+    sources,
+    settings: {
+      outputSelection: {
+        '*': {
+          '*': [
+            'metadata', 'abi', 'evm.bytecode'
+          ],
+          '': []
+        }
+      }
+    }
+  };
+
+  const compilerOut = JSON.parse(solc.compile(JSON.stringify(compilerIn)));
+  console.log(compilerOut);
+  specs = Object.assign({}, ...Object.values(compilerOut.contracts));
+  console.log('Successfully compiled', Object.keys(specs).length, 'contracts/interfaces');
+
+  // Initiate accounts
+  accounts = {};
+  Object.keys(KEYS).forEach(key => {
+    accounts[key] = web3.eth.accounts.wallet.add(KEYS[key]).address;
+  });
+
+  // Initiate nonces
+  nonces = {};
+  await Promise.all(Object.values(accounts).map(
+    address => web3.eth.getTransactionCount(address).then(nonce => {
+      nonces[address] = nonce;
+    })
+  ));
+}
 
 exports.defaultOptions = {
   gas: 5000000,
@@ -68,50 +114,13 @@ exports.enums = {
 };
 
 exports.getAccount = function(name) {
-  // Register accounts if not yet done
-  if (!accounts) {
-    accounts = {};
-    Object.keys(KEYS).forEach(key => {
-      accounts[key] = web3.eth.accounts.wallet.add(KEYS[key]).address;
-    })
-  }
-
-  // Return the desired account address
   return accounts[name];
 }
 
+exports.getNonce = function(account) {
+  return nonces[account]++;
+}
+
 exports.getSpec = function(spec) {
-  // Compile contracts if this has not yet been done
-  if (!specs) {
-    const sources = Object.assign({}, ...SOURCES.map(file => {
-      return {
-        [file]: {
-          content: fs.readFileSync('./solidity/' + file, { encoding: 'utf8' })
-        }
-      };
-    }));
-
-    const compilerIn = {
-      language: 'Solidity',
-      sources,
-      settings: {
-        outputSelection: {
-          '*': {
-            '*': [
-              'metadata', 'abi', 'evm.bytecode'
-            ],
-            '': []
-          }
-        }
-      }
-    };
-
-    const compilerOut = JSON.parse(solc.compile(JSON.stringify(compilerIn)));
-    console.log(compilerOut);
-    specs = Object.assign({}, ...Object.values(compilerOut.contracts));
-    console.log('Successfully compiled', Object.keys(specs).length, 'contracts/interfaces');
-  }
-
-  // Return the contract specification specified
   return specs[spec];
 }

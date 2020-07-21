@@ -24,6 +24,7 @@ class PresentAsyncProvider extends BaseProvider {
         this.currentValue
       ).send({
         from: this.contract.defaultAccount,
+        nonce: util.getNonce(this.contract.defaultAccount),
         ...util.defaultOptions
       }).on('transactionHash', hash => {
         console.log('O[', this.name, ']', 'Callback:', event.returnValues.sender, '|', 'HASH', hash);
@@ -31,7 +32,7 @@ class PresentAsyncProvider extends BaseProvider {
         console.log('O[', this.name, ']', 'Callback:', event.returnValues.sender, '|', 'RECEIPT');
         this.gasUsed += receipt.gasUsed;
       }).on('error', error => {
-        console.log('O[', this.name, ']', 'Callback:', event.returnValues.sender, '|', 'FAILED');
+        console.log('O[', this.name, ']', 'Callback:', event.returnValues.sender, '|', 'FAILED', error);
       });
     }
   }

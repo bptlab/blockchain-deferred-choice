@@ -1,4 +1,5 @@
 {
+  "name": "TIMER_WINS",
   "account": "Consumer2",
   "events": [{
     "type": "TIMER_RELATIVE",
@@ -13,8 +14,6 @@
     "oracleName": "INTERRUPTION",
     "operator": "EQUAL",
     "value": 1
-  }, {
-    "type": "EXPLICIT"
   }],
   "timeline": [
     { "at":    0 },

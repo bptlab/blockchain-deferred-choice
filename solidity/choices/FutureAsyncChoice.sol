@@ -54,6 +54,13 @@ contract FutureAsyncChoice is AbstractChoice, OracleValueConsumer {
       events[index].evaluation = TOP_TIMESTAMP;
     }
 
+    // Additionally, re-evaluate all timer events since they may have become true
+    // by now. We have to do this here since oracle callbacks are independent of any
+    // concrete trigger attempt in the FutureAsync scenario.
+    for (uint8 i = 0; i < events.length; i++) {
+      evaluateEvent(i, target);
+    }
+
     // Try to trigger the correlated original target of this trigger attempt
     tryCompleteTrigger(target);
   }

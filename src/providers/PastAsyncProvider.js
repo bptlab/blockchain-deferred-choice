@@ -13,7 +13,7 @@ class PastAsyncProvider extends BaseProvider {
     super.onValueChange(value);
     this.values.push({
       value,
-      timestamp: Date.now()
+      timestamp: Math.ceil(Date.now() / 1000)
     });
   }
 

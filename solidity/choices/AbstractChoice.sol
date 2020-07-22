@@ -93,6 +93,13 @@ abstract contract AbstractChoice is Base {
   }
 
   /*
+   * Get the evaluation time of the event with the given index.
+   */
+  function getEvaluation(uint8 index) external view returns (uint256) {
+    return events[index].evaluation;
+  }
+
+  /*
    * Change the state of the event with the given index.
    */
   function changeState(uint8 index, EventState newState) private {
@@ -148,6 +155,7 @@ abstract contract AbstractChoice is Base {
       } else {
         events[index].evaluation = TOP_TIMESTAMP;
       }
+      return;
     }
   }
 

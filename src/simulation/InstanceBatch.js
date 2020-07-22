@@ -21,15 +21,27 @@ class InstanceBatch {
     let output = {
       clazz: this.ProviderClazz.getContractPrefix()
     };
+
     const choiceStates = await Promise.all(this.choices.map(async choice => {
       const states = await Promise.all(choice.config.events.map(
         (_, i) => choice.contract.methods.getState(i).call()
       ));
-      return Object.assign({}, ...states.map((state, i) => ({ ['e' + i]: state })));
+      return Object.assign({}, ...states.map((state, i) => ({ ['s' + i]: state })));
     }))
     output.s = Object.assign({}, ...choiceStates.map(
       (choiceState, i) => ({ ['c' + i]: choiceState })
     ));
+
+    const choiceEvals = await Promise.all(this.choices.map(async choice => {
+      const evals = await Promise.all(choice.config.events.map(
+        (_, i) => choice.contract.methods.getEvaluation(i).call()
+      ));
+      return Object.assign({}, ...evals.map((eva, i) => ({ ['e' + i]: eva })));
+    }))
+    output.e = Object.assign({}, ...choiceEvals.map(
+      (choiceEval, i) => ({ ['c' + i]: choiceEval })
+    ));
+
     output.g = Object.assign(
       {},
       ...this.oracles.map((oracle, i) => ({ ['o' + i]: oracle.getGasUsed() })),

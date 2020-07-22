@@ -24,22 +24,28 @@ class ChoiceInstance extends Replayer {
     return this.gasUsed;
   }
 
-  async deploy(oracleAddresses, scaling) {
+  async deploy(oracleAddresses, scaling = 1) {
     // Convert the events to Ethereum struct encoding
-    const payload = this.config.events.map(event => [
-      util.enums.EventDefinition[event.type],
-      // For absolute timers, we regard the given timer value as an offset
-      // to the current timestamp. Otherwise, configs would be rather static
-      event.type == 'TIMER_ABSOLUTE'
-                  ? event.timer * scaling + Math.ceil(Date.now() / 1000)
-                  : (event.timer * scaling || 0),
-      event.oracleName ? oracleAddresses[event.oracleName] :
-                         '0x0000000000000000000000000000000000000000',
-      [
-        event.operator ? util.enums.Operator[event.operator] : 0,
-        event.value || 0
-      ]
-    ]);
+    const payload = this.config.events.map(event => {
+      // Perform timer scaling. We add the current time to absolute timers, so
+      // they are not static to a single date
+      let timer = (event.timer || 0) * scaling;
+      if (event.type == 'TIMER_ABSOLUTE') {
+        timer += Math.ceil(Date.now() / 1000);
+      }
+
+      // Stick together the Ethereum struct array
+      return [
+        util.enums.EventDefinition[event.type],
+        timer,
+        event.oracleName ? oracleAddresses[event.oracleName] :
+                          '0x0000000000000000000000000000000000000000',
+        [
+          event.operator ? util.enums.Operator[event.operator] : 0,
+          event.value || 0
+        ]
+      ];
+    });
 
     await this.contract.deploy({
       arguments: [ payload ]
@@ -52,8 +58,7 @@ class ChoiceInstance extends Replayer {
       this.gasUsed += receipt.gasUsed;
       this.contract.options.address = receipt.contractAddress;
     }).on('error', console.error);
-    
-  
+
     // Subscribe to events for logging purposes
     this.contract.events.allEvents({
       fromBlock: 'latest'

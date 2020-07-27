@@ -11,11 +11,11 @@ contract PresentAsyncChoice is AbstractChoice, OracleValueConsumer {
   constructor(Event[] memory specs) AbstractChoice(specs) public {
   }
 
-  function tryTrigger(uint8 target) public override {
+  function trigger(uint8 target) public override {
     if (callbackCount > 0) {
       revert("Another event is currently being tried");
     }
-    super.tryTrigger(target);
+    super.trigger(target);
   }
 
   function tryCompleteTrigger(uint8 target) internal override {

@@ -2,24 +2,23 @@
   "name": "SAMPLE",
   "account": "Consumer",
   "events": [{
-    "type": "TIMER_RELATIVE",
-    "timer": 60
-  }, {
     "type": "CONDITIONAL",
     "oracleName": "WEATHER_WARNING",
-    "operator": "EQUAL",
-    "value": 4
+    "operator": "GREATER_EQUAL",
+    "value": 2
   }, {
     "type": "CONDITIONAL",
     "oracleName": "INTERRUPTION",
     "operator": "EQUAL",
     "value": 1
   }, {
+    "type": "TIMER_ABSOLUTE",
+    "timer": 8
+  }, {
     "type": "EXPLICIT"
   }],
   "timeline": [
-    { "at":  0 },
-    { "at":  1, "context": { "target": 0 }},
-    { "at": 10, "context": { "target": 1 }}
+    { "at": 0 },
+    { "at": 5, "context": { "target": 1 }}
   ]
 }

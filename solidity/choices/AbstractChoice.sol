@@ -30,10 +30,10 @@ abstract contract AbstractChoice is Base {
   uint256 constant TOP_TIMESTAMP = type(uint256).max;
 
   // Member Variables
+  Event[] events;
   uint256 public activationTime = 0;
-  Event[] public events;
-  mapping(uint8 => uint256) evals;
-  int8 winner = -1;
+  mapping(uint8 => uint256) public evals;
+  int8 public winner = -1;
 
   constructor(Event[] memory specs) public {
     // We have to copy the specs array manually since Solidity does not yet
@@ -62,20 +62,6 @@ abstract contract AbstractChoice is Base {
     }
 
     emit Debug("Activated");
-  }
-
-  /*
-   * Return the winner of the choice.
-   */
-  function getWinner() external view returns (int8) {
-    return winner;
-  }
-
-  /*
-   * Get the evaluation time of the event with the given index.
-   */
-  function getEvaluation(uint8 index) external view returns (uint256) {
-    return evals[index];
   }
 
   function activateEvent(uint8 index) internal virtual {
@@ -135,7 +121,7 @@ abstract contract AbstractChoice is Base {
    * other events are evaluated as well and the function only proceeds (potentially
    * asynchronously) when we can be sure that this event has "won" the race.
    */
-  function tryTrigger(uint8 target) public virtual {
+  function trigger(uint8 target) public virtual {
     // Check if the call is valid
     if (winner >= 0) {
       revert("Choice has already finished");

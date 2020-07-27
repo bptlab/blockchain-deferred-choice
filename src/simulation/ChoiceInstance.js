@@ -86,7 +86,7 @@ class ChoiceInstance extends Replayer {
       });
     } else {
       // Trigger the specific target event
-      this.contract.methods.tryTrigger(context.target).send({
+      this.contract.methods.trigger(context.target).send({
         nonce: util.getNonce(this.contract.defaultAccount),
         ...util.defaultOptions
       }).on('transactionHash', hash => {

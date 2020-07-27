@@ -22,14 +22,14 @@ class InstanceBatch {
       clazz: this.ProviderClazz.getContractPrefix()
     };
 
-    const winners = await Promise.all(this.choices.map(choice => choice.contract.methods.getWinner().call()));
+    const winners = await Promise.all(this.choices.map(choice => choice.contract.methods.winner().call()));
     output.w = Object.assign({}, ...winners.map(
       (winner, i) => ({ ['w' + i]: winner })
     ));
 
     const choiceEvals = await Promise.all(this.choices.map(async choice => {
       const evals = await Promise.all(choice.config.events.map(
-        (_, i) => choice.contract.methods.getEvaluation(i).call()
+        (_, i) => choice.contract.methods.evals(i).call()
       ));
       return Object.assign({}, ...evals.map((eva, i) => ({ ['e' + i]: eva })));
     }))

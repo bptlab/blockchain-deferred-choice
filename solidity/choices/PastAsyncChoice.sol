@@ -8,7 +8,7 @@ import "./../oracles/PastAsyncOracle.sol";
 contract PastAsyncChoice is AbstractChoice, OracleValueArrayConsumer {
   uint8 public callbackCount = 0;
 
-  constructor(EventSpecification[] memory specs) AbstractChoice(specs) public {
+  constructor(Event[] memory specs) AbstractChoice(specs) public {
   }
 
   function tryTrigger(uint8 target) public override {
@@ -31,7 +31,7 @@ contract PastAsyncChoice is AbstractChoice, OracleValueArrayConsumer {
     callbackCount--;
 
     // Do nothing if we have already finished
-    if (hasFinished) {
+    if (winner >= 0) {
       return;
     }
 
@@ -40,16 +40,16 @@ contract PastAsyncChoice is AbstractChoice, OracleValueArrayConsumer {
 
     // Find the first of those values which fulfilled the condition
     for (uint16 i = 0; i < values.length; i += 2) {
-      if (checkCondition(events[index].spec.condition, values[i+1])) {
+      if (checkCondition(events[index].condition, values[i+1])) {
         if (values[i] < activationTime) {
-          events[index].evaluation = activationTime;
+          evals[index] = activationTime;
         } else {
-          events[index].evaluation = values[i];
+          evals[index] = values[i];
         }
         break;
       }
-      if (events[index].evaluation == 0) {
-        events[index].evaluation = TOP_TIMESTAMP;
+      if (evals[index] == 0) {
+        evals[index] = TOP_TIMESTAMP;
       }
     }
 
@@ -58,11 +58,9 @@ contract PastAsyncChoice is AbstractChoice, OracleValueArrayConsumer {
   }
 
   function evaluateEvent(uint8 index, uint8 target) internal override {
-    EventSpecification memory spec = events[index].spec;
-
-    if (spec.definition == EventDefinition.CONDITIONAL) {
+    if (events[index].definition == EventDefinition.CONDITIONAL) {
       uint256 correlation = uint256(target) | (uint256(index) << 8);
-      PastAsyncOracle(spec.oracle).get(correlation, activationTime);
+      PastAsyncOracle(events[index].oracle).get(correlation, activationTime);
       callbackCount++;
       return;
     }

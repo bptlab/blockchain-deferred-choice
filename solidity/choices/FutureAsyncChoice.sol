@@ -6,16 +6,16 @@ import "./AbstractChoice.sol";
 import "./../oracles/FutureAsyncOracle.sol";
 
 contract FutureAsyncChoice is AbstractChoice, OracleValueConsumer {
-  constructor(EventSpecification[] memory specs) AbstractChoice(specs) public {
+  constructor(Event[] memory specs) AbstractChoice(specs) public {
   }
 
   function activateEvent(uint8 index) internal override {
-    if (events[index].spec.definition == EventDefinition.CONDITIONAL) {
+    if (events[index].definition == EventDefinition.CONDITIONAL) {
       // Subscribe to publish/subscribe oracles.
       // Set correlation target as this event itself, since we never call pub/
       // sub oracles again later during the triggering of a concrete other event.
       uint256 correlation = uint256(index) | (uint256(index) << 8);
-      FutureAsyncOracle(events[index].spec.oracle).get(correlation);
+      FutureAsyncOracle(events[index].oracle).get(correlation);
       return;
     }
 
@@ -24,7 +24,7 @@ contract FutureAsyncChoice is AbstractChoice, OracleValueConsumer {
 
   function tryCompleteTrigger(uint8 target) internal override {
     for (uint8 i = 0; i < events.length; i++) {
-      if (events[i].evaluation == 0) {
+      if (evals[i] == 0) {
         emit Debug("Missing initial oracle evaluations");
         return;
       }
@@ -34,24 +34,24 @@ contract FutureAsyncChoice is AbstractChoice, OracleValueConsumer {
 
   function oracleCallback(uint256 correlation, uint256 value) external override {
     // Do nothing if we have already finished
-    if (hasFinished) {
+    if (winner >= 0) {
       return;
     }
-    
+
     uint8 target = uint8(correlation);
     uint8 index = uint8(correlation >> 8);
 
     // Do nothing if the event this oracle belongs to has been evaluated already
     // (this filters out duplicate callbacks, or late pub/sub calls)
-    if (events[index].evaluation > 0 && events[index].evaluation < TOP_TIMESTAMP) {
+    if (evals[index] > 0 && evals[index] < TOP_TIMESTAMP) {
       return;
     }
 
     // Check the conditional event this oracle belongs to
-    if (checkCondition(events[index].spec.condition, value)) {
-      events[index].evaluation = block.timestamp;
+    if (checkCondition(events[index].condition, value)) {
+      evals[index] = block.timestamp;
     } else {
-      events[index].evaluation = TOP_TIMESTAMP;
+      evals[index] = TOP_TIMESTAMP;
     }
 
     // Additionally, re-evaluate all timer events since they may have become true

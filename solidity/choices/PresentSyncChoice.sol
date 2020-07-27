@@ -6,18 +6,16 @@ import "./AbstractChoice.sol";
 import "./../oracles/PresentSyncOracle.sol";
 
 contract PresentSyncChoice is AbstractChoice {
-  constructor(EventSpecification[] memory specs) AbstractChoice(specs) public {
+  constructor(Event[] memory specs) AbstractChoice(specs) public {
   }
 
   function evaluateEvent(uint8 index, uint8 target) internal override {
-    EventSpecification memory spec = events[index].spec;
-
-    if (spec.definition == EventDefinition.CONDITIONAL) {
-      uint256 value = PresentSyncOracle(spec.oracle).get();
-      if (checkCondition(spec.condition, value)) {
-        events[index].evaluation = block.timestamp;
+    if (events[index].definition == EventDefinition.CONDITIONAL) {
+      uint256 value = PresentSyncOracle(events[index].oracle).get();
+      if (checkCondition(events[index].condition, value)) {
+        evals[index] = block.timestamp;
       } else {
-        events[index].evaluation = TOP_TIMESTAMP;
+        evals[index] = TOP_TIMESTAMP;
       }
       return;
     }

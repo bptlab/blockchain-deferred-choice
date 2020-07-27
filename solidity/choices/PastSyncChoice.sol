@@ -6,26 +6,24 @@ import "./AbstractChoice.sol";
 import "./../oracles/PastSyncOracle.sol";
 
 contract PastSyncChoice is AbstractChoice {
-  constructor(EventSpecification[] memory specs) AbstractChoice(specs) public {
+  constructor(Event[] memory specs) AbstractChoice(specs) public {
   }
 
   function evaluateEvent(uint8 index, uint8 target) internal override {
-    EventSpecification memory spec = events[index].spec;
-
-    if (spec.definition == EventDefinition.CONDITIONAL) {
-      uint256[] memory values = PastSyncOracle(spec.oracle).get(activationTime);
+    if (events[index].definition == EventDefinition.CONDITIONAL) {
+      uint256[] memory values = PastSyncOracle(events[index].oracle).get(activationTime);
       for (uint16 i = 0; i < values.length; i += 2) {
-        if (checkCondition(spec.condition, values[i+1])) {
+        if (checkCondition(events[index].condition, values[i+1])) {
           if (values[i] < activationTime) {
-            events[index].evaluation = activationTime;
+            evals[index] = activationTime;
           } else {
-            events[index].evaluation = values[i];
+            evals[index] = values[i];
           }
           break;
         }
       }
-      if (events[index].evaluation == 0) {
-        events[index].evaluation = TOP_TIMESTAMP;
+      if (evals[index] == 0) {
+        evals[index] = TOP_TIMESTAMP;
       }
       return;
     }

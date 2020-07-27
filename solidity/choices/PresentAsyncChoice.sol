@@ -8,7 +8,7 @@ import "./../oracles/PresentAsyncOracle.sol";
 contract PresentAsyncChoice is AbstractChoice, OracleValueConsumer {
   uint8 public callbackCount = 0;
 
-  constructor(EventSpecification[] memory specs) AbstractChoice(specs) public {
+  constructor(Event[] memory specs) AbstractChoice(specs) public {
   }
 
   function tryTrigger(uint8 target) public override {
@@ -30,7 +30,7 @@ contract PresentAsyncChoice is AbstractChoice, OracleValueConsumer {
     callbackCount--;
 
     // Do nothing if we have already finished
-    if (hasFinished) {
+    if (winner >= 0) {
       return;
     }
 
@@ -38,10 +38,10 @@ contract PresentAsyncChoice is AbstractChoice, OracleValueConsumer {
     uint8 index = uint8(correlation >> 8);
 
     // Check the conditional event this oracle belongs to
-    if (checkCondition(events[index].spec.condition, value)) {
-      events[index].evaluation = block.timestamp;
+    if (checkCondition(events[index].condition, value)) {
+      evals[index] = block.timestamp;
     } else {
-      events[index].evaluation = TOP_TIMESTAMP;
+      evals[index] = TOP_TIMESTAMP;
     }
 
     // Try to trigger the correlated original target of this trigger attempt
@@ -49,11 +49,9 @@ contract PresentAsyncChoice is AbstractChoice, OracleValueConsumer {
   }
 
   function evaluateEvent(uint8 index, uint8 target) internal override {
-    EventSpecification memory spec = events[index].spec;
-
-    if (spec.definition == EventDefinition.CONDITIONAL) {
+    if (events[index].definition == EventDefinition.CONDITIONAL) {
       uint256 correlation = uint256(target) | (uint256(index) << 8);
-      PresentAsyncOracle(spec.oracle).get(correlation);
+      PresentAsyncOracle(events[index].oracle).get(correlation);
       callbackCount++;
       return;
     }

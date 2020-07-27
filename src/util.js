@@ -87,22 +87,11 @@ exports.defaultOptions = {
 }
 
 exports.enums = {
-  EventState: {
-    INACTIVE: 0,
-    ACTIVE : 1,
-    COMPLETED: 2,
-    ABORTED: 3
-  },
   EventDefinition: {
     TIMER_ABSOLUTE: 0,
     TIMER_RELATIVE: 1,
     CONDITIONAL: 2,
     EXPLICIT: 3
-  },
-  ChoiceState: {
-    CREATED: 0,
-    RUNNING: 1,
-    FINISHED: 2
   },
   Operator: {
     GREATER: 0,

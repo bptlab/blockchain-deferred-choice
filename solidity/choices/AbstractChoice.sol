@@ -6,22 +6,11 @@ import "./../Interfaces.sol";
 
 abstract contract AbstractChoice is Base {
   // Events
-  event StateChanged(
-    uint8 index,
-    EventState newState
-  );
-
+  event Winner(uint8 winner);
   event Debug(string text);
   event DebugUint(uint256 value);
 
   // Enumerations
-  enum EventState {
-    INACTIVE,
-    ACTIVE,
-    COMPLETED,
-    ABORTED
-  }
-
   enum EventDefinition {
     TIMER_ABSOLUTE,
     TIMER_RELATIVE,
@@ -29,7 +18,7 @@ abstract contract AbstractChoice is Base {
     EXPLICIT
   }
 
-  struct EventSpecification {
+  struct Event {
     EventDefinition definition;
     // Timer specification
     uint256 timer;
@@ -38,28 +27,19 @@ abstract contract AbstractChoice is Base {
     Base.Condition condition;
   }
 
-  // Structures
-  struct Event {
-    EventSpecification spec;
-    EventState state;
-    uint256 evaluation;
-  }
-
   uint256 constant TOP_TIMESTAMP = type(uint256).max;
 
   // Member Variables
   uint256 public activationTime = 0;
   Event[] public events;
-  bool public hasFinished = false;
+  mapping(uint8 => uint256) evals;
+  int8 winner = -1;
 
-  constructor(EventSpecification[] memory specs) public {
+  constructor(Event[] memory specs) public {
+    // We have to copy the specs array manually since Solidity does not yet
+    // support copying whole memory arrays into storage arrays.
     for (uint8 i = 0; i < specs.length; i++) {
-      EventSpecification memory spec = specs[i];
-      events.push(Event(
-        spec,
-        EventState.INACTIVE,
-        0
-      ));
+      events.push() = specs[i];
     }
   }
 
@@ -78,7 +58,6 @@ abstract contract AbstractChoice is Base {
 
     // Activate all events
     for (uint8 i = 0; i < events.length; i++) {
-      changeState(i, EventState.ACTIVE);
       activateEvent(i);
     }
 
@@ -86,32 +65,24 @@ abstract contract AbstractChoice is Base {
   }
 
   /*
-   * Get the state of the event with the given index.
+   * Return the winner of the choice.
    */
-  function getState(uint8 index) external view returns (EventState) {
-    return events[index].state;
+  function getWinner() external view returns (int8) {
+    return winner;
   }
 
   /*
    * Get the evaluation time of the event with the given index.
    */
   function getEvaluation(uint8 index) external view returns (uint256) {
-    return events[index].evaluation;
-  }
-
-  /*
-   * Change the state of the event with the given index.
-   */
-  function changeState(uint8 index, EventState newState) private {
-    events[index].state = newState;
-    emit StateChanged(index, newState);
+    return evals[index];
   }
 
   function activateEvent(uint8 index) internal virtual {
-    if (events[index].spec.definition == EventDefinition.EXPLICIT) {
+    if (events[index].definition == EventDefinition.EXPLICIT) {
       // Explicit (message and signal) events, by default, evaluate to "the future" until
       // their concrete transaction is sent
-      events[index].evaluation = TOP_TIMESTAMP;
+      evals[index] = TOP_TIMESTAMP;
       return;
     }
 
@@ -124,36 +95,36 @@ abstract contract AbstractChoice is Base {
    * index is currently attempting to trigger.
    */
   function evaluateEvent(uint8 index, uint8 target) internal virtual {
-    EventSpecification memory spec = events[index].spec;
+    Event memory e = events[index];
 
     // For explicit events, we just "evaluate" them if they are the target
-    if (spec.definition == EventDefinition.EXPLICIT) {
+    if (e.definition == EventDefinition.EXPLICIT) {
       if (index == target) {
-        events[index].evaluation = block.timestamp;
+        evals[index] = block.timestamp;
       }
       return;
     }
 
     // Check if deadline has passed
-    if (spec.definition == EventDefinition.TIMER_ABSOLUTE) {
-      if (spec.timer <= block.timestamp) {
-        if (spec.timer < activationTime) {
-          events[index].evaluation = activationTime;
+    if (e.definition == EventDefinition.TIMER_ABSOLUTE) {
+      if (e.timer <= block.timestamp) {
+        if (e.timer < activationTime) {
+          evals[index] = activationTime;
         } else {
-          events[index].evaluation = spec.timer;
+          evals[index] = e.timer;
         }
       } else {
-        events[index].evaluation = TOP_TIMESTAMP;
+        evals[index] = TOP_TIMESTAMP;
       }
       return;
     }
 
     // Check if enough time has passed since activation
-    if (spec.definition == EventDefinition.TIMER_RELATIVE) {
-      if (activationTime + spec.timer <= block.timestamp) {
-        events[index].evaluation = activationTime + spec.timer;
+    if (e.definition == EventDefinition.TIMER_RELATIVE) {
+      if (activationTime + e.timer <= block.timestamp) {
+        evals[index] = activationTime + e.timer;
       } else {
-        events[index].evaluation = TOP_TIMESTAMP;
+        evals[index] = TOP_TIMESTAMP;
       }
       return;
     }
@@ -166,7 +137,7 @@ abstract contract AbstractChoice is Base {
    */
   function tryTrigger(uint8 target) public virtual {
     // Check if the call is valid
-    if (hasFinished) {
+    if (winner >= 0) {
       revert("Choice has already finished");
     }
     if (target >= events.length) {
@@ -175,7 +146,7 @@ abstract contract AbstractChoice is Base {
 
     // Evaluate all events if necessary
     for (uint8 i = 0; i < events.length; i++) {
-      if (events[i].evaluation == 0 || events[i].evaluation == TOP_TIMESTAMP) {
+      if (evals[i] == 0 || evals[i] == TOP_TIMESTAMP) {
         evaluateEvent(i, target);
       }
     }
@@ -210,9 +181,9 @@ abstract contract AbstractChoice is Base {
     uint256 min = TOP_TIMESTAMP;
     uint8 minIndex = 0;
     for (uint8 i = 0; i < events.length; i++) {
-      if (events[i].spec.definition != EventDefinition.EXPLICIT) {
-        if (events[i].evaluation < min) {
-          min = events[i].evaluation;
+      if (events[i].definition != EventDefinition.EXPLICIT) {
+        if (evals[i] < min) {
+          min = evals[i];
           minIndex = i;
         }
       }
@@ -224,8 +195,8 @@ abstract contract AbstractChoice is Base {
 
     bool canTrigger = false;
     uint8 toTrigger = 0;
-    if (events[target].spec.definition == EventDefinition.EXPLICIT &&
-        events[target].evaluation <= min) {
+    if (events[target].definition == EventDefinition.EXPLICIT &&
+        evals[target] <= min) {
       // If target is explicit and no implicit one fired before, trigger it
       canTrigger = true;
       toTrigger = target;
@@ -234,8 +205,8 @@ abstract contract AbstractChoice is Base {
       // and prefer the target at the same time
       if (min < TOP_TIMESTAMP) {
         canTrigger = true;
-        if (events[target].spec.definition != EventDefinition.EXPLICIT &&
-            events[target].evaluation == min) {
+        if (events[target].definition != EventDefinition.EXPLICIT &&
+            evals[target] == min) {
           toTrigger = target;
         } else {
           toTrigger = minIndex;
@@ -245,14 +216,8 @@ abstract contract AbstractChoice is Base {
 
     // Change the states of events according to the observations
     if (canTrigger) {
-      for (uint8 i = 0; i < events.length; i++) {
-        if (i == toTrigger) {
-          changeState(i, EventState.COMPLETED);
-        } else {
-          changeState(i, EventState.ABORTED);
-        }
-      }
-      hasFinished = true;
+      winner = int8(toTrigger);
+      emit Winner(toTrigger);
     }
   }
 }

@@ -206,4 +206,12 @@ abstract contract AbstractChoice is Base {
       emit Winner(toTrigger);
     }
   }
+
+  function encodeCorrelation(uint8 index, uint8 target) internal pure returns (uint256) {
+    return (uint256(index) << 8) | uint256(target);
+  }
+
+  function decodeCorrelation(uint256 correlation) internal pure returns (uint8, uint8) {
+    return (uint8(correlation >> 8), uint8(correlation));
+  }
 }

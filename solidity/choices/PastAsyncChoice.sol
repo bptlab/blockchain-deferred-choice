@@ -2,29 +2,12 @@
 pragma solidity ^0.6.9;
 pragma experimental ABIEncoderV2;
 
-import "./AbstractChoice.sol";
+import "./AbstractCallbackCounterChoice.sol";
 import "./../oracles/PastAsyncOracle.sol";
 
-contract PastAsyncChoice is AbstractChoice, OracleValueArrayConsumer {
-  uint8 public callbackCount = 0;
+contract PastAsyncChoice is AbstractCallbackCounterChoice, OracleValueArrayConsumer {
 
-  constructor(Event[] memory specs) AbstractChoice(specs) public {
-  }
-
-  function trigger(uint8 target) public override {
-    if (callbackCount > 0) {
-      revert("Another event is currently being tried");
-    }
-    super.trigger(target);
-  }
-
-  function tryCompleteTrigger(uint8 target) internal override {
-    // We can only complete the trigger if there are no oracle values left to receive
-    if (callbackCount > 0) {
-      emit Debug("Missing required oracle evaluations");
-      return;
-    }
-    super.tryCompleteTrigger(target);
+  constructor(Event[] memory specs) AbstractCallbackCounterChoice(specs) public {
   }
 
   function oracleCallback(uint256 correlation, uint256[] calldata values) external override {
@@ -35,8 +18,7 @@ contract PastAsyncChoice is AbstractChoice, OracleValueArrayConsumer {
       return;
     }
 
-    uint8 target = uint8(correlation);
-    uint8 index = uint8(correlation >> 8);
+    (uint8 target, uint8 index) = decodeCorrelation(correlation);
 
     // Find the first of those values which fulfilled the condition
     for (uint16 i = 0; i < values.length; i += 2) {
@@ -59,7 +41,7 @@ contract PastAsyncChoice is AbstractChoice, OracleValueArrayConsumer {
 
   function evaluateEvent(uint8 index, uint8 target) internal override {
     if (events[index].definition == EventDefinition.CONDITIONAL) {
-      uint256 correlation = uint256(target) | (uint256(index) << 8);
+      uint256 correlation = encodeCorrelation(index, target);
       PastAsyncOracle(events[index].oracle).get(correlation, activationTime);
       callbackCount++;
       return;

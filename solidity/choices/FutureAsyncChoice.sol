@@ -14,7 +14,7 @@ contract FutureAsyncChoice is AbstractChoice, OracleValueConsumer {
       // Subscribe to publish/subscribe oracles.
       // Set correlation target as this event itself, since we never call pub/
       // sub oracles again later during the triggering of a concrete other event.
-      uint256 correlation = uint256(index) | (uint256(index) << 8);
+      uint256 correlation = encodeCorrelation(index, index);
       FutureAsyncOracle(events[index].oracle).get(correlation);
       return;
     }
@@ -38,8 +38,7 @@ contract FutureAsyncChoice is AbstractChoice, OracleValueConsumer {
       return;
     }
 
-    uint8 target = uint8(correlation);
-    uint8 index = uint8(correlation >> 8);
+    (uint8 target, uint8 index) = decodeCorrelation(correlation);
 
     // Do nothing if the event this oracle belongs to has been evaluated already
     // (this filters out duplicate callbacks, or late pub/sub calls)

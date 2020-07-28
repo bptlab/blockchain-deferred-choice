@@ -23,26 +23,26 @@ async function deployAndTest() {
   const c1 = require('./configs/choices/timerWins.json');
   const o0 = require('./configs/oracles/weatherWarning.json');
   const o1 = require('./configs/oracles/interruption.json');
-  const choices = [c0 ]; //, c1]; //[c0, c1];
+  const choices = [c0, c1];
   const oracles = [o0, o1];
   const scaling = 4;
 
   batch = new InstanceBatch(choices, oracles, PastAsyncProvider);
   outputs.push(await batch.simulate(scaling));
 
-  // batch = new InstanceBatch(choices, oracles, PastSyncProvider);
-  // outputs.push(await batch.simulate(scaling));
-
-  // batch = new InstanceBatch(choices, oracles, PresentAsyncProvider);
-  // outputs.push(await batch.simulate(scaling));
-
-  // batch = new InstanceBatch(choices, oracles, PresentSyncProvider);
-  // outputs.push(await batch.simulate(scaling));
-
-  // batch = new InstanceBatch(choices, oracles, FutureAsyncProvider);
-  // outputs.push(await batch.simulate(scaling));
+  batch = new InstanceBatch(choices, oracles, PastSyncProvider);
+  outputs.push(await batch.simulate(scaling));
 
   batch = new InstanceBatch(choices, oracles, PastAsyncCondProvider);
+  outputs.push(await batch.simulate(scaling));
+
+  batch = new InstanceBatch(choices, oracles, PresentAsyncProvider);
+  outputs.push(await batch.simulate(scaling));
+
+  batch = new InstanceBatch(choices, oracles, PresentSyncProvider);
+  outputs.push(await batch.simulate(scaling));
+
+  batch = new InstanceBatch(choices, oracles, FutureAsyncProvider);
   outputs.push(await batch.simulate(scaling));
 
   console.log('FINAL RESULT');

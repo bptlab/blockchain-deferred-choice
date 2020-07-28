@@ -1,10 +1,20 @@
-const PastAsyncProvider = require('./PastAsyncProvider.js');
+const BaseProvider = require('./BaseProvider.js');
 
 const util = require('./../util.js');
 
-class PastAsyncCondProvider extends PastAsyncProvider {
+class PastAsyncCondProvider extends BaseProvider {
+  values = [];
+
   static getContractPrefix() {
     return 'PastAsyncCond';
+  }
+
+  onValueChange(value) {
+    super.onValueChange(value);
+    this.values.push(
+      Math.ceil(Date.now() / 1000),
+      value
+    );
   }
 
   onContractEvent(event) {
@@ -12,7 +22,6 @@ class PastAsyncCondProvider extends PastAsyncProvider {
     if (event.event = 'Query') {
       const from = Number.parseInt(event.returnValues.from);
       const condition = event.returnValues.condition;
-      console.log(event.returnValues);
 
       let first = 0;
       while (first + 2 < this.values.length && this.values[first + 2] < from) {
@@ -27,7 +36,6 @@ class PastAsyncCondProvider extends PastAsyncProvider {
         first += 2;
       }
       result = result || util.TOP_TIMESTAMP;
-      console.log("RESSSSSSULT", result);
 
       new util.web3.eth.Contract(
         util.getSpec('OracleValueConsumer').abi,

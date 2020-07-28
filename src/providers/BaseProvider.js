@@ -26,11 +26,11 @@ const util = require('./../util.js');
   }
 
   onValueChange(value) {
-    console.log('O[', this.name, ']', 'Value change:', value);
+    console.log(this.name, 'Value change:', value);
   }
 
   onContractEvent(event) {
-    console.log('O[', this.name, ']', 'Event:', event.event, '|', 'RESULT', event.returnValues);
+    console.log(this.name, 'Event:', event.event, '|', 'RESULT', event.returnValues);
   }
 }
 

@@ -30,20 +30,20 @@ async function deployAndTest() {
   batch = new InstanceBatch(choices, oracles, PastAsyncProvider);
   outputs.push(await batch.simulate(scaling));
 
-  batch = new InstanceBatch(choices, oracles, PastSyncProvider);
-  outputs.push(await batch.simulate(scaling));
+  // batch = new InstanceBatch(choices, oracles, PastSyncProvider);
+  // outputs.push(await batch.simulate(scaling));
 
-  batch = new InstanceBatch(choices, oracles, PastAsyncCondProvider);
-  outputs.push(await batch.simulate(scaling));
+  // batch = new InstanceBatch(choices, oracles, PastAsyncCondProvider);
+  // outputs.push(await batch.simulate(scaling));
 
-  batch = new InstanceBatch(choices, oracles, PresentAsyncProvider);
-  outputs.push(await batch.simulate(scaling));
+  // batch = new InstanceBatch(choices, oracles, PresentAsyncProvider);
+  // outputs.push(await batch.simulate(scaling));
 
-  batch = new InstanceBatch(choices, oracles, PresentSyncProvider);
-  outputs.push(await batch.simulate(scaling));
+  // batch = new InstanceBatch(choices, oracles, PresentSyncProvider);
+  // outputs.push(await batch.simulate(scaling));
 
-  batch = new InstanceBatch(choices, oracles, FutureAsyncProvider);
-  outputs.push(await batch.simulate(scaling));
+  // batch = new InstanceBatch(choices, oracles, FutureAsyncProvider);
+  // outputs.push(await batch.simulate(scaling));
 
   console.log('FINAL RESULT');
   console.log(JSON.stringify(outputs, null, 2));

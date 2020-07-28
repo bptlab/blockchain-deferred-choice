@@ -11,24 +11,23 @@ class FutureAsyncProvider extends BaseProvider {
   }
 
   doCallback(subscriber) {
-    new util.web3.eth.Contract(
-      util.getSpec('OracleValueConsumer').abi,
-      subscriber.sender
-    ).methods.oracleCallback(
-      subscriber.correlation,
-      this.currentValue
-    ).send({
-      from: this.contract.defaultAccount,
-      nonce: util.getNonce(this.contract.defaultAccount),
-      ...util.defaultOptions
-    }).on('transactionHash', hash => {
-      console.log('O[', this.name, ']', 'Callback:', subscriber.sender, '|', 'HASH', hash);
-    }).on('receipt', receipt => {
-      console.log('O[', this.name, ']', 'Callback:', subscriber.sender, '|', 'RECEIPT');
-      this.gasUsed += receipt.gasUsed;
-    }).on('error', error => {
-      console.log('O[', this.name, ']', 'Callback:', subscriber.sender, '|', 'FAILED', error);
-    });
+    util.wrapTx(
+      this.name,
+      'oracleCallback',
+      new util.web3.eth.Contract(
+        util.getSpec('OracleValueConsumer').abi,
+        subscriber.sender
+      ).methods.oracleCallback(
+        subscriber.correlation,
+        this.currentValue
+      ).send({
+        from: this.contract.defaultAccount,
+        nonce: util.getNonce(this.contract.defaultAccount),
+        ...util.defaultOptions
+      }).on('receipt', receipt => {
+        this.gasUsed += receipt.gasUsed;
+      })
+    );
   }
 
   onValueChange(value) {

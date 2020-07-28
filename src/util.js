@@ -93,6 +93,16 @@ exports.enums = {
   }
 };
 
+exports.wrapTx = function(name, info, tx) {
+  return tx.on('transactionHash', hash => {
+    console.log(name, info, '|', 'HASH', hash);
+  }).on('receipt', receipt => {
+    console.log(name, info, '|', 'RECEIPT');
+  }).on('error', error => {
+    console.log(name, info, '|', 'FAILED', error);
+  });
+}
+
 exports.checkCondition = function(condition, value) {
   const operator = condition.operator;
   if (operator == this.enums.Operator.GREATER) {

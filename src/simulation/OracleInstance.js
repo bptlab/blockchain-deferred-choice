@@ -29,15 +29,16 @@ class OracleInstance extends Replayer {
 
   async deploy() {
     // Create contract
-    await this.contract.deploy().send({
-      nonce: util.getNonce(this.contract.defaultAccount)
-    }).on('transactionHash', hash => {
-      console.log('O[', this.config.name, ']', 'Deployment', '|', 'HASH', hash);
-    }).on('receipt', receipt => {
-      console.log('O[', this.config.name, ']', 'Deployment', '|', 'RECEIPT', receipt.contractAddress);
-      this.gasUsed += receipt.gasUsed;
-      this.contract.options.address = receipt.contractAddress;
-    }).on('error', console.error);
+    await util.wrapTx(
+      this.config.name,
+      'deploy',
+      this.contract.deploy().send({
+        nonce: util.getNonce(this.contract.defaultAccount)
+      }).on('receipt', receipt => {
+        this.gasUsed += receipt.gasUsed;
+        this.contract.options.address = receipt.contractAddress;
+      })
+    );
 
     // Wrap contract in provider
     this.provider = new this.ProviderClazz(this.config.name, this.contract);

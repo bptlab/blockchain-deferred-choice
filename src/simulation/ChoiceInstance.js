@@ -47,23 +47,24 @@ class ChoiceInstance extends Replayer {
       ];
     });
 
-    await this.contract.deploy({
-      arguments: [ payload ]
-    }).send({
-      nonce: util.getNonce(this.contract.defaultAccount)
-    }).on('transactionHash', hash => {
-      console.log('C[', this.config.name, ']', 'Deployment', '|', 'HASH', hash);
-    }).on('receipt', receipt => {
-      console.log('C[', this.config.name, ']', 'Deployment', '|', 'RECEIPT', receipt.contractAddress);
-      this.gasUsed += receipt.gasUsed;
-      this.contract.options.address = receipt.contractAddress;
-    }).on('error', console.error);
+    await util.wrapTx(
+      this.config.name,
+      'deploy',
+      this.contract.deploy({
+        arguments: [ payload ]
+      }).send({
+        nonce: util.getNonce(this.contract.defaultAccount)
+      }).on('receipt', receipt => {
+        this.gasUsed += receipt.gasUsed;
+        this.contract.options.address = receipt.contractAddress;
+      })
+    );
 
     // Subscribe to events for logging purposes
     this.contract.events.allEvents({
       fromBlock: 'latest'
     }).on('data', data => {
-      console.log('C[', this.config.name, ']', 'Event:', data.event, '|', 'RESULT', data.returnValues);
+      console.log(this.config.name, 'Event:', data.event, '|', 'RESULT', data.returnValues);
     }).on('error', console.error);
 
     return this.contract.options.address;
@@ -73,30 +74,28 @@ class ChoiceInstance extends Replayer {
     super.onReplayStep(index, context);
     if (index == 0) {
       // Activate the choice
-      this.contract.methods.activate().send({
-        nonce: util.getNonce(this.contract.defaultAccount),
-        ...util.defaultOptions
-      }).on('transactionHash', hash => {
-        console.log('C[', this.config.name, ']', 'Activation', '|', 'HASH', hash);
-      }).on('receipt', receipt => {
-        console.log('C[', this.config.name, ']', 'Activation', '|', 'RECEIPT');
-        this.gasUsed += receipt.gasUsed;
-      }).on('error', error => {
-        console.log('C[', this.config.name, ']', 'Activation', '|', 'ERROR', error);
-      });
+      util.wrapTx(
+        this.config.name,
+        'activate',
+        this.contract.methods.activate().send({
+          nonce: util.getNonce(this.contract.defaultAccount),
+          ...util.defaultOptions
+        }).on('receipt', receipt => {
+          this.gasUsed += receipt.gasUsed;
+        })
+      );
     } else {
       // Trigger the specific target event
-      this.contract.methods.trigger(context.target).send({
-        nonce: util.getNonce(this.contract.defaultAccount),
-        ...util.defaultOptions
-      }).on('transactionHash', hash => {
-        console.log('C[', this.config.name, ']', 'Trigger:', context.target, '|', 'HASH', hash);
-      }).on('receipt', receipt => {
-        console.log('C[', this.config.name, ']', 'Trigger:', context.target, '|', 'RECEIPT');
-        this.gasUsed += receipt.gasUsed;
-      }).on('error', error => {
-        console.log('C[', this.config.name, ']', 'Trigger:', context.target, '|', 'ERROR', error);
-      });
+      util.wrapTx(
+        this.config.name,
+        'trigger',
+        this.contract.methods.trigger(context.target).send({
+          nonce: util.getNonce(this.contract.defaultAccount),
+          ...util.defaultOptions
+        }).on('receipt', receipt => {
+          this.gasUsed += receipt.gasUsed;
+        })
+      );
     }
   }
 }

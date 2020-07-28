@@ -28,24 +28,23 @@ class PastAsyncProvider extends BaseProvider {
         first += 2;
       }
 
-      new util.web3.eth.Contract(
-        util.getSpec('OracleValueArrayConsumer').abi,
-        event.returnValues.sender
-      ).methods.oracleCallback(
-        event.returnValues.correlation,
-        this.values.slice(first)
-      ).send({
-        from: this.contract.defaultAccount,
-        nonce: util.getNonce(this.contract.defaultAccount),
-        ...util.defaultOptions
-      }).on('transactionHash', hash => {
-        console.log('O[', this.name, ']', 'Callback:', event.returnValues.sender, '|', 'HASH', hash);
-      }).on('receipt', receipt => {
-        console.log('O[', this.name, ']', 'Callback:', event.returnValues.sender, '|', 'RECEIPT');
-        this.gasUsed += receipt.gasUsed;
-      }).on('error', error => {
-        console.log('O[', this.name, ']', 'Callback:', event.returnValues.sender, '|', 'FAILED', error);
-      });
+      util.wrapTx(
+        this.name,
+        'oracleCallback',
+        new util.web3.eth.Contract(
+          util.getSpec('OracleValueArrayConsumer').abi,
+          event.returnValues.sender
+        ).methods.oracleCallback(
+          event.returnValues.correlation,
+          this.values.slice(first)
+        ).send({
+          from: this.contract.defaultAccount,
+          nonce: util.getNonce(this.contract.defaultAccount),
+          ...util.defaultOptions
+        }).on('receipt', receipt => {
+          this.gasUsed += receipt.gasUsed;
+        })
+      );
     }
   }
 }

@@ -9,15 +9,16 @@ class PresentSyncProvider extends BaseProvider {
 
   onValueChange(value) {
     super.onValueChange(value);
-    this.contract.methods.set(value).send({
-      nonce: util.getNonce(this.contract.defaultAccount),
-      ...util.defaultOptions
-    }).on('transactionHash', hash => {
-      console.log('O[', this.name, ']', 'Change tx', '|', 'HASH', hash);
-    }).on('receipt', receipt => {
-      console.log('O[', this.name, ']', 'Change tx', '|', 'RECEIPT');
-      this.gasUsed += receipt.gasUsed;
-    }).on('error', console.error);
+    util.wrapTx(
+      this.name,
+      'set',
+      this.contract.methods.set(value).send({
+        nonce: util.getNonce(this.contract.defaultAccount),
+        ...util.defaultOptions
+      }).on('receipt', receipt => {
+        this.gasUsed += receipt.gasUsed;
+      })
+    );
   }
 }
 

@@ -5,7 +5,7 @@
     "type": "CONDITIONAL",
     "oracleName": "WEATHER_WARNING",
     "operator": "GREATER_EQUAL",
-    "value": 2
+    "value": 50
   }, {
     "type": "CONDITIONAL",
     "oracleName": "INTERRUPTION",
@@ -18,7 +18,7 @@
     "type": "EXPLICIT"
   }],
   "timeline": [
-    { "at": 0 },
-    { "at": 5, "context": { "target": 1 }}
+    { "at": 2 },
+    { "at": 7, "context": { "target": 1 }}
   ]
 }

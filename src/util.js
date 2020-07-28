@@ -1,21 +1,7 @@
 const fs = require('fs-extra');
 const solc = require('solc');
 const Web3 = require('web3');
-
-const SOURCES = [
-  'Interfaces.sol',
-  'choices/AbstractChoice.sol',
-  'choices/FutureAsyncChoice.sol',
-  'choices/PastAsyncChoice.sol',
-  'choices/PastSyncChoice.sol',
-  'choices/PresentAsyncChoice.sol',
-  'choices/PresentSyncChoice.sol',
-  'oracles/FutureAsyncOracle.sol',
-  'oracles/PastAsyncOracle.sol',
-  'oracles/PastSyncOracle.sol',
-  'oracles/PresentAsyncOracle.sol',
-  'oracles/PresentSyncOracle.sol'
-];
+const glob = require("glob");
 
 const KEYS = {
   Consumer: '9756b00ca92badafd4d9ce3b6f02134b4de13cbb9dceaf9db61eda3724bd3a30',
@@ -36,9 +22,14 @@ let nonces;
 
 exports.web3 = web3;
 
+// Top timestamp used in contracts, equal to type(uint256).max
+exports.TOP_TIMESTAMP = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
+
 exports.init = async function() {
   // Compile contracts
-  const sources = Object.assign({}, ...SOURCES.map(file => {
+  const files = glob.sync('./solidity/**/*.sol');
+  const sources = Object.assign({}, ...files.map(file => {
+    file = file.replace('./solidity/', '');
     return {
       [file]: {
         content: fs.readFileSync('./solidity/' + file, { encoding: 'utf8' })
@@ -101,6 +92,21 @@ exports.enums = {
     LESS: 4
   }
 };
+
+exports.checkCondition = function(condition, value) {
+  const operator = condition.operator;
+  if (operator == this.enums.Operator.GREATER) {
+    return value > condition.value;
+  } else if (operator == this.enums.Operator.GREATER_EQUAL) {
+    return value >= condition.value;
+  } else if (operator == this.enums.Operator.EQUAL) {
+    return value == condition.value;
+  } else if (operator == this.enums.Operator.LESS_EQUAL) {
+    return value <= condition.value;
+  } else if (operator == this.enums.Operator.LESS) {
+    return value < condition.value;
+  }
+}
 
 exports.getAccount = function(name) {
   return accounts[name];

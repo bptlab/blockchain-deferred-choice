@@ -3,9 +3,9 @@ pragma solidity ^0.6.9;
 pragma experimental ABIEncoderV2;
 
 import "./AbstractCallbackCounterChoice.sol";
-import "./../oracles/PresentAsyncOracle.sol";
+import "./../oracles/PastAsyncCondOracle.sol";
 
-contract PresentAsyncChoice is AbstractCallbackCounterChoice, OracleValueConsumer {
+contract PastAsyncCondChoice is AbstractCallbackCounterChoice, OracleValueConsumer {
 
   constructor(Event[] memory specs) AbstractCallbackCounterChoice(specs) public {
   }
@@ -19,21 +19,14 @@ contract PresentAsyncChoice is AbstractCallbackCounterChoice, OracleValueConsume
     }
 
     (uint8 index, uint8 target) = decodeCorrelation(correlation);
-
-    // Check the conditional event this oracle belongs to
-    if (checkCondition(events[index].condition, value)) {
-      evals[index] = block.timestamp;
-    } else {
-      evals[index] = TOP_TIMESTAMP;
-    }
-
+    evals[index] = value;
     tryCompleteTrigger(target);
   }
 
   function evaluateEvent(uint8 index, uint8 target) internal override {
     if (events[index].definition == EventDefinition.CONDITIONAL) {
       uint256 correlation = encodeCorrelation(index, target);
-      PresentAsyncOracle(events[index].oracle).get(correlation);
+      PastAsyncCondOracle(events[index].oracle).get(correlation, events[index].condition, activationTime);
       callbackCount++;
       return;
     }

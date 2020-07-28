@@ -1,39 +1,40 @@
-const BaseProvider = require('./BaseProvider.js');
+const PastAsyncProvider = require('./PastAsyncProvider.js');
 
 const util = require('./../util.js');
 
-class PastAsyncProvider extends BaseProvider {
-  values = [];
-
+class PastAsyncCondProvider extends PastAsyncProvider {
   static getContractPrefix() {
-    return 'PastAsync';
-  }
-
-  onValueChange(value) {
-    super.onValueChange(value);
-    this.values.push(
-      Math.ceil(Date.now() / 1000),
-      value
-    );
+    return 'PastAsyncCond';
   }
 
   onContractEvent(event) {
     super.onContractEvent(event);
     if (event.event = 'Query') {
-      // Extract from timestamp from parameters and find the index at which
-      // we have to start returning values
       const from = Number.parseInt(event.returnValues.from);
+      const condition = event.returnValues.condition;
+      console.log(event.returnValues);
+
       let first = 0;
       while (first + 2 < this.values.length && this.values[first + 2] < from) {
         first += 2;
       }
 
+      let result;
+      while (!result && first < this.values.length) {
+        if (util.checkCondition(condition, this.values[first + 1])) {
+          result = Math.max(from, this.values[first]);
+        }
+        first += 2;
+      }
+      result = result || util.TOP_TIMESTAMP;
+      console.log("RESSSSSSULT", result);
+
       new util.web3.eth.Contract(
-        util.getSpec('OracleValueArrayConsumer').abi,
+        util.getSpec('OracleValueConsumer').abi,
         event.returnValues.sender
       ).methods.oracleCallback(
         event.returnValues.correlation,
-        this.values.slice(first)
+        result
       ).send({
         from: this.contract.defaultAccount,
         nonce: util.getNonce(this.contract.defaultAccount),
@@ -50,4 +51,4 @@ class PastAsyncProvider extends BaseProvider {
   }
 }
 
-module.exports = PastAsyncProvider;
+module.exports = PastAsyncCondProvider;

@@ -18,7 +18,7 @@ contract PastAsyncChoice is AbstractCallbackCounterChoice, OracleValueArrayConsu
       return;
     }
 
-    (uint8 target, uint8 index) = decodeCorrelation(correlation);
+    (uint8 index, uint8 target) = decodeCorrelation(correlation);
 
     // Find the first of those values which fulfilled the condition
     for (uint16 i = 0; i < values.length; i += 2) {
@@ -30,9 +30,9 @@ contract PastAsyncChoice is AbstractCallbackCounterChoice, OracleValueArrayConsu
         }
         break;
       }
-      if (evals[index] == 0) {
-        evals[index] = TOP_TIMESTAMP;
-      }
+    }
+    if (evals[index] == 0) {
+      evals[index] = TOP_TIMESTAMP;
     }
 
     // Try to trigger the correlated original target of this trigger attempt

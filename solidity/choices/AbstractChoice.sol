@@ -207,11 +207,11 @@ abstract contract AbstractChoice is Base {
     }
   }
 
-  function encodeCorrelation(uint8 index, uint8 target) internal pure returns (uint256) {
+  function encodeCorrelation(uint8 index, uint8 target) internal pure returns (uint256 correlation) {
     return (uint256(index) << 8) | uint256(target);
   }
 
-  function decodeCorrelation(uint256 correlation) internal pure returns (uint8, uint8) {
+  function decodeCorrelation(uint256 correlation) internal pure returns (uint8 index, uint8 target) {
     return (uint8(correlation >> 8), uint8(correlation));
   }
 }

@@ -38,7 +38,7 @@ contract FutureAsyncChoice is AbstractChoice, OracleValueConsumer {
       return;
     }
 
-    (uint8 target, uint8 index) = decodeCorrelation(correlation);
+    (uint8 index, uint8 target) = decodeCorrelation(correlation);
 
     // Do nothing if the event this oracle belongs to has been evaluated already
     // (this filters out duplicate callbacks, or late pub/sub calls)

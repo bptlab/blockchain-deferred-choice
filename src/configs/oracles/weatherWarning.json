@@ -4,8 +4,8 @@
   "timeline": [
     { "at": 0, "context": { "value":   5 }},
     { "at": 1, "context": { "value":   8 }},
-    { "at": 2, "context": { "value": 100 }},
-    { "at": 4, "context": { "value":   5 }},
-    { "at": 5, "context": { "value":   4 }}
+    { "at": 3, "context": { "value": 100 }},
+    { "at": 6, "context": { "value":   5 }},
+    { "at": 7, "context": { "value":   4 }}
   ]
 }

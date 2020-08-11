@@ -41,10 +41,7 @@ class FutureAsyncProvider extends BaseProvider {
   onContractEvent(event) {
     super.onContractEvent(event);
     if (event.event = 'Query') {
-      const sub = {
-        sender: event.returnValues.sender,
-        correlation: event.returnValues.correlation
-      };
+      const sub = event.returnValues;
       this.subscribers.push(sub);
       this.doCallback(sub);
     }

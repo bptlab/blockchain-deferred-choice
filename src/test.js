@@ -8,9 +8,11 @@ const InstanceBatch = require('./simulation/InstanceBatch.js');
 const PastAsyncProvider = require('./providers/PastAsyncProvider.js');
 const PastAsyncCondProvider = require('./providers/PastAsyncCondProvider.js');
 const PastSyncProvider = require('./providers/PastSyncProvider.js');
+const PastSyncCondProvider = require('./providers/PastSyncCondProvider.js');
 const PresentAsyncProvider = require('./providers/PresentAsyncProvider.js');
 const PresentSyncProvider = require('./providers/PresentSyncProvider.js');
 const FutureAsyncProvider = require('./providers/FutureAsyncProvider.js');
+const FutureAsyncCondProvider = require('./providers/FutureAsyncCondProvider.js');
 
 // Deploy an oracle
 async function deployAndTest() {
@@ -27,23 +29,16 @@ async function deployAndTest() {
   const oracles = [o0, o1];
   const scaling = 4;
 
-  batch = new InstanceBatch(choices, oracles, PastAsyncProvider);
-  outputs.push(await batch.simulate(scaling));
+  const providers = [
+    PastAsyncCondProvider,
+    PastSyncCondProvider,
+    FutureAsyncCondProvider
+  ];
 
-  // batch = new InstanceBatch(choices, oracles, PastSyncProvider);
-  // outputs.push(await batch.simulate(scaling));
-
-  // batch = new InstanceBatch(choices, oracles, PastAsyncCondProvider);
-  // outputs.push(await batch.simulate(scaling));
-
-  // batch = new InstanceBatch(choices, oracles, PresentAsyncProvider);
-  // outputs.push(await batch.simulate(scaling));
-
-  // batch = new InstanceBatch(choices, oracles, PresentSyncProvider);
-  // outputs.push(await batch.simulate(scaling));
-
-  // batch = new InstanceBatch(choices, oracles, FutureAsyncProvider);
-  // outputs.push(await batch.simulate(scaling));
+  for (provider of providers) {
+    batch = new InstanceBatch(choices, oracles, provider);
+    outputs.push(await batch.simulate(scaling));
+  }
 
   console.log('FINAL RESULT');
   console.log(JSON.stringify(outputs, null, 2));

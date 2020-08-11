@@ -2,7 +2,7 @@
 pragma solidity ^0.6.9;
 pragma experimental ABIEncoderV2;
 
-import "./AbstractCondOracle.sol";
+import "./../Interfaces.sol";
 
 contract PastAsyncCondOracle is Oracle {
   event Query(

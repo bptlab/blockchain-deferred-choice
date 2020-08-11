@@ -27,8 +27,6 @@ abstract contract AbstractChoice is Base {
     Base.Condition condition;
   }
 
-  uint256 constant TOP_TIMESTAMP = type(uint256).max;
-
   // Member Variables
   Event[] events;
   uint256 public activationTime = 0;

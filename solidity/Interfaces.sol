@@ -6,11 +6,13 @@ pragma experimental ABIEncoderV2;
  * General base interface with structures and enumerations which all contracts
  * regularly need access to.
  */
-interface Base {
+abstract contract Base {
   struct Condition {
     Operator operator;
     uint256 value;
   }
+
+  uint256 constant TOP_TIMESTAMP = type(uint256).max;
 
   enum Operator {
     GREATER,
@@ -21,7 +23,7 @@ interface Base {
   }
 }
 
-interface Oracle is Base {
+abstract contract Oracle is Base {
 }
 
 interface OracleValueConsumer {

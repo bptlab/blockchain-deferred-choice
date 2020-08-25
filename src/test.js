@@ -3,7 +3,7 @@ const fs = require('fs-extra');
 
 const util = require('./util.js');
 
-const InstanceBatch = require('./simulation/InstanceBatch.js');
+const Experiment = require('./simulation/Experiment.js');
 
 const PastAsyncProvider = require('./providers/PastAsyncProvider.js');
 const PastAsyncCondProvider = require('./providers/PastAsyncCondProvider.js');
@@ -18,15 +18,9 @@ const FutureAsyncCondProvider = require('./providers/FutureAsyncCondProvider.js'
 async function deployAndTest() {
   await util.init();
 
-  let batch;
   let outputs = [];
 
-  const c0 = require('./configs/choices/sample.json');
-  const c1 = require('./configs/choices/timerWins.json');
-  const o0 = require('./configs/oracles/weatherWarning.json');
-  const o1 = require('./configs/oracles/interruption.json');
-  const choices = [c0, c1];
-  const oracles = [o0, o1];
+  const config = require('./configs/experiments/1.json');
   const scaling = 4;
 
   const providers = [
@@ -36,8 +30,8 @@ async function deployAndTest() {
   ];
 
   for (provider of providers) {
-    batch = new InstanceBatch(choices, oracles, provider);
-    outputs.push(await batch.simulate(scaling));
+    const experiment = new Experiment(config, provider);
+    outputs.push(await experiment.simulate(scaling));
   }
 
   console.log('FINAL RESULT');

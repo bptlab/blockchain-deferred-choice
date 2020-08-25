@@ -7,8 +7,8 @@ class ChoiceInstance extends Replayer {
   config;
   gasUsed = 0;
 
-  constructor(config, ProviderClazz) {
-    super(config.timeline);
+  constructor(timeline, config, ProviderClazz) {
+    super(timeline);
     this.config = config;
 
     const spec = util.getSpec(ProviderClazz.getContractPrefix() + 'Choice');

@@ -12,8 +12,7 @@ abstract contract AbstractChoice is Base {
 
   // Enumerations
   enum EventDefinition {
-    TIMER_ABSOLUTE,
-    TIMER_RELATIVE,
+    TIMER,
     CONDITIONAL,
     EXPLICIT
   }
@@ -90,23 +89,13 @@ abstract contract AbstractChoice is Base {
     }
 
     // Check if deadline has passed
-    if (e.definition == EventDefinition.TIMER_ABSOLUTE) {
+    if (e.definition == EventDefinition.TIMER) {
       if (e.timer <= block.timestamp) {
         if (e.timer < activationTime) {
           evals[index] = activationTime;
         } else {
           evals[index] = e.timer;
         }
-      } else {
-        evals[index] = TOP_TIMESTAMP;
-      }
-      return;
-    }
-
-    // Check if enough time has passed since activation
-    if (e.definition == EventDefinition.TIMER_RELATIVE) {
-      if (activationTime + e.timer <= block.timestamp) {
-        evals[index] = activationTime + e.timer;
       } else {
         evals[index] = TOP_TIMESTAMP;
       }

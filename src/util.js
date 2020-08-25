@@ -80,9 +80,9 @@ exports.defaultOptions = {
 exports.enums = {
   EventDefinition: {
     TIMER_ABSOLUTE: 0,
-    TIMER_RELATIVE: 1,
-    CONDITIONAL: 2,
-    EXPLICIT: 3
+    TIMER_RELATIVE: 0, // the smart contract does not distinguish between relative and absolute
+    CONDITIONAL: 1,
+    EXPLICIT: 2
   },
   Operator: {
     GREATER: 0,

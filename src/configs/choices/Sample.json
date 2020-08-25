@@ -1,14 +1,14 @@
 {
-  "name": "SAMPLE",
+  "name": "Sample",
   "account": "Consumer",
   "events": [{
     "type": "CONDITIONAL",
-    "oracleName": "WEATHER_WARNING",
+    "oracleName": "WeatherWarning",
     "operator": "GREATER_EQUAL",
     "value": 50
   }, {
     "type": "CONDITIONAL",
-    "oracleName": "INTERRUPTION",
+    "oracleName": "Interruption",
     "operator": "EQUAL",
     "value": 1
   }, {
@@ -16,9 +16,5 @@
     "timer": 8
   }, {
     "type": "EXPLICIT"
-  }],
-  "timeline": [
-    { "at": 2 },
-    { "at": 7, "context": { "target": 1 }}
-  ]
+  }]
 }

@@ -1,14 +1,20 @@
 const OracleInstance = require('./OracleInstance.js');
 const ChoiceInstance = require('./ChoiceInstance.js');
 
-class InstanceBatch {
+class Experiment {
   oracles;
   choices;
   ProviderClazz;
 
-  constructor(choiceConfigs, oracleConfigs, ProviderClazz) {
-    this.oracles = oracleConfigs.map(config => new OracleInstance(config, ProviderClazz));
-    this.choices = choiceConfigs.map(config => new ChoiceInstance(config, ProviderClazz));
+  constructor(config, ProviderClazz) {
+    this.oracles = config.oracles.map(name => {
+      const oracleConfig = require('./../configs/oracles/' + name + '.json');
+      new OracleInstance(config.timelines[name], oracleConfig, ProviderClazz)
+    });
+    this.choices = config.choices.map(name => {
+      const choiceConfig = require('./../configs/choices/' + name + '.json');
+      new ChoiceInstance(config.timelines[name], choiceConfig, ProviderClazz)
+    });
     this.ProviderClazz = ProviderClazz;
   }
 
@@ -66,4 +72,4 @@ class InstanceBatch {
   }
 }
 
-module.exports = InstanceBatch;
+module.exports = Experiment;

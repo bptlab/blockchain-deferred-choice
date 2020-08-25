@@ -1,22 +1,18 @@
 {
-  "name": "TIMER_WINS",
+  "name": "TimerWins",
   "account": "Consumer2",
   "events": [{
     "type": "TIMER_RELATIVE",
     "timer": 1
   }, {
     "type": "CONDITIONAL",
-    "oracleName": "WEATHER_WARNING",
+    "oracleName": "WeatherWarning",
     "operator": "EQUAL",
     "value": 4
   }, {
     "type": "CONDITIONAL",
-    "oracleName": "INTERRUPTION",
+    "oracleName": "Interruption",
     "operator": "EQUAL",
     "value": 1
-  }],
-  "timeline": [
-    { "at": 0 },
-    { "at": 6, "context": { "target": 0 }}
-  ]
+  }]
 }

@@ -9,8 +9,8 @@ class OracleInstance extends Replayer {
   gasUsed = 0;
   ProviderClazz;
 
-  constructor(config, ProviderClazz) {
-    super(config.timeline);
+  constructor(timeline, config, ProviderClazz) {
+    super(timeline);
     this.config = config;
     this.ProviderClazz = ProviderClazz;
 

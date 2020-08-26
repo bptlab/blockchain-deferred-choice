@@ -9,11 +9,11 @@ class Experiment {
   constructor(config, ProviderClazz) {
     this.oracles = config.oracles.map(name => {
       const oracleConfig = require('./../configs/oracles/' + name + '.json');
-      new OracleInstance(config.timelines[name], oracleConfig, ProviderClazz)
+      return new OracleInstance(config.timelines[name], oracleConfig, ProviderClazz)
     });
     this.choices = config.choices.map(name => {
       const choiceConfig = require('./../configs/choices/' + name + '.json');
-      new ChoiceInstance(config.timelines[name], choiceConfig, ProviderClazz)
+      return new ChoiceInstance(config.timelines[name], choiceConfig, ProviderClazz)
     });
     this.ProviderClazz = ProviderClazz;
   }
@@ -51,21 +51,36 @@ class Experiment {
     return output;
   }
 
+  /**
+   * Deploy the oracle and choice contracts which are part of this simulation.
+   * 
+   * @param {Number} scaling Temporal scaling factor
+   */
   async deploy(scaling) {
-    // Deploy all oracles
+    // Deploy all oracles and collect their addresses, since they need to be provided
+    // to the choice contracts later
     let oracleAddresses = {};
+    console.log("Start deploying oracles...");
     for (let i = 0; i < this.oracles.length; i++) {
-      oracleAddresses[this.oracles[i].config.name] = await this.oracles[i].deploy();
+      const oracle = this.oracles[i];
+      oracleAddresses[oracle.config.name] = await oracle.deploy();
     }
+    console.log("Finished deploying oracles");
 
     // Deploy all choices
+    console.log("Start deploying choices...");
     for (let i = 0; i < this.choices.length; i++) {
       await this.choices[i].deploy(oracleAddresses, scaling);
     }
+    console.log("Finished deploying choices");
   }
 
+  /**
+   * Perform the simulation by replaying all oracle and choice simulators.
+   * 
+   * @param {Number} scaling 
+   */
   async replay(scaling) {
-    // Wait for all oracles' and choices' replay promises to resolve
     await Promise.all(
       this.oracles.concat(this.choices).map(inst => inst.replay(scaling))
     );

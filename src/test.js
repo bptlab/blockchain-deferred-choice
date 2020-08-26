@@ -24,8 +24,13 @@ async function deployAndTest() {
   const scaling = 4;
 
   const providers = [
+    PastAsyncProvider,
     PastAsyncCondProvider,
+    PastSyncProvider,
     PastSyncCondProvider,
+    PresentAsyncProvider,
+    PresentSyncProvider,
+    FutureAsyncProvider,
     FutureAsyncCondProvider
   ];
 
@@ -38,7 +43,7 @@ async function deployAndTest() {
   console.log(JSON.stringify(outputs, null, 2));
 
   const csv = await json2csv.json2csvAsync(outputs);
-  await fs.outputFile('results.csv', csv);
+  await fs.outputFile('results_' + Date.now() + '.csv', csv);
 
   process.exit();
 }

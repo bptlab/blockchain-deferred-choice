@@ -5,7 +5,7 @@
     "type": "CONDITIONAL",
     "oracleName": "WeatherWarning",
     "operator": "GREATER_EQUAL",
-    "value": 50
+    "value": 2
   }, {
     "type": "CONDITIONAL",
     "oracleName": "Interruption",

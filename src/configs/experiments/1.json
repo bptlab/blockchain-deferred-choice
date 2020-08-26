@@ -8,20 +8,18 @@
   ],
   "timelines": {
     "Sample": [
-      { "at": 2 },
-      { "at": 7, "context": { "target": 1 }}
+      { "at": 1 },
+      { "at": 9, "context": { "target": 0 }}
     ],
     "Interruption": [
       { "at": 0, "context": { "value": 0 }},
-      { "at": 4, "context": { "value": 1 }},
-      { "at": 6, "context": { "value": 0 }}
+      { "at": 8, "context": { "value": 1 }}
     ],
     "WeatherWarning": [
-      { "at": 0, "context": { "value":   5 }},
-      { "at": 1, "context": { "value":   8 }},
-      { "at": 3, "context": { "value": 100 }},
-      { "at": 6, "context": { "value":   5 }},
-      { "at": 7, "context": { "value":   4 }}
+      { "at": 0, "context": { "value": 0 }},
+      { "at": 4, "context": { "value": 1 }},
+      { "at": 6, "context": { "value": 2 }},
+      { "at": 9, "context": { "value": 1 }}
     ]
   }
 }

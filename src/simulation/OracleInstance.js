@@ -1,8 +1,8 @@
-const Replayer = require('./Replayer.js');
+const Simulator = require('./Simulator.js');
 
 const util = require('../util.js');
 
-class OracleInstance extends Replayer {
+class OracleInstance extends Simulator {
   contract;
   provider;
   config;
@@ -46,8 +46,8 @@ class OracleInstance extends Replayer {
     return this.contract.options.address;
   }
 
-  onReplayStep(index, context) {
-    super.onReplayStep(index, context);
+  onAction(index, context) {
+    super.onAction(index, context);
     this.provider.onValueChange(context.value);
   }
 }

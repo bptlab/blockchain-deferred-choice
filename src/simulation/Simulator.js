@@ -1,15 +1,15 @@
-class Replayer {
+class Simulator {
   constructor(timeline) {
     this.timeline = timeline;
   }
 
-  async replay(scaling) {
+  async simulate(scaling) {
     this.index = 0;
     this.start = Date.now();
 
     return new Promise(resolve => {
       const step = () => {
-        this.onReplayStep(this.index, this.timeline[this.index].context);
+        this.onAction(this.index, this.timeline[this.index].context);
         this.index++;
         if (this.index < this.timeline.length) {
           const delay = this.timeline[this.index].at * 1000 * scaling - (Date.now() - this.start);
@@ -22,9 +22,9 @@ class Replayer {
     });
   }
 
-  onReplayStep(index, context) {
-    // React to the replay step
+  onAction(index, context) {
+    // React to the simulation step
   }
 }
 
-module.exports = Replayer;
+module.exports = Simulator;

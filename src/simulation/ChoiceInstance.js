@@ -1,8 +1,8 @@
-const Replayer = require('./Replayer.js');
+const Simulator = require('./Simulator.js');
 
 const util = require('../util.js');
 
-class ChoiceInstance extends Replayer {
+class ChoiceInstance extends Simulator {
   contract;
   config;
   gasUsed = 0;
@@ -70,8 +70,8 @@ class ChoiceInstance extends Replayer {
     return this.contract.options.address;
   }
 
-  onReplayStep(index, context) {
-    super.onReplayStep(index, context);
+  onAction(index, context) {
+    super.onAction(index, context);
     if (index == 0) {
       // Activate the choice
       util.wrapTx(

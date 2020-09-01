@@ -20,9 +20,9 @@ contract PastAsyncChoice is AbstractCallbackCounterChoice, OracleValueArrayConsu
 
     (uint8 index, uint8 target) = decodeCorrelation(correlation);
 
-    // Find the first of those values which fulfilled the condition
+    // Find the first of those values which fulfilled the expression
     for (uint16 i = 0; i < values.length; i += 2) {
-      if (checkCondition(events[index].condition, values[i+1])) {
+      if (checkExpression(events[index].expression, values[i+1])) {
         if (values[i] < activationTime) {
           evals[index] = activationTime;
         } else {

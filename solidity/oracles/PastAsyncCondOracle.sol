@@ -8,11 +8,11 @@ contract PastAsyncCondOracle is Oracle {
   event Query(
     address sender,
     uint256 correlation,
-    Condition condition,
+    Expression expression,
     uint256 from
   );
 
-  function get(uint256 correlation, Condition calldata condition, uint256 from) external {
-    emit Query(msg.sender, correlation, condition, from);
+  function get(uint256 correlation, Expression calldata expression, uint256 from) external {
+    emit Query(msg.sender, correlation, expression, from);
   }
 }

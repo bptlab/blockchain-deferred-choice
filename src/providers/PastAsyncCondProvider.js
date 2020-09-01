@@ -21,7 +21,7 @@ class PastAsyncCondProvider extends BaseProvider {
     super.onContractEvent(event);
     if (event.event = 'Query') {
       const from = Number.parseInt(event.returnValues.from);
-      const condition = event.returnValues.condition;
+      const expression = event.returnValues.expression;
 
       let first = 0;
       while (first + 2 < this.values.length && this.values[first + 2] < from) {
@@ -30,7 +30,7 @@ class PastAsyncCondProvider extends BaseProvider {
 
       let result;
       while (!result && first < this.values.length) {
-        if (util.checkCondition(condition, this.values[first + 1])) {
+        if (util.checkExpression(expression, this.values[first + 1])) {
           result = Math.max(from, this.values[first]);
         }
         first += 2;

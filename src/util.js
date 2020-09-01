@@ -103,18 +103,18 @@ exports.wrapTx = function(name, info, tx) {
   });
 }
 
-exports.checkCondition = function(condition, value) {
-  const operator = condition.operator;
+exports.checkExpression = function(expression, value) {
+  const operator = expression.operator;
   if (operator == this.enums.Operator.GREATER) {
-    return value > condition.value;
+    return value > expression.value;
   } else if (operator == this.enums.Operator.GREATER_EQUAL) {
-    return value >= condition.value;
+    return value >= expression.value;
   } else if (operator == this.enums.Operator.EQUAL) {
-    return value == condition.value;
+    return value == expression.value;
   } else if (operator == this.enums.Operator.LESS_EQUAL) {
-    return value <= condition.value;
+    return value <= expression.value;
   } else if (operator == this.enums.Operator.LESS) {
-    return value < condition.value;
+    return value < expression.value;
   }
 }
 

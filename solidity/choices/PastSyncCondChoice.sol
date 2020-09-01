@@ -11,7 +11,7 @@ contract PastSyncCondChoice is AbstractChoice {
 
   function evaluateEvent(uint8 index, uint8 target) internal override {
     if (events[index].definition == EventDefinition.CONDITIONAL) {
-      evals[index] = PastSyncCondOracle(events[index].oracle).get(activationTime, events[index].condition);
+      evals[index] = PastSyncCondOracle(events[index].oracle).get(activationTime, events[index].expression);
       return;
     }
 

@@ -8,10 +8,10 @@ contract FutureAsyncCondOracle is Oracle {
   event Query(
     address sender,
     uint256 correlation,
-    Condition condition
+    Expression expression
   );
 
-  function get(uint256 correlation, Condition calldata condition) external {
-    emit Query(msg.sender, correlation, condition);
+  function get(uint256 correlation, Expression calldata expression) external {
+    emit Query(msg.sender, correlation, expression);
   }
 }

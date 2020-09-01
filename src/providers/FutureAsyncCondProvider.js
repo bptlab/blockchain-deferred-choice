@@ -12,7 +12,7 @@ class FutureAsyncCondProvider extends FutureAsyncProvider {
       return;
     }
 
-    if (util.checkCondition(subscriber.condition, this.currentValue)) {
+    if (util.checkExpression(subscriber.expression, this.currentValue)) {
       subscriber.unsubscribed = true;
       util.wrapTx(
         this.name,

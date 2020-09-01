@@ -26,7 +26,7 @@ contract PastAsyncCondChoice is AbstractCallbackCounterChoice, OracleValueConsum
   function evaluateEvent(uint8 index, uint8 target) internal override {
     if (events[index].definition == EventDefinition.CONDITIONAL) {
       uint256 correlation = encodeCorrelation(index, target);
-      PastAsyncCondOracle(events[index].oracle).get(correlation, events[index].condition, activationTime);
+      PastAsyncCondOracle(events[index].oracle).get(correlation, events[index].expression, activationTime);
       callbackCount++;
       return;
     }

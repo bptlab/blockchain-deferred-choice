@@ -13,7 +13,7 @@ contract PastSyncChoice is AbstractChoice {
     if (events[index].definition == EventDefinition.CONDITIONAL) {
       uint256[] memory values = PastSyncOracle(events[index].oracle).get(activationTime);
       for (uint16 i = 0; i < values.length; i += 2) {
-        if (checkCondition(events[index].condition, values[i+1])) {
+        if (checkExpression(events[index].expression, values[i+1])) {
           if (values[i] < activationTime) {
             evals[index] = activationTime;
           } else {

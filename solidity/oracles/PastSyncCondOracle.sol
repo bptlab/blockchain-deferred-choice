@@ -12,14 +12,14 @@ contract PastSyncCondOracle is AbstractCondOracle {
     values.push() = newValue;
   }
 
-  function get(uint256 from, Condition calldata condition) external view returns (uint256 result) {
+  function get(uint256 from, Expression calldata expression) external view returns (uint256 result) {
     uint16 first = 0;
     while (first + 2 < values.length && values[first + 2] < from) {
       first += 2;
     }
 
     while (first < values.length) {
-      if (checkCondition(condition, values[first + 1])) {
+      if (checkExpression(expression, values[first + 1])) {
         if (from > values[first]) {
           return from;
         } else {

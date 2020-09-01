@@ -15,7 +15,7 @@ contract FutureAsyncCondChoice is AbstractChoice, OracleBoolConsumer {
       // Set correlation target as this event itself, since we never call pub/
       // sub oracles again later during the triggering of a concrete other event.
       uint256 correlation = encodeCorrelation(index, index);
-      FutureAsyncCondOracle(events[index].oracle).get(correlation, events[index].condition);
+      FutureAsyncCondOracle(events[index].oracle).get(correlation, events[index].expression);
       return;
     }
 

@@ -7,7 +7,7 @@ pragma experimental ABIEncoderV2;
  * regularly need access to.
  */
 abstract contract Base {
-  struct Condition {
+  struct Expression {
     Operator operator;
     uint256 value;
   }

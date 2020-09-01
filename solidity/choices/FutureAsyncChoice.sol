@@ -47,7 +47,7 @@ contract FutureAsyncChoice is AbstractChoice, OracleValueConsumer {
     }
 
     // Check the conditional event this oracle belongs to
-    if (checkCondition(events[index].condition, value)) {
+    if (checkExpression(events[index].expression, value)) {
       evals[index] = block.timestamp;
     } else {
       evals[index] = TOP_TIMESTAMP;

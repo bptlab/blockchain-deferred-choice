@@ -23,7 +23,7 @@ abstract contract AbstractChoice is Base {
     uint256 timer;
     // Conditional specification
     address oracle;
-    Base.Condition condition;
+    Base.Expression expression;
   }
 
   // Member Variables
@@ -129,9 +129,9 @@ abstract contract AbstractChoice is Base {
   }
 
   /*
-   * Helper function that returns true if the given condition is satisfied by the value.
+   * Helper function that returns true if the given expression is satisfied by the value.
    */
-  function checkCondition(Condition memory c, uint256 value) internal pure returns (bool result) {
+  function checkExpression(Expression memory c, uint256 value) internal pure returns (bool result) {
     if (c.operator == Operator.GREATER) {
       result = value > c.value;
     } else if (c.operator == Operator.GREATER_EQUAL) {

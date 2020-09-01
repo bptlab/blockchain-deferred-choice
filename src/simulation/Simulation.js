@@ -1,5 +1,5 @@
-const OracleInstance = require('./OracleInstance.js');
-const ChoiceInstance = require('./ChoiceInstance.js');
+const OracleSimulator = require('./OracleSimulator.js');
+const ChoiceSimulator = require('./ChoiceSimulator.js');
 
 class Simulation {
   oracles;
@@ -9,11 +9,11 @@ class Simulation {
   constructor(config, ProviderClazz) {
     this.oracles = config.oracles.map(name => {
       const oracleConfig = require('./../configs/oracles/' + name + '.json');
-      return new OracleInstance(config.timelines[name], oracleConfig, ProviderClazz)
+      return new OracleSimulator(config.timelines[name], oracleConfig, ProviderClazz)
     });
     this.choices = config.choices.map(name => {
       const choiceConfig = require('./../configs/choices/' + name + '.json');
-      return new ChoiceInstance(config.timelines[name], choiceConfig, ProviderClazz)
+      return new ChoiceSimulator(config.timelines[name], choiceConfig, ProviderClazz)
     });
     this.ProviderClazz = ProviderClazz;
   }

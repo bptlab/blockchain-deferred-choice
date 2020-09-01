@@ -2,7 +2,7 @@ const Simulator = require('./Simulator.js');
 
 const util = require('../util.js');
 
-class ChoiceInstance extends Simulator {
+class ChoiceSimulator extends Simulator {
   contract;
   config;
   gasUsed = 0;
@@ -100,4 +100,4 @@ class ChoiceInstance extends Simulator {
   }
 }
 
-module.exports = ChoiceInstance;
+module.exports = ChoiceSimulator;

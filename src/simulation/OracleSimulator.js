@@ -2,7 +2,7 @@ const Simulator = require('./Simulator.js');
 
 const util = require('../util.js');
 
-class OracleInstance extends Simulator {
+class OracleSimulator extends Simulator {
   contract;
   provider;
   config;
@@ -52,4 +52,4 @@ class OracleInstance extends Simulator {
   }
 }
 
-module.exports = OracleInstance;
+module.exports = OracleSimulator;

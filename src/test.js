@@ -3,7 +3,7 @@ const fs = require('fs-extra');
 
 const util = require('./util.js');
 
-const Experiment = require('./simulation/Experiment.js');
+const Simulation = require('./simulation/Simulation.js');
 
 const PastAsyncProvider = require('./providers/PastAsyncProvider.js');
 const PastAsyncCondProvider = require('./providers/PastAsyncCondProvider.js');
@@ -20,7 +20,7 @@ async function deployAndTest() {
 
   let outputs = [];
 
-  const config = require('./configs/experiments/1.json');
+  const config = require('./configs/simulations/1.json');
   const scaling = 4;
 
   const providers = [
@@ -35,8 +35,8 @@ async function deployAndTest() {
   ];
 
   for (provider of providers) {
-    const experiment = new Experiment(config, provider);
-    outputs.push(await experiment.simulate(scaling));
+    const simulation = new Simulation(config, provider);
+    outputs.push(await simulation.perform(scaling));
   }
 
   console.log('FINAL RESULT');

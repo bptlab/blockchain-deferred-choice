@@ -1,7 +1,7 @@
 const OracleInstance = require('./OracleInstance.js');
 const ChoiceInstance = require('./ChoiceInstance.js');
 
-class Experiment {
+class Simulation {
   oracles;
   choices;
   ProviderClazz;
@@ -71,4 +71,4 @@ class Experiment {
   }
 }
 
-module.exports = Experiment;
+module.exports = Simulation;

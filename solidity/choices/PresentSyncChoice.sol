@@ -5,7 +5,7 @@ pragma experimental ABIEncoderV2;
 import "./AbstractChoice.sol";
 import "./../oracles/PresentSyncOracle.sol";
 
-contract PresentSyncChoice is AbstractChoice {
+contract PresentSyncChoice is AbstractChoice, ExpressionChecker {
   constructor(Event[] memory specs) AbstractChoice(specs) public {
   }
 

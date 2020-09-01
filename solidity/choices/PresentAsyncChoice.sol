@@ -5,7 +5,7 @@ pragma experimental ABIEncoderV2;
 import "./AbstractCallbackCounterChoice.sol";
 import "./../oracles/PresentAsyncOracle.sol";
 
-contract PresentAsyncChoice is AbstractCallbackCounterChoice, OracleValueConsumer {
+contract PresentAsyncChoice is AbstractCallbackCounterChoice, OracleValueConsumer, ExpressionChecker {
 
   constructor(Event[] memory specs) AbstractCallbackCounterChoice(specs) public {
   }

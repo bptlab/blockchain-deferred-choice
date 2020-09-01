@@ -4,7 +4,7 @@ pragma experimental ABIEncoderV2;
 
 import "./../Interfaces.sol";
 
-contract PresentSyncOracle is Oracle {
+contract PresentSyncOracle is SyncOracle {
   uint256 value;
 
   function set(uint256 newValue) external {

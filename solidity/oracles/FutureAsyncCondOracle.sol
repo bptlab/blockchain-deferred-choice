@@ -4,7 +4,7 @@ pragma experimental ABIEncoderV2;
 
 import "./../Interfaces.sol";
 
-contract FutureAsyncCondOracle is Oracle {
+contract FutureAsyncCondOracle is AsyncOracle {
   event Query(
     address sender,
     uint256 correlation,

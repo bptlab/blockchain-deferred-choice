@@ -2,9 +2,9 @@
 pragma solidity ^0.6.9;
 pragma experimental ABIEncoderV2;
 
-import "./AbstractCondOracle.sol";
+import "./../Interfaces.sol";
 
-contract PastSyncCondOracle is AbstractCondOracle {
+contract PastSyncCondOracle is SyncOracle, ExpressionChecker {
   uint256[] public values;
 
   function set(uint256 newValue) external {

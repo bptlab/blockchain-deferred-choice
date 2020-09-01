@@ -8,7 +8,12 @@ class FutureAsyncCondProvider extends FutureAsyncProvider {
   }
 
   doCallback(subscriber) {
+    if (subscriber.unsubscribed) {
+      return;
+    }
+
     if (util.checkCondition(subscriber.condition, this.currentValue)) {
+      subscriber.unsubscribed = true;
       util.wrapTx(
         this.name,
         'oracleCallback',

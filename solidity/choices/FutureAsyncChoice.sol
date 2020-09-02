@@ -13,6 +13,7 @@ contract FutureAsyncChoice is AbstractAsyncChoice, OracleValueConsumer, Expressi
     if (events[index].definition == EventDefinition.CONDITIONAL) {
       // Subscribe to publish/subscribe oracles.
       FutureAsyncOracle(events[index].oracle).get(index);
+      evals[index] = TOP_TIMESTAMP;
       return;
     }
 

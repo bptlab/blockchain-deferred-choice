@@ -2,17 +2,18 @@
 pragma solidity ^0.6.9;
 pragma experimental ABIEncoderV2;
 
-import "./AbstractChoice.sol";
+import "./AbstractAsyncChoice.sol";
 import "./../oracles/FutureAsyncCondOracle.sol";
 
-contract FutureAsyncCondChoice is AbstractChoice, OracleBoolConsumer {
-  constructor(Event[] memory specs) AbstractChoice(specs) public {
+contract FutureAsyncCondChoice is AbstractAsyncChoice, OracleBoolConsumer {
+  constructor(Event[] memory specs) AbstractAsyncChoice(specs) public {
   }
 
   function activateEvent(uint8 index) internal override {
     if (events[index].definition == EventDefinition.CONDITIONAL) {
       // Subscribe to publish/subscribe oracles.
       FutureAsyncCondOracle(events[index].oracle).get(index, events[index].expression);
+      evals[index] = TOP_TIMESTAMP;
       return;
     }
 

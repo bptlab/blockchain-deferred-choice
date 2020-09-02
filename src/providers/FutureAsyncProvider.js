@@ -25,7 +25,7 @@ class FutureAsyncProvider extends BaseProvider {
         nonce: util.getNonce(this.contract.defaultAccount),
         ...util.defaultOptions
       }).on('receipt', receipt => {
-        this.gasUsed += receipt.gasUsed;
+        this.receipts.push(receipt);
       })
     );
   }

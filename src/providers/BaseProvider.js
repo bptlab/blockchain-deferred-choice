@@ -3,7 +3,7 @@ const util = require('./../util.js');
 /* abstract */ class BaseProvider {
   name;
   contract;
-  gasUsed = 0;
+  receipts = [];
 
   constructor(name, contract) {
     this.name = name;
@@ -19,10 +19,6 @@ const util = require('./../util.js');
 
   static getContractPrefix() {
     return undefined;
-  }
-
-  getGasUsed() {
-    return this.gasUsed;
   }
 
   onValueChange(value) {

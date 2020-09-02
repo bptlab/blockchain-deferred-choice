@@ -5,7 +5,7 @@ const util = require('../util.js');
 class ChoiceSimulator extends Simulator {
   contract;
   config;
-  gasUsed = 0;
+  receipts = [];
 
   constructor(timeline, config, ProviderClazz) {
     super(timeline);
@@ -21,7 +21,11 @@ class ChoiceSimulator extends Simulator {
   }
 
   getGasUsed() {
-    return this.gasUsed;
+    return this.receipts.reduce((gas, receipt) => gas + receipt.gasUsed, 0);
+  }
+
+  getTxCount() {
+    return this.receipts.length;
   }
 
   async deploy(oracleAddresses, scaling = 1) {
@@ -55,7 +59,7 @@ class ChoiceSimulator extends Simulator {
       }).send({
         nonce: util.getNonce(this.contract.defaultAccount)
       }).on('receipt', receipt => {
-        this.gasUsed += receipt.gasUsed;
+        this.receipts.push(receipt);
         this.contract.options.address = receipt.contractAddress;
       })
     );
@@ -81,7 +85,7 @@ class ChoiceSimulator extends Simulator {
           nonce: util.getNonce(this.contract.defaultAccount),
           ...util.defaultOptions
         }).on('receipt', receipt => {
-          this.gasUsed += receipt.gasUsed;
+          this.receipts.push(receipt);
         })
       );
     } else {
@@ -93,7 +97,7 @@ class ChoiceSimulator extends Simulator {
           nonce: util.getNonce(this.contract.defaultAccount),
           ...util.defaultOptions
         }).on('receipt', receipt => {
-          this.gasUsed += receipt.gasUsed;
+          this.receipts.push(receipt);
         })
       );
     }

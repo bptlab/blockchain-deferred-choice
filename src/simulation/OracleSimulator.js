@@ -6,7 +6,7 @@ class OracleSimulator extends Simulator {
   contract;
   provider;
   config;
-  gasUsed = 0;
+  receipts = [];
   ProviderClazz;
 
   constructor(timeline, config, ProviderClazz) {
@@ -24,7 +24,11 @@ class OracleSimulator extends Simulator {
   }
 
   getGasUsed() {
-    return this.gasUsed + this.provider.getGasUsed();
+    return this.receipts.concat(this.provider.receipts).reduce((gas, receipt) => gas + receipt.gasUsed, 0);
+  }
+
+  getTxCount() {
+    return this.receipts.length + this.provider.receipts.length;
   }
 
   async deploy() {
@@ -35,7 +39,7 @@ class OracleSimulator extends Simulator {
       this.contract.deploy().send({
         nonce: util.getNonce(this.contract.defaultAccount)
       }).on('receipt', receipt => {
-        this.gasUsed += receipt.gasUsed;
+        this.receipts.push(receipt);
         this.contract.options.address = receipt.contractAddress;
       })
     );

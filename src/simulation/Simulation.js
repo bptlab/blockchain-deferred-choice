@@ -77,6 +77,13 @@ class Simulation {
       ...this.oracles.map((oracle, i) => ({ ['o' + i]: oracle.getGasUsed() })),
       ...this.choices.map((choice, i) => ({ ['c' + i]: choice.getGasUsed() }))
     );
+
+    output.tx = Object.assign(
+      {},
+      ...this.oracles.map((oracle, i) => ({ ['o' + i]: oracle.getTxCount() })),
+      ...this.choices.map((choice, i) => ({ ['c' + i]: choice.getTxCount() }))
+    );
+
     console.log("Finished preparing statistics");
     return output;
   }

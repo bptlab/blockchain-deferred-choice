@@ -21,17 +21,17 @@ async function deployAndTest() {
   let outputs = [];
 
   const config = require('./configs/simulations/1.json');
-  const scaling = 2;
+  const scaling = 4;
 
   const providers = [
     PastAsyncProvider,
-    // PastAsyncCondProvider,
+    PastAsyncCondProvider,
     PastSyncProvider,
-    // PastSyncCondProvider,
+    PastSyncCondProvider,
     PresentAsyncProvider,
     PresentSyncProvider,
     FutureAsyncProvider,
-    // FutureAsyncCondProvider,
+    FutureAsyncCondProvider,
   ];
 
   for (provider of providers) {

@@ -8,12 +8,12 @@
     "value": 2
   }, {
     "type": "CONDITIONAL",
-    "oracleName": "Interruption",
+    "oracleName": "RouteClosure",
     "operator": "EQUAL",
     "value": 1
   }, {
-    "type": "TIMER_ABSOLUTE",
-    "timer": 8
+    "type": "TIMER_RELATIVE",
+    "timer": 7
   }, {
     "type": "EXPLICIT"
   }]

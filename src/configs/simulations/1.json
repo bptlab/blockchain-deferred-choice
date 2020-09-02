@@ -1,25 +1,25 @@
 {
   "choices": [
-    "Sample"
+    "RunningExample"
   ],
   "oracles": [
-    "Interruption",
+    "RouteClosure",
     "WeatherWarning"
   ],
   "timelines": {
     "Sample": [
-      { "at": 1 },
+      { "at": 0 },
       { "at": 9, "context": { "target": 0 }}
     ],
-    "Interruption": [
+    "RouteClosure": [
       { "at": 0, "context": { "value": 0 }},
       { "at": 8, "context": { "value": 1 }}
     ],
     "WeatherWarning": [
       { "at": 0, "context": { "value": 0 }},
-      { "at": 4, "context": { "value": 1 }},
-      { "at": 6, "context": { "value": 2 }},
-      { "at": 9, "context": { "value": 1 }}
+      { "at": 3, "context": { "value": 1 }},
+      { "at": 5, "context": { "value": 2 }},
+      { "at": 8, "context": { "value": 1 }}
     ]
   }
 }

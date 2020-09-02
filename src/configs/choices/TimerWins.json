@@ -11,7 +11,7 @@
     "value": 4
   }, {
     "type": "CONDITIONAL",
-    "oracleName": "Interruption",
+    "oracleName": "RouteClosure",
     "operator": "EQUAL",
     "value": 1
   }]

@@ -16,7 +16,7 @@ contract PastAsyncChoice is AbstractAsyncChoice, OracleValueArrayConsumer, Expre
       return;
     }
 
-    (uint8 index, uint8 target) = decodeCorrelation(correlation);
+    uint8 index = uint8(correlation);
 
     // Find the first of those values which fulfilled the expression
     for (uint16 i = 0; i < values.length; i += 2) {
@@ -34,17 +34,16 @@ contract PastAsyncChoice is AbstractAsyncChoice, OracleValueArrayConsumer, Expre
     }
 
     // Try to trigger the correlated original target of this trigger attempt
-    tryCompleteTrigger(target);
+    tryCompleteTrigger();
   }
 
-  function evaluateEvent(uint8 index, uint8 target) internal override {
+  function evaluateEvent(uint8 index) internal override {
     if (events[index].definition == EventDefinition.CONDITIONAL) {
-      uint256 correlation = encodeCorrelation(index, target);
-      PastAsyncOracle(events[index].oracle).get(correlation, activationTime);
+      PastAsyncOracle(events[index].oracle).get(index, activationTime);
       evals[index] = 0;
       return;
     }
 
-    super.evaluateEvent(index, target);
+    super.evaluateEvent(index);
   }
 }

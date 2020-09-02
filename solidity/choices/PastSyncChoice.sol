@@ -9,7 +9,7 @@ contract PastSyncChoice is AbstractSyncChoice, ExpressionChecker {
   constructor(Event[] memory specs) AbstractSyncChoice(specs) public {
   }
 
-  function evaluateEvent(uint8 index, uint8 target) internal override {
+  function evaluateEvent(uint8 index) internal override {
     if (events[index].definition == EventDefinition.CONDITIONAL) {
       uint256[] memory values = PastSyncOracle(events[index].oracle).get(activationTime);
       for (uint16 i = 0; i < values.length; i += 2) {
@@ -28,6 +28,6 @@ contract PastSyncChoice is AbstractSyncChoice, ExpressionChecker {
       return;
     }
 
-    super.evaluateEvent(index, target);
+    super.evaluateEvent(index);
   }
 }

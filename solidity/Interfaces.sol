@@ -23,12 +23,6 @@ abstract contract Base {
   }
 }
 
-abstract contract SyncChoice is Base {
-}
-
-abstract contract AsyncChoice is Base {
-}
-
 abstract contract SyncOracle is Base {
 }
 

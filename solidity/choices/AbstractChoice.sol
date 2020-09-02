@@ -31,6 +31,7 @@ abstract contract AbstractChoice is Base {
   uint256 public activationTime = 0;
   mapping(uint8 => uint256) public evals;
   int8 public winner = -1;
+  uint8 public target = type(uint8).max;
 
   constructor(Event[] memory specs) public {
     // We have to copy the specs array manually since Solidity does not yet
@@ -70,14 +71,14 @@ abstract contract AbstractChoice is Base {
     }
 
     // Otherwise, just evaluate them through the regular interfaces
-    evaluateEvent(index, index);
+    evaluateEvent(index);
   }
 
   /*
    * Evaluate the event with the given index, under the circumstance that the event at the target
    * index is currently attempting to trigger.
    */
-  function evaluateEvent(uint8 index, uint8 target) internal virtual {
+  function evaluateEvent(uint8 index) internal virtual {
     Event memory e = events[index];
 
     // For explicit events, we just "evaluate" them if they are the target
@@ -108,31 +109,35 @@ abstract contract AbstractChoice is Base {
    * other events are evaluated as well and the function only proceeds (potentially
    * asynchronously) when we can be sure that this event has "won" the race.
    */
-  function trigger(uint8 target) public virtual {
+  function trigger(uint8 targetEvent) public {
     // Check if the call is valid
+    if (target < events.length) {
+      revert("Another target is currently being triggered");
+    }
     if (winner >= 0) {
       revert("Choice has already finished");
     }
-    if (target >= events.length) {
+    if (targetEvent >= events.length) {
       revert("Event with target index does not exist");
     }
+    target = targetEvent;
 
     // Evaluate all events if necessary
     for (uint8 i = 0; i < events.length; i++) {
       if (evals[i] == 0 || evals[i] == TOP_TIMESTAMP) {
-        evaluateEvent(i, target);
+        evaluateEvent(i);
       }
     }
 
     // Try to complete the triggering of this event
-    tryCompleteTrigger(target);
+    tryCompleteTrigger();
   }
 
   /*
    * This function completes the current trigger attempt if possible by either completing
    * or aborting the target event.
    */
-  function tryCompleteTrigger(uint8 target) internal virtual {
+  function tryCompleteTrigger() internal virtual {
     // Find minimum evaluation timestamp of any implicit event
     uint256 min = TOP_TIMESTAMP;
     uint8 minIndex = 0;
@@ -149,39 +154,21 @@ abstract contract AbstractChoice is Base {
     // each implicit event. If not, something internal went wrong.
     assert(min > 0);
 
-    bool canTrigger = false;
-    uint8 toTrigger = 0;
-    if (events[target].definition == EventDefinition.EXPLICIT &&
-        evals[target] <= min) {
-      // If target is explicit and no implicit one fired before, trigger it
-      canTrigger = true;
+    uint8 toTrigger = uint8(events.length);
+
+    // Check if the target can be triggered
+    if (target < events.length && evals[target] <= min && evals[target] < TOP_TIMESTAMP) {
       toTrigger = target;
-    } else {
-      // Otherwise, fire the implicit one with the lowest timestamp if possible
-      // and prefer the target at the same time
-      if (min < TOP_TIMESTAMP) {
-        canTrigger = true;
-        if (events[target].definition != EventDefinition.EXPLICIT &&
-            evals[target] == min) {
-          toTrigger = target;
-        } else {
-          toTrigger = minIndex;
-        }
-      }
+    } else if (min < TOP_TIMESTAMP) {
+      // Otherwise, fire the implicit one with the lowest timestamp if there is one
+      toTrigger = minIndex;
     }
 
     // Change the states of events according to the observations
-    if (canTrigger) {
+    if (toTrigger < events.length) {
       winner = int8(toTrigger);
       emit Winner(toTrigger);
     }
-  }
-
-  function encodeCorrelation(uint8 index, uint8 target) internal pure returns (uint256 correlation) {
-    return (uint256(index) << 8) | uint256(target);
-  }
-
-  function decodeCorrelation(uint256 correlation) internal pure returns (uint8 index, uint8 target) {
-    return (uint8(correlation >> 8), uint8(correlation));
+    target = type(uint8).max;
   }
 }

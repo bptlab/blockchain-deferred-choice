@@ -12,10 +12,7 @@ contract FutureAsyncCondChoice is AbstractChoice, OracleBoolConsumer {
   function activateEvent(uint8 index) internal override {
     if (events[index].definition == EventDefinition.CONDITIONAL) {
       // Subscribe to publish/subscribe oracles.
-      // Set correlation target as this event itself, since we never call pub/
-      // sub oracles again later during the triggering of a concrete other event.
-      uint256 correlation = encodeCorrelation(index, index);
-      FutureAsyncCondOracle(events[index].oracle).get(correlation, events[index].expression);
+      FutureAsyncCondOracle(events[index].oracle).get(index, events[index].expression);
       return;
     }
 
@@ -28,7 +25,7 @@ contract FutureAsyncCondChoice is AbstractChoice, OracleBoolConsumer {
       return;
     }
 
-    (uint8 index, uint8 target) = decodeCorrelation(correlation);
+    uint8 index = uint8(correlation);
 
     // Do nothing if the event this oracle belongs to has been evaluated already
     // (this filters out duplicate callbacks, or late pub/sub calls)
@@ -47,10 +44,10 @@ contract FutureAsyncCondChoice is AbstractChoice, OracleBoolConsumer {
     // by now. We have to do this here since oracle callbacks are independent of any
     // concrete trigger attempt in the FutureAsync scenario.
     for (uint8 i = 0; i < events.length; i++) {
-      evaluateEvent(i, target);
+      evaluateEvent(i);
     }
 
     // Try to trigger the correlated original target of this trigger attempt
-    tryCompleteTrigger(target);
+    tryCompleteTrigger();
   }
 }

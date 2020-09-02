@@ -2,7 +2,7 @@
   "name": "TimerWins",
   "account": "Consumer2",
   "events": [{
-    "type": "TIMER_RELATIVE",
+    "type": "TIMER",
     "timer": 1
   }, {
     "type": "CONDITIONAL",

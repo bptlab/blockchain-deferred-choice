@@ -16,19 +16,18 @@ contract PastAsyncCondChoice is AbstractAsyncChoice, OracleValueConsumer {
       return;
     }
 
-    (uint8 index, uint8 target) = decodeCorrelation(correlation);
+    uint8 index = uint8(correlation);
     evals[index] = value;
-    tryCompleteTrigger(target);
+    tryCompleteTrigger();
   }
 
-  function evaluateEvent(uint8 index, uint8 target) internal override {
+  function evaluateEvent(uint8 index) internal override {
     if (events[index].definition == EventDefinition.CONDITIONAL) {
-      uint256 correlation = encodeCorrelation(index, target);
-      PastAsyncCondOracle(events[index].oracle).get(correlation, events[index].expression, activationTime);
+      PastAsyncCondOracle(events[index].oracle).get(index, events[index].expression, activationTime);
       evals[index] = 0;
       return;
     }
 
-    super.evaluateEvent(index, target);
+    super.evaluateEvent(index);
   }
 }

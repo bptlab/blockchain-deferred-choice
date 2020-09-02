@@ -9,12 +9,12 @@ contract PastSyncCondChoice is AbstractSyncChoice {
   constructor(Event[] memory specs) AbstractSyncChoice(specs) public {
   }
 
-  function evaluateEvent(uint8 index, uint8 target) internal override {
+  function evaluateEvent(uint8 index) internal override {
     if (events[index].definition == EventDefinition.CONDITIONAL) {
       evals[index] = PastSyncCondOracle(events[index].oracle).get(activationTime, events[index].expression);
       return;
     }
 
-    super.evaluateEvent(index, target);
+    super.evaluateEvent(index);
   }
 }

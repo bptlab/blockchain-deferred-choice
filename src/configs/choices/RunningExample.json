@@ -1,5 +1,5 @@
 {
-  "name": "Sample",
+  "name": "RunningExample",
   "account": "Consumer",
   "events": [{
     "type": "CONDITIONAL",
@@ -12,7 +12,7 @@
     "operator": "EQUAL",
     "value": 1
   }, {
-    "type": "TIMER_RELATIVE",
+    "type": "TIMER",
     "timer": 7
   }, {
     "type": "EXPLICIT"

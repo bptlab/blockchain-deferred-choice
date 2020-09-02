@@ -7,7 +7,7 @@
     "WeatherWarning"
   ],
   "timelines": {
-    "Sample": [
+    "RunningExample": [
       { "at": 0 },
       { "at": 9, "context": { "target": 0 }}
     ],

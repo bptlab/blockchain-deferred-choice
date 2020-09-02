@@ -16,7 +16,7 @@ contract PresentAsyncChoice is AbstractAsyncChoice, OracleValueConsumer, Express
       return;
     }
 
-    (uint8 index, uint8 target) = decodeCorrelation(correlation);
+    uint8 index = uint8(correlation);
 
     // Check the conditional event this oracle belongs to
     if (checkExpression(events[index].expression, value)) {
@@ -25,17 +25,16 @@ contract PresentAsyncChoice is AbstractAsyncChoice, OracleValueConsumer, Express
       evals[index] = TOP_TIMESTAMP;
     }
 
-    tryCompleteTrigger(target);
+    tryCompleteTrigger();
   }
 
-  function evaluateEvent(uint8 index, uint8 target) internal override {
+  function evaluateEvent(uint8 index) internal override {
     if (events[index].definition == EventDefinition.CONDITIONAL) {
-      uint256 correlation = encodeCorrelation(index, target);
-      PresentAsyncOracle(events[index].oracle).get(correlation);
+      PresentAsyncOracle(events[index].oracle).get(index);
       evals[index] = 0;
       return;
     }
 
-    super.evaluateEvent(index, target);
+    super.evaluateEvent(index);
   }
 }

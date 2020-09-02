@@ -30,7 +30,7 @@ class ChoiceSimulator extends Simulator {
       // Perform timer scaling. We add the current time to absolute timers, so
       // they are not static to a single date
       let timer = (event.timer || 0) * scaling;
-      if (event.type == 'TIMER_ABSOLUTE') {
+      if (event.type == 'TIMER') {
         timer += Math.ceil(Date.now() / 1000);
       }
 

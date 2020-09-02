@@ -9,7 +9,7 @@ contract PresentSyncChoice is AbstractSyncChoice, ExpressionChecker {
   constructor(Event[] memory specs) AbstractSyncChoice(specs) public {
   }
 
-  function evaluateEvent(uint8 index, uint8 target) internal override {
+  function evaluateEvent(uint8 index) internal override {
     if (events[index].definition == EventDefinition.CONDITIONAL) {
       uint256 value = PresentSyncOracle(events[index].oracle).get();
       if (checkExpression(events[index].expression, value)) {
@@ -20,6 +20,6 @@ contract PresentSyncChoice is AbstractSyncChoice, ExpressionChecker {
       return;
     }
 
-    super.evaluateEvent(index, target);
+    super.evaluateEvent(index);
   }
 }

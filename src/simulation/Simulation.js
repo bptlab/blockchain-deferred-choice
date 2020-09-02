@@ -37,12 +37,17 @@ class Simulation {
     console.log("Finished deploying choices");
 
     // Start and await all simulations
+    console.log("Start simulations...");
     await Promise.all(
       [].concat(this.oracles, this.choices).map(sim => sim.simulate(scaling))
     );
+    console.log("Finished simulations");
 
     // Output some statistics after a while
+    console.log("Wait for statistics...");
     await new Promise(resolve => setTimeout(resolve, 3000 * scaling));
+
+    console.log("Start preparing statistics...");
     let output = {
       clazz: this.ProviderClazz.getContractPrefix()
     };
@@ -50,6 +55,11 @@ class Simulation {
     const winners = await Promise.all(this.choices.map(choice => choice.contract.methods.winner().call()));
     output.w = Object.assign({}, ...winners.map(
       (winner, i) => ({ ['w' + i]: winner })
+    ));
+
+    const actTimes = await Promise.all(this.choices.map(choice => choice.contract.methods.activationTime().call()));
+    output.a = Object.assign({}, ...actTimes.map(
+      (actTime, i) => ({ ['a' + i]: actTime })
     ));
 
     const choiceEvals = await Promise.all(this.choices.map(async choice => {
@@ -67,6 +77,7 @@ class Simulation {
       ...this.oracles.map((oracle, i) => ({ ['o' + i]: oracle.getGasUsed() })),
       ...this.choices.map((choice, i) => ({ ['c' + i]: choice.getGasUsed() }))
     );
+    console.log("Finished preparing statistics");
     return output;
   }
 }

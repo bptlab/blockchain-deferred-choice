@@ -2,11 +2,11 @@
 pragma solidity ^0.6.9;
 pragma experimental ABIEncoderV2;
 
-import "./AbstractChoice.sol";
+import "./AbstractAsyncChoice.sol";
 import "./../oracles/FutureAsyncOracle.sol";
 
-contract FutureAsyncChoice is AbstractChoice, OracleValueConsumer, ExpressionChecker {
-  constructor(Event[] memory specs) AbstractChoice(specs) public {
+contract FutureAsyncChoice is AbstractAsyncChoice, OracleValueConsumer, ExpressionChecker {
+  constructor(Event[] memory specs) AbstractAsyncChoice(specs) public {
   }
 
   function activateEvent(uint8 index) internal override {
@@ -20,16 +20,6 @@ contract FutureAsyncChoice is AbstractChoice, OracleValueConsumer, ExpressionChe
     }
 
     super.activateEvent(index);
-  }
-
-  function tryCompleteTrigger(uint8 target) internal override {
-    for (uint8 i = 0; i < events.length; i++) {
-      if (evals[i] == 0) {
-        emit Debug("Missing initial oracle evaluations");
-        return;
-      }
-    }
-    super.tryCompleteTrigger(target);
   }
 
   function oracleCallback(uint256 correlation, uint256 value) external override {

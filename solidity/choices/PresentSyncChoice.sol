@@ -2,11 +2,11 @@
 pragma solidity ^0.6.9;
 pragma experimental ABIEncoderV2;
 
-import "./AbstractChoice.sol";
+import "./AbstractSyncChoice.sol";
 import "./../oracles/PresentSyncOracle.sol";
 
-contract PresentSyncChoice is AbstractChoice, ExpressionChecker {
-  constructor(Event[] memory specs) AbstractChoice(specs) public {
+contract PresentSyncChoice is AbstractSyncChoice, ExpressionChecker {
+  constructor(Event[] memory specs) AbstractSyncChoice(specs) public {
   }
 
   function evaluateEvent(uint8 index, uint8 target) internal override {

@@ -2,17 +2,15 @@
 pragma solidity ^0.6.9;
 pragma experimental ABIEncoderV2;
 
-import "./AbstractCallbackCounterChoice.sol";
+import "./AbstractAsyncChoice.sol";
 import "./../oracles/PresentAsyncOracle.sol";
 
-contract PresentAsyncChoice is AbstractCallbackCounterChoice, OracleValueConsumer, ExpressionChecker {
+contract PresentAsyncChoice is AbstractAsyncChoice, OracleValueConsumer, ExpressionChecker {
 
-  constructor(Event[] memory specs) AbstractCallbackCounterChoice(specs) public {
+  constructor(Event[] memory specs) AbstractAsyncChoice(specs) public {
   }
 
   function oracleCallback(uint256 correlation, uint256 value) external override {
-    callbackCount--;
-
     // Do nothing if we have already finished
     if (winner >= 0) {
       return;
@@ -34,7 +32,7 @@ contract PresentAsyncChoice is AbstractCallbackCounterChoice, OracleValueConsume
     if (events[index].definition == EventDefinition.CONDITIONAL) {
       uint256 correlation = encodeCorrelation(index, target);
       PresentAsyncOracle(events[index].oracle).get(correlation);
-      callbackCount++;
+      evals[index] = 0;
       return;
     }
 

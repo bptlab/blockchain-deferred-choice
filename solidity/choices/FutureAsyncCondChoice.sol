@@ -22,16 +22,6 @@ contract FutureAsyncCondChoice is AbstractChoice, OracleBoolConsumer {
     super.activateEvent(index);
   }
 
-  function tryCompleteTrigger(uint8 target) internal override {
-    for (uint8 i = 0; i < events.length; i++) {
-      if (evals[i] == 0) {
-        emit Debug("Missing initial oracle evaluations");
-        return;
-      }
-    }
-    super.tryCompleteTrigger(target);
-  }
-
   function oracleCallback(uint256 correlation, bool value) external override {
     // Do nothing if we have already finished
     if (winner >= 0) {

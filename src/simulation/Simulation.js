@@ -72,10 +72,16 @@ class Simulation {
       (choiceEval, i) => ({ ['c' + i]: choiceEval })
     ));
 
-    output.g = Object.assign(
+    output.gd = Object.assign(
       {},
-      ...this.oracles.map((oracle, i) => ({ ['o' + i]: oracle.getGasUsed() })),
-      ...this.choices.map((choice, i) => ({ ['c' + i]: choice.getGasUsed() }))
+      ...this.oracles.map((oracle, i) => ({ ['o' + i]: oracle.receipts[0].gasUsed })),
+      ...this.choices.map((choice, i) => ({ ['c' + i]: choice.receipts[0].gasUsed }))
+    );
+
+    output.gt = Object.assign(
+      {},
+      ...this.oracles.map((oracle, i) => ({ ['o' + i]: oracle.getGasUsed() - oracle.receipts[0].gasUsed })),
+      ...this.choices.map((choice, i) => ({ ['c' + i]: choice.getGasUsed() - choice.receipts[0].gasUsed }))
     );
 
     output.tx = Object.assign(

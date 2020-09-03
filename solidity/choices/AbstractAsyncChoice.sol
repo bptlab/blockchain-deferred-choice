@@ -12,7 +12,9 @@ abstract contract AbstractAsyncChoice is AbstractChoice {
   function tryCompleteTrigger() internal override {
     for (uint8 i = 0; i < events.length; i++) {
       if (evals[i] == 0) {
+        // #ifdef DEBUG
         emit Debug("Missing required event evaluations");
+        // #endif
         return;
       }
     }

@@ -26,14 +26,22 @@ exports.web3 = web3;
 exports.TOP_TIMESTAMP = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
 
 exports.init = async function() {
+  // Setup a very simple precompiler which removes DEBUG instructions
+  const PRE_OPTIONS = {
+    DEBUG: true
+  };
+  const prePattern = new RegExp('// #ifdef ([A-Z]+)\\s*$([\\S\\s]*?)// #endif\\s*$', 'ugm');
+  const preReplace = (_, p1, p2) => PRE_OPTIONS[p1] ? p2 : '';
+
   // Compile contracts
   const files = glob.sync('./solidity/**/*.sol');
   const sources = Object.assign({}, ...files.map(file => {
     file = file.replace('./solidity/', '');
+    let content = fs
+      .readFileSync('./solidity/' + file, { encoding: 'utf8' })
+      .replace(prePattern, preReplace);
     return {
-      [file]: {
-        content: fs.readFileSync('./solidity/' + file, { encoding: 'utf8' })
-      }
+      [file]: { content }
     };
   }));
 

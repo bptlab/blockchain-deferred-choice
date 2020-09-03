@@ -20,7 +20,7 @@ async function deployAndTest() {
 
   let outputs = [];
 
-  const config = require('./configs/simulations/1.json');
+  const config = require('./configs/simulations/2.json');
   const scaling = 4;
 
   const providers = [

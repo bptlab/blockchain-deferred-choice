@@ -7,8 +7,10 @@ import "./../Interfaces.sol";
 abstract contract AbstractChoice is Base {
   // Events
   event Winner(uint8 winner);
+  // #ifdef DEBUG
   event Debug(string text);
   event DebugUint(uint256 value);
+  // #endif
 
   // Enumerations
   enum EventDefinition {
@@ -48,7 +50,11 @@ abstract contract AbstractChoice is Base {
   function activate() external {
     // Revert if it has been activated already
     if (activationTime > 0) {
-      revert("Deferred choice can only be activated once");
+      revert(
+        // #ifdef DEBUG
+        "Deferred choice can only be activated once"
+        // #endif
+      );
     }
 
     // Remember the time of activation
@@ -59,7 +65,9 @@ abstract contract AbstractChoice is Base {
       activateEvent(i);
     }
 
+    // #ifdef DEBUG
     emit Debug("Activated");
+    // #endif
   }
 
   function activateEvent(uint8 index) internal virtual {
@@ -112,13 +120,25 @@ abstract contract AbstractChoice is Base {
   function trigger(uint8 targetEvent) public {
     // Check if the call is valid
     if (target < events.length) {
-      revert("Another target is currently being triggered");
+      revert(
+        // #ifdef DEBUG
+        "Another target is currently being triggered"
+        // #endif
+      );
     }
     if (winner >= 0) {
-      revert("Choice has already finished");
+      revert(
+        // #ifdef DEBUG
+        "Choice has already finished"
+        // #endif
+      );
     }
     if (targetEvent >= events.length) {
-      revert("Event with target index does not exist");
+      revert(
+        // #ifdef DEBUG
+        "Event with target index does not exist"
+        // #endif
+      );
     }
     target = targetEvent;
 

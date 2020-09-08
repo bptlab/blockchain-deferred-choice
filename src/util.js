@@ -28,7 +28,7 @@ exports.TOP_TIMESTAMP = '1157920892373161954235709850086879078532699846656405640
 exports.init = async function() {
   // Setup a very simple precompiler which removes DEBUG instructions
   const PRE_OPTIONS = {
-    DEBUG: true
+    DEBUG: false
   };
   const prePattern = new RegExp('// #ifdef ([A-Z]+)\\s*$([\\S\\s]*?)// #endif\\s*$', 'ugm');
   const preReplace = (_, p1, p2) => PRE_OPTIONS[p1] ? p2 : '';
@@ -98,6 +98,17 @@ exports.enums = {
     LESS_EQUAL: 3,
     LESS: 4
   }
+};
+
+exports.augmentSimulationConfig = function(config) {
+  config.oracles.forEach(c => {
+    oracleConfig = require('./configs/oracles/' + c.name + '.json');
+    Object.assign(c, oracleConfig);
+  });
+  config.choices.forEach(c => {
+    choiceConfig = require('./configs/choices/' + c.name + '.json');
+    Object.assign(c, choiceConfig);
+  });
 };
 
 exports.wrapTx = function(name, info, tx) {

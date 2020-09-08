@@ -7,8 +7,8 @@ class ChoiceSimulator extends Simulator {
   config;
   receipts = [];
 
-  constructor(timeline, config, ProviderClazz) {
-    super(timeline);
+  constructor(config, ProviderClazz) {
+    super(config.timeline);
     this.config = config;
 
     const spec = util.getSpec(ProviderClazz.getContractPrefix() + 'Choice');

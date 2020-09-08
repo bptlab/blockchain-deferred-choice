@@ -3,7 +3,7 @@ const BaseProvider = require('./BaseProvider.js');
 const util = require('./../util.js');
 
 class PastAsyncProvider extends BaseProvider {
-  values = [];
+  values = [0, 0];
 
   static getContractPrefix() {
     return 'PastAsync';

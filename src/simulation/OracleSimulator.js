@@ -9,8 +9,8 @@ class OracleSimulator extends Simulator {
   receipts = [];
   ProviderClazz;
 
-  constructor(timeline, config, ProviderClazz) {
-    super(timeline);
+  constructor(config, ProviderClazz) {
+    super(config.timeline);
     this.config = config;
     this.ProviderClazz = ProviderClazz;
 

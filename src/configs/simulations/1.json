@@ -1,25 +1,29 @@
 {
+  "name": "Railway",
   "choices": [
-    "RunningExample"
+    {
+      "name": "RunningExample",
+      "timeline": [
+        { "at": 0 },
+        { "at": 9, "context": { "target": 0 }}
+      ]
+    }
   ],
   "oracles": [
-    "RouteClosure",
-    "WeatherWarning"
-  ],
-  "timelines": {
-    "RunningExample": [
-      { "at": 0 },
-      { "at": 9, "context": { "target": 0 }}
-    ],
-    "RouteClosure": [
-      { "at": 0, "context": { "value": 0 }},
-      { "at": 8, "context": { "value": 1 }}
-    ],
-    "WeatherWarning": [
-      { "at": 0, "context": { "value": 0 }},
-      { "at": 3, "context": { "value": 1 }},
-      { "at": 5, "context": { "value": 2 }},
-      { "at": 8, "context": { "value": 1 }}
-    ]
-  }
+    {
+      "name": "RouteClosure",
+      "timeline": [
+        { "at": 0, "context": { "value": 0 }},
+        { "at": 8, "context": { "value": 1 }}
+      ]
+    }, {
+      "name": "WeatherWarning",
+      "timeline": [
+        { "at": 0, "context": { "value": 0 }},
+        { "at": 3, "context": { "value": 1 }},
+        { "at": 5, "context": { "value": 2 }},
+        { "at": 8, "context": { "value": 1 }}
+      ]
+    }
+  ]
 }

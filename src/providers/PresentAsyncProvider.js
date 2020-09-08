@@ -3,7 +3,7 @@ const BaseProvider = require('./BaseProvider.js');
 const util = require('./../util.js');
 
 class PresentAsyncProvider extends BaseProvider {
-  currentValue;
+  currentValue = 0;
 
   static getContractPrefix() {
     return 'PresentAsync';

@@ -4,7 +4,7 @@ const util = require('./../util.js');
 
 class FutureAsyncProvider extends BaseProvider {
   subscribers = [];
-  currentValue;
+  currentValue = 0;
 
   static getContractPrefix() {
     return 'FutureAsync';

@@ -3,13 +3,14 @@
   "description": "",
   "version": "0.1.0",
   "scripts": {
-    "test": "forever -m 1 src/test.js"
+    "test": "node src/test.js",
+    "generator": "node src/generator.js"
   },
   "dependencies": {
-    "forever": "^3.0.0",
     "fs-extra": "^9.0.1",
     "glob": "^7.1.6",
     "json-2-csv": "^3.7.5",
+    "seedrandom": "^3.0.5",
     "solc": "^0.6.10",
     "web3": "^1.2.9"
   }

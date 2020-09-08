@@ -4,6 +4,10 @@ class Simulator {
   }
 
   async simulate(scaling) {
+    if (this.timeline.length == 0) {
+      return;
+    }
+
     this.index = 0;
     this.start = Date.now();
 

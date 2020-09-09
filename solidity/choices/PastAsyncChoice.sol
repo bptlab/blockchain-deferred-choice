@@ -10,7 +10,7 @@ contract PastAsyncChoice is AbstractAsyncChoice {
   constructor(Event[] memory specs) AbstractAsyncChoice(specs) {
   }
 
-  function oracleCallback(uint256 correlation, bytes calldata result) external override {
+  function oracleCallback(uint16 correlation, bytes calldata result) external override {
     // Do nothing if we have already finished
     if (winner >= 0) {
       return;

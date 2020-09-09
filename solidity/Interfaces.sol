@@ -42,7 +42,7 @@ abstract contract AsyncOracle is Base {
 }
 
 interface OracleConsumer {
-  function oracleCallback(uint256 correlation, bytes calldata result) external;
+  function oracleCallback(uint16 correlation, bytes calldata result) external;
 }
 
 /*

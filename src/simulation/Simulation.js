@@ -40,7 +40,7 @@ class Simulation {
 
     // Output some statistics after a while
     console.log("Wait for statistics...");
-    await new Promise(resolve => setTimeout(resolve, 3000 * scaling));
+    await new Promise(resolve => setTimeout(resolve, 1000 * scaling));
 
     console.log("Start preparing statistics...");
     let output = {

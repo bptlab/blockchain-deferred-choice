@@ -44,7 +44,7 @@ function generateConfig(n, m) {
   ]
 
   return {
-    "name": n + "x" + m,
+    "name": ("00"+n).slice(-2) + "x" + ("00"+m).slice(-2),
     "choices": Array(n).fill().map((_, i) => ({
       "name": "OracleConsumer" + i,
       "account": "Consumer",
@@ -82,7 +82,7 @@ async function run() {
     FutureAsyncCondProvider,
   ];
 
-  const steps = [0, 1, 2, 3, 4, 5, 10, 20, 50];
+  const steps = [50, 1, 2, 3, 4, 5, 10, 20, 0];
   for (let i = 0; i < steps.length; i++) {
     for (let j = 0; j < steps.length; j++) {
       const config = generateConfig(steps[i], steps[j]);

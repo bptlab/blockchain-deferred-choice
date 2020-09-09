@@ -1,7 +1,5 @@
 const BaseProvider = require('./BaseProvider.js');
 
-const util = require('./../util.js');
-
 class FutureAsyncProvider extends BaseProvider {
   subscribers = [];
   currentValue = 0;
@@ -11,22 +9,11 @@ class FutureAsyncProvider extends BaseProvider {
   }
 
   doCallback(subscriber) {
-    util.wrapTx(
-      this.name,
-      'oracleCallback',
-      new util.web3.eth.Contract(
-        util.getSpec('OracleValueConsumer').abi,
-        subscriber.sender
-      ).methods.oracleCallback(
-        subscriber.correlation,
-        this.currentValue
-      ).send({
-        from: this.contract.defaultAccount,
-        nonce: util.getNonce(this.contract.defaultAccount),
-        ...util.defaultOptions
-      }).on('receipt', receipt => {
-        this.receipts.push(receipt);
-      })
+    this.sendConsumer(
+      subscriber.sender,
+      subscriber.correlation,
+      'uint256',
+      this.currentValue
     );
   }
 

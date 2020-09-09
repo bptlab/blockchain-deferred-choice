@@ -4,7 +4,7 @@ pragma experimental ABIEncoderV2;
 
 import "./AbstractChoice.sol";
 
-abstract contract AbstractAsyncChoice is AbstractChoice {
+abstract contract AbstractAsyncChoice is AbstractChoice, OracleConsumer {
 
   constructor(Event[] memory specs) AbstractChoice(specs) public {
   }

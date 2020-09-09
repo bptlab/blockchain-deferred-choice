@@ -5,7 +5,7 @@ pragma experimental ABIEncoderV2;
 import "./AbstractAsyncChoice.sol";
 import "./../oracles/FutureAsyncCondOracle.sol";
 
-contract FutureAsyncCondChoice is AbstractAsyncChoice, OracleBoolConsumer {
+contract FutureAsyncCondChoice is AbstractAsyncChoice {
   constructor(Event[] memory specs) AbstractAsyncChoice(specs) public {
   }
 
@@ -20,7 +20,7 @@ contract FutureAsyncCondChoice is AbstractAsyncChoice, OracleBoolConsumer {
     super.activateEvent(index);
   }
 
-  function oracleCallback(uint256 correlation, bool value) external override {
+  function oracleCallback(uint256 correlation, bytes calldata result) external override {
     // Do nothing if we have already finished
     if (winner >= 0) {
       return;
@@ -34,12 +34,7 @@ contract FutureAsyncCondChoice is AbstractAsyncChoice, OracleBoolConsumer {
       return;
     }
 
-    // Check the conditional event this oracle belongs to
-    if (value) {
-      evals[index] = block.timestamp;
-    } else {
-      evals[index] = TOP_TIMESTAMP;
-    }
+    evals[index] = block.timestamp;
 
     // Additionally, re-evaluate all timer events since they may have become true
     // by now. We have to do this here since oracle callbacks are independent of any

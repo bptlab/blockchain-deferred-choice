@@ -1,7 +1,5 @@
 const BaseProvider = require('./BaseProvider.js');
 
-const util = require('./../util.js');
-
 class PastAsyncProvider extends BaseProvider {
   values = [0, 0];
 
@@ -28,22 +26,11 @@ class PastAsyncProvider extends BaseProvider {
         first += 2;
       }
 
-      util.wrapTx(
-        this.name,
-        'oracleCallback',
-        new util.web3.eth.Contract(
-          util.getSpec('OracleValueArrayConsumer').abi,
-          event.returnValues.sender
-        ).methods.oracleCallback(
-          event.returnValues.correlation,
-          this.values.slice(first)
-        ).send({
-          from: this.contract.defaultAccount,
-          nonce: util.getNonce(this.contract.defaultAccount),
-          ...util.defaultOptions
-        }).on('receipt', receipt => {
-          this.receipts.push(receipt);
-        })
+      this.sendConsumer(
+        event.returnValues.sender,
+        event.returnValues.correlation,
+        'uint256[]',
+        this.values.slice(first)
       );
     }
   }

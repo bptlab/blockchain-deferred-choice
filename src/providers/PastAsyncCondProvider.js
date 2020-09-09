@@ -37,22 +37,11 @@ class PastAsyncCondProvider extends BaseProvider {
       }
       result = result || util.TOP_TIMESTAMP;
 
-      util.wrapTx(
-        this.name,
-        'oracleCallback',
-        new util.web3.eth.Contract(
-          util.getSpec('OracleValueConsumer').abi,
-          event.returnValues.sender
-        ).methods.oracleCallback(
-          event.returnValues.correlation,
-          result
-        ).send({
-          from: this.contract.defaultAccount,
-          nonce: util.getNonce(this.contract.defaultAccount),
-          ...util.defaultOptions
-        }).on('receipt', receipt => {
-          this.receipts.push(receipt);
-        })
+      this.sendConsumer(
+        event.returnValues.sender,
+        event.returnValues.correlation,
+        'uint256',
+        result
       );
     }
   }

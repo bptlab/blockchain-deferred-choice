@@ -29,16 +29,8 @@ abstract contract SyncOracle is Base {
 abstract contract AsyncOracle is Base {
 }
 
-interface OracleValueConsumer {
-  function oracleCallback(uint256 correlation, uint256 value) external;
-}
-
-interface OracleBoolConsumer {
-  function oracleCallback(uint256 correlation, bool result) external;
-}
-
-interface OracleValueArrayConsumer {
-  function oracleCallback(uint256 correlation, uint256[] calldata values) external;
+interface OracleConsumer {
+  function oracleCallback(uint256 correlation, bytes calldata result) external;
 }
 
 abstract contract ExpressionChecker is Base {

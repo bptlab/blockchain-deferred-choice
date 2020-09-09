@@ -5,18 +5,19 @@ pragma experimental ABIEncoderV2;
 import "./AbstractAsyncChoice.sol";
 import "./../oracles/PastAsyncOracle.sol";
 
-contract PastAsyncChoice is AbstractAsyncChoice, OracleValueArrayConsumer, ExpressionChecker {
+contract PastAsyncChoice is AbstractAsyncChoice, ExpressionChecker {
 
   constructor(Event[] memory specs) AbstractAsyncChoice(specs) public {
   }
 
-  function oracleCallback(uint256 correlation, uint256[] calldata values) external override {
+  function oracleCallback(uint256 correlation, bytes calldata result) external override {
     // Do nothing if we have already finished
     if (winner >= 0) {
       return;
     }
 
     uint8 index = uint8(correlation);
+    uint256[] memory values = abi.decode(result, (uint256[]));
 
     // Find the first of those values which fulfilled the expression
     for (uint16 i = 0; i < values.length; i += 2) {

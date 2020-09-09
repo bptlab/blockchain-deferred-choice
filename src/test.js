@@ -23,17 +23,17 @@ async function deployAndTest() {
   const config = require('./configs/simulations/2.json');
   util.augmentSimulationConfig(config);
 
-  const scaling = 4;
+  const scaling = 2;
 
   const providers = [
+    FutureAsyncProvider,
+    FutureAsyncCondProvider,
     PastAsyncProvider,
     PastAsyncCondProvider,
     PastSyncProvider,
     PastSyncCondProvider,
     PresentAsyncProvider,
     PresentSyncProvider,
-    FutureAsyncProvider,
-    FutureAsyncCondProvider,
   ];
 
   for (provider of providers) {

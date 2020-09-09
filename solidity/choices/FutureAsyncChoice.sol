@@ -5,7 +5,7 @@ pragma experimental ABIEncoderV2;
 import "./AbstractAsyncChoice.sol";
 import "./../oracles/FutureAsyncOracle.sol";
 
-contract FutureAsyncChoice is AbstractAsyncChoice, OracleValueConsumer, ExpressionChecker {
+contract FutureAsyncChoice is AbstractAsyncChoice, ExpressionChecker {
   constructor(Event[] memory specs) AbstractAsyncChoice(specs) public {
   }
 
@@ -20,7 +20,7 @@ contract FutureAsyncChoice is AbstractAsyncChoice, OracleValueConsumer, Expressi
     super.activateEvent(index);
   }
 
-  function oracleCallback(uint256 correlation, uint256 value) external override {
+  function oracleCallback(uint256 correlation, bytes calldata result) external override {
     // Do nothing if we have already finished
     if (winner >= 0) {
       return;
@@ -35,6 +35,7 @@ contract FutureAsyncChoice is AbstractAsyncChoice, OracleValueConsumer, Expressi
     }
 
     // Check the conditional event this oracle belongs to
+    uint256 value = abi.decode(result, (uint256));
     if (checkExpression(events[index].expression, value)) {
       evals[index] = block.timestamp;
     } else {

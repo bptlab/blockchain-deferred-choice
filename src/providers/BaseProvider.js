@@ -28,6 +28,30 @@ const util = require('./../util.js');
   onContractEvent(event) {
     console.log(this.name, 'Event:', event.event, '|', 'RESULT', event.returnValues);
   }
+
+  sendConsumer(sender, correlation, valueType, value) {
+    let payload = '0x';
+    if (valueType) {
+      payload = util.web3.eth.abi.encodeParameter(valueType, value)
+    }
+    util.wrapTx(
+      this.name,
+      'oracleCallback',
+      new util.web3.eth.Contract(
+        util.getSpec('OracleConsumer').abi,
+        sender
+      ).methods.oracleCallback(
+        correlation,
+        payload
+      ).send({
+        from: this.contract.defaultAccount,
+        nonce: util.getNonce(this.contract.defaultAccount),
+        ...util.defaultOptions
+      }).on('receipt', receipt => {
+        this.receipts.push(receipt);
+      })
+    );
+  }
 }
 
 module.exports = BaseProvider;

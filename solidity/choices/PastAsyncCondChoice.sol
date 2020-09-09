@@ -25,7 +25,10 @@ contract PastAsyncCondChoice is AbstractAsyncChoice {
 
   function evaluateEvent(uint8 index) internal override {
     if (events[index].definition == EventDefinition.CONDITIONAL) {
-      PastAsyncCondOracle(events[index].oracle).get(index, events[index].expression, activationTime);
+      PastAsyncCondOracle(events[index].oracle).query(
+        index,
+        abi.encode(events[index].expression, activationTime)
+      );
       evals[index] = 0;
       return;
     }

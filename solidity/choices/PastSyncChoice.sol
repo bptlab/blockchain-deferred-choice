@@ -11,7 +11,10 @@ contract PastSyncChoice is AbstractSyncChoice {
 
   function evaluateEvent(uint8 index) internal override {
     if (events[index].definition == EventDefinition.CONDITIONAL) {
-      uint256[] memory values = PastSyncOracle(events[index].oracle).get(activationTime);
+      uint256[] memory values = abi.decode(
+        PastSyncOracle(events[index].oracle).query(abi.encode(activationTime)),
+        (uint256[])
+      );
       for (uint16 i = 0; i < values.length; i += 2) {
         if (checkExpression(events[index].expression, values[i+1])) {
           if (values[i] < activationTime) {

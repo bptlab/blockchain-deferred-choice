@@ -1,6 +1,6 @@
-const BaseProvider = require('./BaseProvider.js');
+const BaseAsyncProvider = require('./BaseAsyncProvider.js');
 
-class FutureAsyncProvider extends BaseProvider {
+class FutureAsyncProvider extends BaseAsyncProvider {
   subscribers = [];
   currentValue = 0;
 
@@ -25,13 +25,13 @@ class FutureAsyncProvider extends BaseProvider {
     });
   }
 
-  onContractEvent(event) {
-    super.onContractEvent(event);
-    if (event.event = 'Query') {
-      const sub = event.returnValues;
-      this.subscribers.push(sub);
-      this.doCallback(sub);
+  onQuery(sender, correlation) {
+    const sub = {
+      sender,
+      correlation
     }
+    this.subscribers.push(sub);
+    this.doCallback(sub);
   }
 }
 

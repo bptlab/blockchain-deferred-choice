@@ -7,12 +7,14 @@ import "./../Interfaces.sol";
 contract PastSyncCondOracle is SyncOracle {
   uint256[] public values;
 
-  function set(uint256 newValue) external {
+  function set(uint256 newValue) external override {
     values.push() = block.timestamp;
     values.push() = newValue;
   }
 
-  function get(uint256 from, Expression calldata expression) external view returns (uint256 result) {
+  function query(bytes memory parameters) public view override returns (bytes memory result) {
+    (uint256 from, Expression memory expression) = abi.decode(parameters, (uint256, Expression));
+
     uint16 first = 0;
     while (first + 2 < values.length && values[first + 2] < from) {
       first += 2;
@@ -21,13 +23,13 @@ contract PastSyncCondOracle is SyncOracle {
     while (first < values.length) {
       if (checkExpression(expression, values[first + 1])) {
         if (from > values[first]) {
-          return from;
+          return abi.encode(from);
         } else {
-          return values[first];
+          return abi.encode(values[first]);
         }
       }
       first += 2;
     }
-    return TOP_TIMESTAMP;
+    return abi.encode(TOP_TIMESTAMP);
   }
 }

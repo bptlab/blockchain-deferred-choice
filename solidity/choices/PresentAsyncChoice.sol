@@ -31,7 +31,7 @@ contract PresentAsyncChoice is AbstractAsyncChoice {
 
   function evaluateEvent(uint8 index) internal override {
     if (events[index].definition == EventDefinition.CONDITIONAL) {
-      PresentAsyncOracle(events[index].oracle).get(index);
+      PresentAsyncOracle(events[index].oracle).query(index, new bytes(0));
       evals[index] = 0;
       return;
     }

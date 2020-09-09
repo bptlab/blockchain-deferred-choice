@@ -24,9 +24,20 @@ abstract contract Base {
 }
 
 abstract contract SyncOracle is Base {
+  function set(uint256 newValue) external virtual;
+  function query(bytes memory parameters) public view virtual returns (bytes memory result);
 }
 
 abstract contract AsyncOracle is Base {
+  event Query(
+    address sender,
+    uint16 correlation,
+    bytes parameters
+  );
+
+  function query(uint16 correlation, bytes memory parameters) public {
+    emit Query(msg.sender, correlation, parameters);
+  }
 }
 
 interface OracleConsumer {

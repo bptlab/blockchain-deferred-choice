@@ -1,6 +1,6 @@
-const BaseProvider = require('./BaseProvider.js');
+const BaseAsyncProvider = require('./BaseAsyncProvider.js');
 
-class PresentAsyncProvider extends BaseProvider {
+class PresentAsyncProvider extends BaseAsyncProvider {
   currentValue = 0;
 
   static getContractPrefix() {
@@ -11,16 +11,13 @@ class PresentAsyncProvider extends BaseProvider {
     this.currentValue = value;
   }
 
-  onContractEvent(event) {
-    super.onContractEvent(event);
-    if (event.event = 'Query') {
-      this.sendConsumer(
-        event.returnValues.sender,
-        event.returnValues.correlation,
-        'uint256',
-        this.currentValue
-      );
-    }
+  onQuery(sender, correlation) {
+    this.sendConsumer(
+      sender,
+      correlation,
+      'uint256',
+      this.currentValue
+    );
   }
 }
 

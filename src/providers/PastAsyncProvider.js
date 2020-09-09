@@ -1,10 +1,14 @@
-const BaseProvider = require('./BaseProvider.js');
+const BaseAsyncProvider = require('./BaseAsyncProvider.js');
 
-class PastAsyncProvider extends BaseProvider {
+class PastAsyncProvider extends BaseAsyncProvider {
   values = [0, 0];
 
   static getContractPrefix() {
     return 'PastAsync';
+  }
+
+  getQueryParameterTypes() {
+    return [ 'uint256' ];
   }
 
   onValueChange(value) {
@@ -15,24 +19,20 @@ class PastAsyncProvider extends BaseProvider {
     );
   }
 
-  onContractEvent(event) {
-    super.onContractEvent(event);
-    if (event.event = 'Query') {
-      // Extract from timestamp from parameters and find the index at which
-      // we have to start returning values
-      const from = Number.parseInt(event.returnValues.from);
-      let first = 0;
-      while (first + 2 < this.values.length && this.values[first + 2] < from) {
-        first += 2;
-      }
+  onQuery(sender, correlation, from) {
+    from = Number.parseInt(from);
 
-      this.sendConsumer(
-        event.returnValues.sender,
-        event.returnValues.correlation,
-        'uint256[]',
-        this.values.slice(first)
-      );
+    let first = 0;
+    while (first + 2 < this.values.length && this.values[first + 2] < from) {
+      first += 2;
     }
+
+    this.sendConsumer(
+      sender,
+      correlation,
+      'uint256[]',
+      this.values.slice(first)
+    );
   }
 }
 

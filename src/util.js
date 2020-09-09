@@ -85,6 +85,13 @@ exports.defaultOptions = {
   gasPrice: '20000000000' // 20 gwei
 }
 
+exports.expressionType = {
+  'Expression': {
+    'operator': 'uint8',
+    'value': 'uint256'
+  }
+};
+
 exports.enums = {
   EventDefinition: {
     TIMER: 0,

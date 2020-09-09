@@ -26,8 +26,8 @@ async function deployAndTest() {
   const scaling = 2;
 
   const providers = [
-    FutureAsyncProvider,
     FutureAsyncCondProvider,
+    FutureAsyncProvider,
     PastAsyncProvider,
     PastAsyncCondProvider,
     PastSyncProvider,

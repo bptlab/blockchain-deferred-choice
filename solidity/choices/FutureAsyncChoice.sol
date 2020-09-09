@@ -12,7 +12,7 @@ contract FutureAsyncChoice is AbstractAsyncChoice {
   function activateEvent(uint8 index) internal override {
     if (events[index].definition == EventDefinition.CONDITIONAL) {
       // Subscribe to publish/subscribe oracles.
-      FutureAsyncOracle(events[index].oracle).get(index);
+      FutureAsyncOracle(events[index].oracle).query(index, new bytes(0));
       evals[index] = TOP_TIMESTAMP;
       return;
     }

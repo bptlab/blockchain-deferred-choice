@@ -11,7 +11,10 @@ contract PresentSyncChoice is AbstractSyncChoice {
 
   function evaluateEvent(uint8 index) internal override {
     if (events[index].definition == EventDefinition.CONDITIONAL) {
-      uint256 value = PresentSyncOracle(events[index].oracle).get();
+      uint256 value = abi.decode(
+        PresentSyncOracle(events[index].oracle).query(new bytes(0)),
+        (uint256)
+      );
       if (checkExpression(events[index].expression, value)) {
         evals[index] = block.timestamp;
       } else {

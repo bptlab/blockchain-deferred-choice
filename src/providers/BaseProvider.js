@@ -21,7 +21,7 @@ const util = require('./../util.js');
     return undefined;
   }
 
-  onValueChange(value) {
+  onDataUpdate(value) {
     console.log(this.name, 'Value change:', value);
   }
 

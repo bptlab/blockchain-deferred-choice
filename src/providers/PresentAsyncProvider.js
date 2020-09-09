@@ -7,7 +7,7 @@ class PresentAsyncProvider extends BaseAsyncProvider {
     return 'PresentAsync';
   }
 
-  onValueChange(value) {
+  onDataUpdate(value) {
     this.currentValue = value;
   }
 

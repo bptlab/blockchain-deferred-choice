@@ -52,7 +52,7 @@ class OracleSimulator extends Simulator {
 
   onAction(index, context) {
     super.onAction(index, context);
-    this.provider.onValueChange(context.value);
+    this.provider.onDataUpdate(context.value);
   }
 }
 

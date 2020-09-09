@@ -7,8 +7,8 @@ class PastSyncProvider extends BaseProvider {
     return 'PastSync';
   }
 
-  onValueChange(value) {
-    super.onValueChange(value);
+  onDataUpdate(value) {
+    super.onDataUpdate(value);
     util.wrapTx(
       this.name,
       'set',

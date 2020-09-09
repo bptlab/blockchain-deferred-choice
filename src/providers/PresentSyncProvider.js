@@ -7,8 +7,8 @@ class PresentSyncProvider extends BaseProvider {
     return 'PresentSync';
   }
 
-  onValueChange(value) {
-    super.onValueChange(value);
+  onDataUpdate(value) {
+    super.onDataUpdate(value);
     util.wrapTx(
       this.name,
       'set',

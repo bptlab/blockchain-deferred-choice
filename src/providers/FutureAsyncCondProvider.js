@@ -25,8 +25,8 @@ class FutureAsyncCondProvider extends BaseAsyncProvider {
     }
   }
 
-  onValueChange(value) {
-    super.onValueChange(value);
+  onDataUpdate(value) {
+    super.onDataUpdate(value);
     this.currentValue = value;
     this.subscribers.forEach(sub => {
       this.doCallback(sub);

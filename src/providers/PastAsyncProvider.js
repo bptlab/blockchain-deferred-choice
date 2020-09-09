@@ -11,8 +11,8 @@ class PastAsyncProvider extends BaseAsyncProvider {
     return [ 'uint256' ];
   }
 
-  onValueChange(value) {
-    super.onValueChange(value);
+  onDataUpdate(value) {
+    super.onDataUpdate(value);
     this.values.push(
       Math.ceil(Date.now() / 1000),
       value

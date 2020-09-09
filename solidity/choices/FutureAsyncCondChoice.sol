@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.6.9;
+pragma solidity ^0.7.1;
 pragma experimental ABIEncoderV2;
 
 import "./AbstractAsyncChoice.sol";
 import "./../oracles/FutureAsyncCondOracle.sol";
 
 contract FutureAsyncCondChoice is AbstractAsyncChoice {
-  constructor(Event[] memory specs) AbstractAsyncChoice(specs) public {
+  constructor(Event[] memory specs) AbstractAsyncChoice(specs) {
   }
 
   function activateEvent(uint8 index) internal override {
@@ -20,7 +20,7 @@ contract FutureAsyncCondChoice is AbstractAsyncChoice {
     super.activateEvent(index);
   }
 
-  function oracleCallback(uint256 correlation, bytes calldata result) external override {
+  function oracleCallback(uint256 correlation, bytes calldata) external override {
     // Do nothing if we have already finished
     if (winner >= 0) {
       return;

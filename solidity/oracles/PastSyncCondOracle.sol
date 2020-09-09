@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.6.9;
+pragma solidity ^0.7.1;
 pragma experimental ABIEncoderV2;
 
 import "./../Interfaces.sol";
 
-contract PastSyncCondOracle is SyncOracle, ExpressionChecker {
+contract PastSyncCondOracle is SyncOracle {
   uint256[] public values;
 
   function set(uint256 newValue) external {

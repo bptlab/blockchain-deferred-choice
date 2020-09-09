@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.6.9;
+pragma solidity ^0.7.1;
 pragma experimental ABIEncoderV2;
 
 /*
@@ -33,21 +33,19 @@ interface OracleConsumer {
   function oracleCallback(uint256 correlation, bytes calldata result) external;
 }
 
-abstract contract ExpressionChecker is Base {
-  /*
-   * Helper function that returns true if the given expression is satisfied by the value.
-   */
-  function checkExpression(Expression memory c, uint256 value) internal pure returns (bool result) {
-    if (c.operator == Operator.GREATER) {
-      result = value > c.value;
-    } else if (c.operator == Operator.GREATER_EQUAL) {
-      result = value >= c.value;
-    } else if (c.operator == Operator.EQUAL) {
-      result = value == c.value;
-    } else if (c.operator == Operator.LESS_EQUAL) {
-      result = value <= c.value;
-    } else if (c.operator == Operator.LESS) {
-      result = value < c.value;
-    }
+/*
+ * Helper function that returns true if the given expression is satisfied by the value.
+ */
+function checkExpression(Base.Expression memory c, uint256 value) pure returns (bool result) {
+  if (c.operator == Base.Operator.GREATER) {
+    result = value > c.value;
+  } else if (c.operator == Base.Operator.GREATER_EQUAL) {
+    result = value >= c.value;
+  } else if (c.operator == Base.Operator.EQUAL) {
+    result = value == c.value;
+  } else if (c.operator == Base.Operator.LESS_EQUAL) {
+    result = value <= c.value;
+  } else if (c.operator == Base.Operator.LESS) {
+    result = value < c.value;
   }
 }

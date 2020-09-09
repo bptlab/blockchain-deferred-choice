@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.6.9;
+pragma solidity ^0.7.1;
 pragma experimental ABIEncoderV2;
 
 import "./AbstractAsyncChoice.sol";
 import "./../oracles/FutureAsyncOracle.sol";
 
-contract FutureAsyncChoice is AbstractAsyncChoice, ExpressionChecker {
-  constructor(Event[] memory specs) AbstractAsyncChoice(specs) public {
+contract FutureAsyncChoice is AbstractAsyncChoice {
+  constructor(Event[] memory specs) AbstractAsyncChoice(specs) {
   }
 
   function activateEvent(uint8 index) internal override {

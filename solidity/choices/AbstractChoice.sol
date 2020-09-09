@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.6.9;
+pragma solidity ^0.7.1;
 pragma experimental ABIEncoderV2;
 
 import "./../Interfaces.sol";
@@ -35,7 +35,7 @@ abstract contract AbstractChoice is Base {
   int8 public winner = -1;
   uint8 public target = type(uint8).max;
 
-  constructor(Event[] memory specs) public {
+  constructor(Event[] memory specs) {
     // We have to copy the specs array manually since Solidity does not yet
     // support copying whole memory arrays into storage arrays.
     for (uint8 i = 0; i < specs.length; i++) {

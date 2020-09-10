@@ -39,7 +39,7 @@ function generateConfig(n, m) {
     }
   })) || [];
   let consumerTimeline = [
-    { "at": 0 },
+    { "at": 0, "context": { "target": 0 }},
     { "at": m + 1, "context": { "target": 0 }}
   ]
 

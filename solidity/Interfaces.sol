@@ -23,6 +23,11 @@ abstract contract Base {
   }
 }
 
+interface Choice {
+  function activate() external;
+  function trigger(uint8 targetEvent) external;
+}
+
 abstract contract SyncOracle is Base {
   function set(uint256 newValue)
       external virtual;

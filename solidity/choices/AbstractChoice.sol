@@ -4,7 +4,7 @@ pragma experimental ABIEncoderV2;
 
 import "./../Interfaces.sol";
 
-abstract contract AbstractChoice is Base {
+abstract contract AbstractChoice is Choice, Base {
   // Events
   event Winner(uint8 winner);
   // #ifdef DEBUG
@@ -47,7 +47,7 @@ abstract contract AbstractChoice is Base {
    * Initially activate this deferred choice scenario.
    * This is equivalent to an event-based gateway being reached.
    */
-  function activate() external {
+  function activate() external override {
     // Revert if it has been activated already
     if (activationTime > 0) {
       revert(
@@ -117,7 +117,7 @@ abstract contract AbstractChoice is Base {
    * other events are evaluated as well and the function only proceeds (potentially
    * asynchronously) when we can be sure that this event has "won" the race.
    */
-  function trigger(uint8 targetEvent) public {
+  function trigger(uint8 targetEvent) external override {
     // Check if the call is valid
     if (target < events.length) {
       revert(

@@ -10,7 +10,9 @@ const PastAsyncCondProvider = require('./providers/PastAsyncCondProvider.js');
 const PastSyncProvider = require('./providers/PastSyncProvider.js');
 const PastSyncCondProvider = require('./providers/PastSyncCondProvider.js');
 const PresentAsyncProvider = require('./providers/PresentAsyncProvider.js');
+const PresentAsyncCondProvider = require('./providers/PresentAsyncCondProvider.js');
 const PresentSyncProvider = require('./providers/PresentSyncProvider.js');
+const PresentSyncCondProvider = require('./providers/PresentSyncCondProvider.js');
 const FutureAsyncProvider = require('./providers/FutureAsyncProvider.js');
 const FutureAsyncCondProvider = require('./providers/FutureAsyncCondProvider.js');
 
@@ -26,14 +28,16 @@ async function deployAndTest() {
   const scaling = 2;
 
   const providers = [
+    PresentSyncProvider,
+    PresentSyncCondProvider,
+    PresentAsyncProvider,
+    PresentAsyncCondProvider,
     FutureAsyncCondProvider,
     FutureAsyncProvider,
     PastAsyncProvider,
     PastAsyncCondProvider,
     PastSyncProvider,
     PastSyncCondProvider,
-    PresentAsyncProvider,
-    PresentSyncProvider,
   ];
 
   for (provider of providers) {

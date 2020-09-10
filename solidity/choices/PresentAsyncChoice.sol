@@ -7,7 +7,19 @@ import "./../oracles/PresentAsyncOracle.sol";
 
 contract PresentAsyncChoice is AbstractAsyncChoice {
 
+  uint256 triggerTime;
+
   constructor(Event[] memory specs) AbstractAsyncChoice(specs) {
+  }
+
+  function activate(uint8 targetEvent) public override {
+    super.activate(targetEvent);
+    triggerTime = block.timestamp;
+  }
+
+  function trigger(uint8 targetEvent) public override {
+    super.trigger(targetEvent);
+    triggerTime = block.timestamp;
   }
 
   function oracleCallback(uint16 correlation, bytes calldata result) external override {
@@ -21,7 +33,7 @@ contract PresentAsyncChoice is AbstractAsyncChoice {
 
     // Check the conditional event this oracle belongs to
     if (checkExpression(events[index].expression, value)) {
-      evals[index] = block.timestamp;
+      evals[index] = triggerTime;
     } else {
       evals[index] = TOP_TIMESTAMP;
     }

@@ -81,7 +81,7 @@ class ChoiceSimulator extends Simulator {
       util.wrapTx(
         this.config.name,
         'activate',
-        this.contract.methods.activate().send({
+        this.contract.methods.activate(context.target).send({
           nonce: util.getNonce(this.contract.defaultAccount),
           ...util.defaultOptions
         }).on('receipt', receipt => {

@@ -3,16 +3,18 @@
   "account": "Consumer2",
   "events": [{
     "type": "TIMER",
-    "timer": 1
+    "timer": 3
   }, {
     "type": "CONDITIONAL",
     "oracleName": "WeatherWarning",
     "operator": "EQUAL",
-    "value": 4
+    "value": 2
   }, {
     "type": "CONDITIONAL",
     "oracleName": "RouteClosure",
     "operator": "EQUAL",
     "value": 1
+  }, {
+    "type": "EXPLICIT"
   }]
 }

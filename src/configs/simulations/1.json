@@ -4,7 +4,7 @@
     {
       "name": "RunningExample",
       "timeline": [
-        { "at": 0 },
+        { "at": 0, "context": { "target": 0 }},
         { "at": 9, "context": { "target": 0 }}
       ]
     }

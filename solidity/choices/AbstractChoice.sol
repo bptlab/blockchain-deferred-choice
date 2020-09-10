@@ -43,12 +43,7 @@ abstract contract AbstractChoice is Choice, Base {
     }
   }
 
-  /*
-   * Initially activate this deferred choice scenario.
-   * This is equivalent to an event-based gateway being reached.
-   */
-  function activate() external override {
-    // Revert if it has been activated already
+  function activate(uint8 targetEvent) public virtual override {
     if (activationTime > 0) {
       revert(
         // #ifdef DEBUG
@@ -56,6 +51,14 @@ abstract contract AbstractChoice is Choice, Base {
         // #endif
       );
     }
+    if (targetEvent >= events.length) {
+      revert(
+        // #ifdef DEBUG
+        "Event with target index does not exist"
+        // #endif
+      );
+    }
+    target = targetEvent;
 
     // Remember the time of activation
     activationTime = block.timestamp;
@@ -68,13 +71,20 @@ abstract contract AbstractChoice is Choice, Base {
     // #ifdef DEBUG
     emit Debug("Activated");
     // #endif
+
+    // Try to complete the triggering of this event
+    tryCompleteTrigger();
   }
 
   function activateEvent(uint8 index) internal virtual {
     if (events[index].definition == EventDefinition.EXPLICIT) {
-      // Explicit (message and signal) events, by default, evaluate to "the future" until
-      // their concrete transaction is sent
-      evals[index] = TOP_TIMESTAMP;
+      // Explicit (message and signal) events, by default, evaluate to "the future"
+      // unless they are the immediate target of the activation
+      if (index == target) {
+        evals[index] = block.timestamp;
+      } else {
+        evals[index] = TOP_TIMESTAMP;
+      }
       return;
     }
 
@@ -117,8 +127,15 @@ abstract contract AbstractChoice is Choice, Base {
    * other events are evaluated as well and the function only proceeds (potentially
    * asynchronously) when we can be sure that this event has "won" the race.
    */
-  function trigger(uint8 targetEvent) external override {
+  function trigger(uint8 targetEvent) public virtual override {
     // Check if the call is valid
+    if (activationTime == 0) {
+      revert(
+        // #ifdef DEBUG
+        "Choice has not been activated yet"
+        // #endif
+      );
+    }
     if (target < events.length) {
       revert(
         // #ifdef DEBUG

@@ -13,7 +13,7 @@ contract FutureAsyncCondChoice is AbstractAsyncChoice {
     if (events[index].definition == EventDefinition.CONDITIONAL) {
       // Subscribe to publish/subscribe oracles.
       FutureAsyncCondOracle(events[index].oracle).query(index, abi.encode(events[index].expression));
-      evals[index] = TOP_TIMESTAMP;
+      evals[index] = 0;
       return;
     }
 
@@ -34,13 +34,19 @@ contract FutureAsyncCondChoice is AbstractAsyncChoice {
       return;
     }
 
-    evals[index] = block.timestamp;
+    if (evals[index] == 0) {
+      evals[index] = activationTime;
+    } else {
+      evals[index] = block.timestamp;
+    }
 
     // Additionally, re-evaluate all timer events since they may have become true
     // by now. We have to do this here since oracle callbacks are independent of any
     // concrete trigger attempt in the FutureAsync scenario.
     for (uint8 i = 0; i < events.length; i++) {
-      evaluateEvent(i);
+      if (evals[i] == 0 || evals[i] == TOP_TIMESTAMP) {
+        evaluateEvent(i);
+      }
     }
 
     // Try to trigger the correlated original target of this trigger attempt

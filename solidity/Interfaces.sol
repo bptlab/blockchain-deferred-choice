@@ -23,9 +23,24 @@ abstract contract Base {
   }
 }
 
-interface Choice {
-  function activate() external;
-  function trigger(uint8 targetEvent) external;
+abstract contract Choice {
+  /*
+   * Initially activate the deferred choice instance.
+   * @param targetEvent Index of the event to trigger if evaluated successfully; 
+   *                    otherwise, an arbitrary implicit event might be chosen if
+   *                    it can trigger "immediately" (potentially after waiting
+   *                    for callbacks)
+   */
+  function activate(uint8 targetEvent) public virtual;
+
+  /*
+   * Try to trigger the event with the given index.
+   * @param targetEvent Index of the event to trigger if evaluated successfully; 
+   *                    otherwise, an arbitrary implicit event might be chosen if
+   *                    it can trigger "immediately" (potentially after waiting
+   *                    for callbacks)
+   */
+  function trigger(uint8 targetEvent) public virtual;
 }
 
 abstract contract SyncOracle is Base {

@@ -16,19 +16,19 @@ class Simulation {
 
     // Deploy all oracles and collect their addresses, since they need to be provided
     // to the choice contracts later
-    let oracleAddresses = {};
     console.log("Start deploying oracles...");
-    for (let i = 0; i < oracles.length; i++) {
-      const oracle = oracles[i];
-      oracleAddresses[oracle.config.name] = await oracle.deploy();
-    }
+    const addresses = await Promise.all(
+      oracles.map(o => o.deploy())
+    );
+    let addressMap = {};
+    addresses.forEach((addr, i) => addressMap[oracles[i].config.name] = addr);
     console.log("Finished deploying oracles");
 
     // Deploy all choices
     console.log("Start deploying choices...");
-    for (let i = 0; i < choices.length; i++) {
-      await choices[i].deploy(oracleAddresses, scaling);
-    }
+    await Promise.all(
+      choices.map(c => c.deploy(addressMap, scaling))
+    );
     console.log("Finished deploying choices");
 
     // Start and await all simulations

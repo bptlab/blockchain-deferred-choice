@@ -17,18 +17,17 @@ const FutureAsyncCondProvider = require('./providers/FutureAsyncCondProvider.js'
 
 var rng = seedrandom('oracle');
 
-// [0,1,2,3,4,5,10,20,50]^2
+// Experiment 1:
+// One oracle instance
+// [1, 10, 50, 100] updates
+// [1, 5, 10, 25, 50] consumers
+// In this experiment, the triggering behavior of the choice is irrelevant. We assume a worst-case, that is, nothing ever fires.
 
-// one oracle instance
-// choices (consumers) x updates
-// 1x1
-// 1x10
-// 1x100
-// 1x1000
-// 10x1
-// 10x10
-// 10x100
-// 10x1000
+// Experiment 2:
+// One choice instance
+// [1, 10, 50, 100] updates
+// [1, 2, 3, 4, 5] oracles
+// In this experiment, the triggering behavior of the choice is irrelevant. We assume a worst-case, that is, nothing ever fires.
 
 function generateConfig(n, m) {
   // Timelines

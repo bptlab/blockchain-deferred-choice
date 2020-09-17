@@ -3,6 +3,17 @@ const solc = require('solc');
 const Web3 = require('web3');
 const glob = require("glob");
 
+const PastAsyncProvider = require('./providers/PastAsyncProvider.js');
+const PastAsyncCondProvider = require('./providers/PastAsyncCondProvider.js');
+const PastSyncProvider = require('./providers/PastSyncProvider.js');
+const PastSyncCondProvider = require('./providers/PastSyncCondProvider.js');
+const PresentAsyncProvider = require('./providers/PresentAsyncProvider.js');
+const PresentAsyncCondProvider = require('./providers/PresentAsyncCondProvider.js');
+const PresentSyncProvider = require('./providers/PresentSyncProvider.js');
+const PresentSyncCondProvider = require('./providers/PresentSyncCondProvider.js');
+const FutureAsyncProvider = require('./providers/FutureAsyncProvider.js');
+const FutureAsyncCondProvider = require('./providers/FutureAsyncCondProvider.js');
+
 const KEYS = {
   Consumer: '9756b00ca92badafd4d9ce3b6f02134b4de13cbb9dceaf9db61eda3724bd3a30',
   Consumer2: 'f9a4f587def617e4d943fe5ce1b1f0b4a86270ce7e8baaeb4087f3ce10f28684',
@@ -13,7 +24,8 @@ const KEYS = {
 // Connect to blockchain
 const web3 = new Web3(new Web3.providers.WebsocketProvider(
   //'wss://ropsten.infura.io/ws/v3/ac8b7480996843d18ee89a61c6d0d673'
-  'ws://localhost:8545'
+  //'ws://localhost:8545'
+  'http://localhost:8545'
 ));
 
 let specs;
@@ -69,6 +81,7 @@ exports.init = async function() {
   accounts = {};
   Object.keys(KEYS).forEach(key => {
     accounts[key] = web3.eth.accounts.wallet.add(KEYS[key]).address;
+    console.log('Registered account: ' + accounts[key]);
   });
 
   // Initiate nonces
@@ -146,6 +159,19 @@ exports.checkExpression = function(expression, value) {
 exports.getAccount = function(name) {
   return accounts[name];
 }
+
+exports.getProviders = () => [
+  PresentSyncProvider,
+  PresentSyncCondProvider,
+  PresentAsyncProvider,
+  PresentAsyncCondProvider,
+  FutureAsyncCondProvider,
+  FutureAsyncProvider,
+  PastAsyncProvider,
+  PastAsyncCondProvider,
+  PastSyncProvider,
+  PastSyncCondProvider
+]
 
 exports.getNonce = function(account) {
   return nonces[account]++;

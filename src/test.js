@@ -11,7 +11,7 @@ async function deployAndTest() {
 
   let outputs = [];
 
-  const config = require('./configs/simulations/ActivationTest.json');
+  const config = require('./configs/simulations/2.json');
   util.augmentSimulationConfig(config);
 
   const scaling = 2;

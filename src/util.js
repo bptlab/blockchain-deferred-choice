@@ -23,9 +23,9 @@ const KEYS = {
 
 // Connect to blockchain
 const web3 = new Web3(new Web3.providers.WebsocketProvider(
-  //'wss://ropsten.infura.io/ws/v3/ac8b7480996843d18ee89a61c6d0d673'
-  //'ws://localhost:8545'
-  'http://localhost:8545'
+  //'wss://ropsten.infura.io/ws/v3/ac8b7480996843d18ee89a61c6d0d673' // Infura
+  //'ws://localhost:8545' // ganache
+  'ws://localhost:8546' // geth
 ));
 
 let specs;
@@ -135,7 +135,7 @@ exports.wrapTx = function(name, info, tx) {
   return tx.on('transactionHash', hash => {
     console.log(name, info, '|', 'HASH', hash);
   }).on('receipt', receipt => {
-    console.log(name, info, '|', 'RECEIPT');
+    console.log(name, info, '|', 'RECEIPT, BLOCK#', receipt.blockNumber);
   }).on('error', error => {
     console.log(name, info, '|', 'FAILED', error);
   });

@@ -58,21 +58,20 @@ async function run() {
   await util.init();
 
   let outputs = [];
-  const scaling = 10;
+  const scaling = 5;
 
   const updateSteps = [1, 10, 50, 100];
   const oracleSteps = [1, 2, 3, 4, 5];
   const choiceSteps = [1, 5, 10, 25, 50];
 
-  for (updates of updateSteps) {
-    for (choices of choiceSteps) {
+  for (const updates of updateSteps) {
+    for (const choices of choiceSteps) {
       const config = generateConfig(1, choices, updates);
-      const simulations = util.getProviders().map(provider => {
+      for (const provider of util.getProviders()) {
         const simulation = new Simulation(config, provider);
-        return simulation.perform(scaling);
-      });
-      const results = await Promise.all(simulations);
-      outputs = outputs.concat(results);
+        const result = await simulation.perform(scaling);
+        outputs.push(result);
+      }
     }
   };
 

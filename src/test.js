@@ -14,7 +14,7 @@ async function deployAndTest() {
   const config = require('./configs/simulations/2.json');
   util.augmentSimulationConfig(config);
 
-  const scaling = 2;
+  const scaling = 5;
 
   for (provider of util.getProviders()) {
     const simulation = new Simulation(config, provider);

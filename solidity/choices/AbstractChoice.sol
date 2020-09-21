@@ -65,6 +65,13 @@ abstract contract AbstractChoice is Choice, Base {
 
     // Activate all events
     for (uint8 i = 0; i < events.length; i++) {
+      // Small "hack": for timer events, the timer value is actually the offset from
+      // activation, which we have to change here. This accounts for the deployment
+      // delay of the choice instances.
+      if (events[i].definition == EventDefinition.TIMER) {
+        events[i].timer += activationTime;
+      }
+
       activateEvent(i);
     }
 

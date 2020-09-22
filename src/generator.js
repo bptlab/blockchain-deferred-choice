@@ -21,9 +21,9 @@ var rng = seedrandom('oracle');
 // In this experiment, the triggering behavior of the choice is irrelevant. We assume a worst-case, that is, nothing ever fires.
 
 function generateConfig(oracles, choices, updates) {
-  const name = "o" + ("00"+oracles).slice(-2) + "x" +
-               "c" + ("00"+choices).slice(-2) + "x" +
-               "u" + ("00"+updates).slice(-2);
+  const name = "o" + ("000"+oracles).slice(-3) + "x" +
+               "c" + ("000"+choices).slice(-3) + "x" +
+               "u" + ("000"+updates).slice(-3);
 
   return {
     "name": name,
@@ -64,9 +64,20 @@ async function run() {
   const oracleSteps = [1, 2, 3, 4, 5];
   const choiceSteps = [1, 5, 10, 25, 50];
 
+  // for (const updates of updateSteps) {
+  //   for (const choices of choiceSteps) {
+  //     const config = generateConfig(1, choices, updates);
+  //     for (const provider of util.getProviders()) {
+  //       const simulation = new Simulation(config, provider);
+  //       const result = await simulation.perform(scaling);
+  //       outputs.push(result);
+  //     }
+  //   }
+  // };
+
   for (const updates of updateSteps) {
-    for (const choices of choiceSteps) {
-      const config = generateConfig(1, choices, updates);
+    for (const oracles of oracleSteps) {
+      const config = generateConfig(oracles, 1, updates);
       for (const provider of util.getProviders()) {
         const simulation = new Simulation(config, provider);
         const result = await simulation.perform(scaling);

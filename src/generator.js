@@ -10,14 +10,10 @@ var rng = seedrandom('oracle');
 
 // Experiment 1:
 // One oracle instance
-// [1, 10, 50, 100] updates
-// [1, 5, 10, 25, 50] consumers
 // In this experiment, the triggering behavior of the choice is irrelevant. We assume a worst-case, that is, nothing ever fires.
 
 // Experiment 2:
 // One choice instance
-// [1, 10, 50, 100] updates
-// [1, 2, 3, 4, 5] oracles
 // In this experiment, the triggering behavior of the choice is irrelevant. We assume a worst-case, that is, nothing ever fires.
 
 function generateConfig(oracles, choices, updates) {
@@ -77,20 +73,20 @@ async function run() {
   let jsonBuffer = 'results_' + Date.now() + '.txt';
   let outputs = [];
   let configs;
-  const scaling = 1;
+  const scaling = 10;
 
   // Experiment 1
   configs = generateConfigs(
     [1], // oracles
     [1, 5, 10, 25, 50], // choices
-    [1, 5, 10, 50, 100] // updates
+    [1, 5, 10, 25, 50] // updates
   );
 
   // Experiment 2
   // configs = generateConfigs(
   //   [1, 2, 3, 4, 5], // oracles
   //   [1], // choices
-  //   [1, 5, 10, 50, 100] // updates
+  //   [1, 5, 10, 25, 50] // updates
   // );
 
   for (const [i, config] of configs.entries()) {
@@ -98,7 +94,7 @@ async function run() {
       console.log();
       console.log();
       console.log('Starting config', i + 1, '/', configs.length);
-      console.log('Using provider', j + 1, '/', util.getProviders().length);
+      console.log('Using provider', j + 1, '/', util.getProviders().length, provider.getContractPrefix());
       console.log('Counts: ', config.counts)
       console.log();
 

@@ -96,7 +96,7 @@ exports.init = async function() {
 
 exports.defaultOptions = {
   gas: 5000000,
-  gasPrice: '20000000000' // 20 gwei
+  gasPrice: '100000000000' // 100 gwei
 }
 
 exports.expressionType = {

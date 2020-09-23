@@ -27,6 +27,11 @@ function generateConfig(oracles, choices, updates) {
 
   return {
     "name": name,
+    "counts": {
+      "o": oracles,
+      "c": choices,
+      "u": updates
+    },
     "choices": Array(choices).fill().map((_, c) => ({
       "name": "OracleConsumer" + c,
       "account": "Consumer",
@@ -54,40 +59,60 @@ function generateConfig(oracles, choices, updates) {
   };
 }
 
+function generateConfigs(oracleSteps, choiceSteps, updateSteps) {
+  let configs = [];
+  for (const oracles of oracleSteps) {
+    for (const choices of choiceSteps) {
+      for (const updates of updateSteps) {
+        configs.push(generateConfig(oracles, choices, updates));
+      }
+    }
+  }
+  return configs;
+}
+
 async function run() {
   await util.init();
 
+  let jsonBuffer = 'results_' + Date.now() + '.txt';
   let outputs = [];
-  const scaling = 5;
+  let configs;
+  const scaling = 1;
 
-  const updateSteps = [1, 10, 50, 100];
-  const oracleSteps = [1, 2, 3, 4, 5];
-  const choiceSteps = [1, 5, 10, 25, 50];
+  // Experiment 1
+  configs = generateConfigs(
+    [1], // oracles
+    [1, 5, 10, 25, 50], // choices
+    [1, 5, 10, 50, 100] // updates
+  );
 
-  // for (const updates of updateSteps) {
-  //   for (const choices of choiceSteps) {
-  //     const config = generateConfig(1, choices, updates);
-  //     for (const provider of util.getProviders()) {
-  //       const simulation = new Simulation(config, provider);
-  //       const result = await simulation.perform(scaling);
-  //       outputs.push(result);
-  //     }
-  //   }
-  // };
+  // Experiment 2
+  // configs = generateConfigs(
+  //   [1, 2, 3, 4, 5], // oracles
+  //   [1], // choices
+  //   [1, 5, 10, 50, 100] // updates
+  // );
 
-  for (const updates of updateSteps) {
-    for (const oracles of oracleSteps) {
-      const config = generateConfig(oracles, 1, updates);
-      for (const provider of util.getProviders()) {
-        const simulation = new Simulation(config, provider);
-        const result = await simulation.perform(scaling);
-        outputs.push(result);
-      }
+  for (const [i, config] of configs.entries()) {
+    for (const [j, provider] of util.getProviders().entries()) {
+      console.log();
+      console.log();
+      console.log('Starting config', i + 1, '/', configs.length);
+      console.log('Using provider', j + 1, '/', util.getProviders().length);
+      console.log('Counts: ', config.counts)
+      console.log();
+
+      const simulation = new Simulation(config, provider);
+      const result = await simulation.perform(scaling);
+      result.counts = config.counts;
+      outputs.push(result);
+      await fs.appendFile(jsonBuffer, JSON.stringify(result) + ',');
     }
-  };
+  }
 
-  console.log('FINAL RESULT');
-  console.log(JSON.stringify(outputs, null, 2));
+  console.log();
+  console.log();
+  console.log('Experiment finished!');
 
   const csv = await json2csv.json2csvAsync(outputs);
   await fs.outputFile('results_' + Date.now() + '.csv', csv);

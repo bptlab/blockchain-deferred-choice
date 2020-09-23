@@ -27,6 +27,7 @@ const web3 = new Web3(new Web3.providers.WebsocketProvider(
   //'ws://localhost:8545' // ganache
   'ws://localhost:8546' // geth
 ));
+web3.eth.transactionBlockTimeout = 1000;
 
 let specs;
 let accounts;

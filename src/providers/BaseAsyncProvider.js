@@ -4,10 +4,6 @@ const util = require('./../util.js');
 
 /* abstract */ class BaseAsyncProvider extends BaseProvider {
 
-  constructor(name, contract) {
-    super(name, contract);
-  }
-
   onContractEvent(event) {
     super.onContractEvent(event);
     if (event.event = 'Query') {
@@ -45,8 +41,8 @@ const util = require('./../util.js');
         correlation,
         payload
       ).send({
-        from: this.contract.defaultAccount,
-        nonce: util.getNonce(this.contract.defaultAccount),
+        from: util.getAccount(this.account),
+        nonce: util.getNonce(this.account),
         ...util.defaultOptions
       }).on('receipt', receipt => {
         this.receipts.push(receipt);

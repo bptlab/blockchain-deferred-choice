@@ -3,6 +3,8 @@ const solc = require('solc');
 const Web3 = require('web3');
 const glob = require("glob");
 
+const KEYS = require('./keys/private.json');
+
 const PastAsyncProvider = require('./providers/PastAsyncProvider.js');
 const PastAsyncCondProvider = require('./providers/PastAsyncCondProvider.js');
 const PastSyncProvider = require('./providers/PastSyncProvider.js');
@@ -13,13 +15,6 @@ const PresentSyncProvider = require('./providers/PresentSyncProvider.js');
 const PresentSyncCondProvider = require('./providers/PresentSyncCondProvider.js');
 const FutureAsyncProvider = require('./providers/FutureAsyncProvider.js');
 const FutureAsyncCondProvider = require('./providers/FutureAsyncCondProvider.js');
-
-const KEYS = {
-  Consumer: '9756b00ca92badafd4d9ce3b6f02134b4de13cbb9dceaf9db61eda3724bd3a30',
-  Consumer2: 'f9a4f587def617e4d943fe5ce1b1f0b4a86270ce7e8baaeb4087f3ce10f28684',
-  Oracle: '68ea7c2f6d68a6cecb02009e0767e11546d276abb607c3a910b4d07ef4d3a2a5',
-  Oracle2: '22ceb0fc8deaa76b6c96be6cd7b63c3154bc67f2b4332d2895aa123e2988fb76'
-};
 
 // Connect to blockchain
 const web3 = new Web3(new Web3.providers.WebsocketProvider(
@@ -79,18 +74,14 @@ exports.init = async function() {
   console.log('Successfully compiled', Object.keys(specs).length, 'contracts/interfaces');
 
   // Initiate accounts
-  accounts = {};
-  Object.keys(KEYS).forEach(key => {
-    accounts[key] = web3.eth.accounts.wallet.add(KEYS[key]).address;
-    console.log('Registered account: ' + accounts[key]);
+  accounts = KEYS.map(key => {
+    return web3.eth.accounts.wallet.add(key).address;
   });
+  console.log('Registered', KEYS.length, 'accounts');
 
   // Initiate nonces
-  nonces = {};
-  await Promise.all(Object.values(accounts).map(
-    address => web3.eth.getTransactionCount(address).then(nonce => {
-      nonces[address] = nonce;
-    })
+  nonces = await Promise.all(accounts.map(
+    address => web3.eth.getTransactionCount(address)
   ));
 }
 
@@ -157,8 +148,12 @@ exports.checkExpression = function(expression, value) {
   }
 }
 
-exports.getAccount = function(name) {
-  return accounts[name];
+exports.getAccount = function(index) {
+  return accounts[index];
+}
+
+exports.getNonce = function(index) {
+  return nonces[index]++;
 }
 
 exports.getProviders = () => [
@@ -173,10 +168,6 @@ exports.getProviders = () => [
   PastSyncProvider,
   PastSyncCondProvider
 ]
-
-exports.getNonce = function(account) {
-  return nonces[account]++;
-}
 
 exports.getSpec = function(spec) {
   return specs[spec];

@@ -16,51 +16,61 @@ var rng = seedrandom('oracle');
 // One choice instance
 // In this experiment, the triggering behavior of the choice is irrelevant. We assume a worst-case, that is, nothing ever fires.
 
-function generateConfig(oracles, choices, updates) {
-  const name = "o" + ("000"+oracles).slice(-3) + "x" +
-               "c" + ("000"+choices).slice(-3) + "x" +
-               "u" + ("000"+updates).slice(-3);
+function generateConfig(oracles, choices, updates, triggerInterval) {
+  const name = "o"  + oracles +
+               "c"  + choices +
+               "u"  + updates +
+               "ti" + triggerInterval;
+
+  const triggerCount = 1 + Math.ceil(updates / triggerInterval);
+  const triggerTime = t => {
+    let time = Math.min(t * triggerInterval, updates);
+    if (time == updates) {
+      time++;
+    }
+    return time;
+  };
 
   return {
     "name": name,
     "counts": {
       "o": oracles,
       "c": choices,
-      "u": updates
+      "u": updates,
+      "ti": triggerInterval
     },
     "choices": Array(choices).fill().map((_, c) => ({
-      "name": "OracleConsumer" + c,
-      "account": "Consumer",
+      "name": "Choice" + c,
+      "account": c,
       "events": Array(oracles).fill().map((_, o) => ({
         "type": "CONDITIONAL",
         "oracleName": "Oracle" + o,
-        "operator": "GREATER",
-        "value": 100
+        "operator": "GREATER_EQUAL",
+        "value": updates
       })),
-      "timeline": [
-        { "at": 0, "context": { "target": 0 }},
-        { "at": updates + 1, "context": { "target": 0 }}
-      ]
+      "timeline": Array(triggerCount).fill().map((_, t) => ({
+        "at": triggerTime(t), "context": { "target": 0 }
+      }))
     })),
     "oracles": Array(oracles).fill().map((_, o) => ({
       "name": "Oracle" + o,
-      "account": "Oracle",
+      "account": choices + o,
       "timeline": Array(updates).fill().map((_, u) => ({
-        "at": u,
+        "at": u + 1,
         "context": {
-          "value": Math.floor(rng() * 100)
+          "value": u + 1
         }
       }))
     }))
   };
 }
 
-function generateConfigs(oracleSteps, choiceSteps, updateSteps) {
+function generateConfigs(oracleSteps, choiceSteps, updateSteps, triggerInterval) {
   let configs = [];
   for (const oracles of oracleSteps) {
     for (const choices of choiceSteps) {
       for (const updates of updateSteps) {
-        configs.push(generateConfig(oracles, choices, updates));
+        configs.push(generateConfig(oracles, choices, updates, triggerInterval));
       }
     }
   }
@@ -73,14 +83,22 @@ async function run() {
   let jsonBuffer = 'results_' + Date.now() + '.txt';
   let outputs = [];
   let configs;
-  const scaling = 10;
+  const scaling = 5;
 
   // Experiment 1
+  // configs = generateConfigs(
+  //   [1], // oracles
+  //   [1, 5, 10, 25, 50], // choices
+  //   [1, 5, 10, 25, 50] // updates
+  // );
   configs = generateConfigs(
-    [1], // oracles
-    [1, 5, 10, 25, 50], // choices
-    [1, 5, 10, 25, 50] // updates
+    [2], // oracles
+    [2], // choices
+    [5], // updates
+    5 // trigger interval
   );
+  //console.dir(configs, { depth: null });
+  //process.exit();
 
   // Experiment 2
   // configs = generateConfigs(

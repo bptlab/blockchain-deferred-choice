@@ -37,7 +37,7 @@ class OracleSimulator extends Simulator {
       this.config.name,
       'deploy',
       this.contract.deploy().send({
-        nonce: util.getNonce(this.contract.defaultAccount)
+        nonce: util.getNonce(this.config.account)
       }).on('receipt', receipt => {
         this.receipts.push(receipt);
         this.contract.options.address = receipt.contractAddress;
@@ -45,7 +45,7 @@ class OracleSimulator extends Simulator {
     );
 
     // Wrap contract in provider
-    this.provider = new this.ProviderClazz(this.config.name, this.contract);
+    this.provider = new this.ProviderClazz(this.config.name, this.contract, this.config.account);
 
     return this.contract.options.address;
   }

@@ -3,11 +3,13 @@ const util = require('./../util.js');
 /* abstract */ class BaseProvider {
   name;
   contract;
+  account;
   receipts = [];
 
-  constructor(name, contract) {
+  constructor(name, contract, account) {
     this.name = name;
     this.contract = contract;
+    this.account = account;
 
     // Subscribe to contract events for logging purposes
     this.contract.events.allEvents({

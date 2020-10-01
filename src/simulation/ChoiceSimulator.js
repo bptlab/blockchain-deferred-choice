@@ -54,7 +54,7 @@ class ChoiceSimulator extends Simulator {
       this.contract.deploy({
         arguments: [ payload ]
       }).send({
-        nonce: util.getNonce(this.contract.defaultAccount)
+        nonce: util.getNonce(this.config.account)
       }).on('receipt', receipt => {
         this.receipts.push(receipt);
         this.contract.options.address = receipt.contractAddress;
@@ -79,7 +79,7 @@ class ChoiceSimulator extends Simulator {
         this.config.name,
         'activate',
         this.contract.methods.activate(context.target).send({
-          nonce: util.getNonce(this.contract.defaultAccount),
+          nonce: util.getNonce(this.config.account),
           ...util.defaultOptions
         }).on('receipt', receipt => {
           this.receipts.push(receipt);
@@ -91,7 +91,7 @@ class ChoiceSimulator extends Simulator {
         this.config.name,
         'trigger',
         this.contract.methods.trigger(context.target).send({
-          nonce: util.getNonce(this.contract.defaultAccount),
+          nonce: util.getNonce(this.config.account),
           ...util.defaultOptions
         }).on('receipt', receipt => {
           this.receipts.push(receipt);

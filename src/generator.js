@@ -86,25 +86,19 @@ async function run() {
   const scaling = 5;
 
   // Experiment 1
-  // configs = generateConfigs(
-  //   [1], // oracles
-  //   [1, 5, 10, 25, 50], // choices
-  //   [1, 5, 10, 25, 50] // updates
-  // );
   configs = generateConfigs(
-    [2], // oracles
-    [2], // choices
-    [5], // updates
+    [1], // oracles
+    [1, 5, 10, 25, 50], // choices
+    [1, 5, 10, 25, 50], // updates
     5 // trigger interval
   );
-  //console.dir(configs, { depth: null });
-  //process.exit();
 
   // Experiment 2
   // configs = generateConfigs(
   //   [1, 2, 3, 4, 5], // oracles
   //   [1], // choices
-  //   [1, 5, 10, 25, 50] // updates
+  //   [1, 5, 10, 25, 50], // updates
+  //   5 // trigger interval
   // );
 
   for (const [i, config] of configs.entries()) {

@@ -3,7 +3,6 @@ pragma solidity ^0.7.1;
 pragma experimental ABIEncoderV2;
 
 import "./AbstractAsyncChoice.sol";
-import "./../oracles/PastAsyncCondOracle.sol";
 
 contract PastAsyncCondChoice is AbstractAsyncChoice {
 
@@ -25,7 +24,7 @@ contract PastAsyncCondChoice is AbstractAsyncChoice {
 
   function evaluateEvent(uint8 index) internal override {
     if (events[index].definition == EventDefinition.CONDITIONAL) {
-      PastAsyncCondOracle(events[index].oracle).query(
+      AsyncOracle(events[index].oracle).query(
         index,
         abi.encode(events[index].expression, activationTime)
       );

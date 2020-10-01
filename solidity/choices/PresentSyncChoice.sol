@@ -3,7 +3,6 @@ pragma solidity ^0.7.1;
 pragma experimental ABIEncoderV2;
 
 import "./AbstractSyncChoice.sol";
-import "./../oracles/PresentSyncOracle.sol";
 
 contract PresentSyncChoice is AbstractSyncChoice {
   constructor(Event[] memory specs) AbstractSyncChoice(specs) {
@@ -12,7 +11,7 @@ contract PresentSyncChoice is AbstractSyncChoice {
   function evaluateEvent(uint8 index) internal override {
     if (events[index].definition == EventDefinition.CONDITIONAL) {
       uint256 value = abi.decode(
-        PresentSyncOracle(events[index].oracle).query(new bytes(0)),
+        SyncOracle(events[index].oracle).query(new bytes(0)),
         (uint256)
       );
       if (checkExpression(events[index].expression, value)) {

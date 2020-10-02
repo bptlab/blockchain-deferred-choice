@@ -22,9 +22,9 @@ function generateConfig(oracles, choices, updates, triggerInterval) {
                "u"  + updates +
                "ti" + triggerInterval;
 
-  const triggerCount = 1 + Math.ceil(updates / triggerInterval);
+  const triggerCount = 2 + Math.ceil(updates / triggerInterval);
   const triggerTime = t => {
-    let time = Math.min(t * triggerInterval, updates);
+    let time = Math.min(t * triggerInterval, updates + 1);
     if (time == updates) {
       time++;
     }
@@ -83,15 +83,21 @@ async function run() {
   let jsonBuffer = 'results_' + Date.now() + '.txt';
   let outputs = [];
   let configs;
-  const scaling = 5;
+  const scaling = 10;
 
   // Experiment 1
   configs = generateConfigs(
     [1], // oracles
-    [1, 5, 10, 25, 50], // choices
-    [1, 5, 10, 25, 50], // updates
+    [5,10,15,20], // choices
+    [1,5,10,25], // updates
     5 // trigger interval
   );
+  // configs = generateConfigs(
+  //   [1], // oracles
+  //   [1, 5, 10, 25, 50], // choices
+  //   [1, 5, 10, 25, 50], // updates
+  //   5 // trigger interval
+  // );
 
   // Experiment 2
   // configs = generateConfigs(
@@ -100,6 +106,8 @@ async function run() {
   //   [1, 5, 10, 25, 50], // updates
   //   5 // trigger interval
   // );
+
+  const start = Date.now();
 
   for (const [i, config] of configs.entries()) {
     for (const [j, provider] of util.getProviders().entries()) {
@@ -121,6 +129,8 @@ async function run() {
   console.log();
   console.log();
   console.log('Experiment finished!');
+  console.log('Started at:', start);
+  console.log('Time now:', Date.now());
 
   const csv = await json2csv.json2csvAsync(outputs);
   await fs.outputFile('results_' + Date.now() + '.csv', csv);

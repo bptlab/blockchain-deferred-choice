@@ -1,6 +1,8 @@
 const OracleSimulator = require('./OracleSimulator.js');
 const ChoiceSimulator = require('./ChoiceSimulator.js');
 
+const util = require('../util.js');
+
 class Simulation {
   config;
   ProviderClazz;
@@ -38,9 +40,9 @@ class Simulation {
     );
     console.log("Finished simulations");
 
-    // Output some statistics after a while
-    console.log("Wait for statistics...");
-    await new Promise(resolve => setTimeout(resolve, 1000 * scaling));
+    // Only start gathering statistics when all transactions finished
+    console.log("Wait for pending transactions...");
+    await util.waitForPending();
 
     console.log("Start preparing statistics...");
     let output = {

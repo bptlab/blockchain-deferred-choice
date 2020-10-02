@@ -123,14 +123,24 @@ exports.augmentSimulationConfig = function(config) {
   });
 };
 
+let pending = 0;
 exports.wrapTx = function(name, info, tx) {
+  pending++;
   return tx.on('transactionHash', hash => {
     console.log(name, info, '|', 'HASH', hash);
   }).on('receipt', receipt => {
+    pending--;
     console.log(name, info, '|', 'RECEIPT, BLOCK#', receipt.blockNumber);
   }).on('error', error => {
-    console.log(name, info, '|', 'FAILED', error);
+    pending--;
+    console.log(name, info, '|', 'FAILED', error.message.split('\n', 1)[0]);
   });
+}
+
+exports.waitForPending = async function() {
+  while (pending > 0) {
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  }
 }
 
 exports.checkExpression = function(expression, value) {

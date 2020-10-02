@@ -28,7 +28,7 @@ const util = require('./../util.js');
   }
 
   onContractEvent(event) {
-    console.log(this.name, 'Event:', event.event, '|', 'RESULT', event.returnValues);
+    console.log(this.name, 'Event:', event.event, '|', 'RESULT', JSON.stringify(event.returnValues));
   }
 }
 

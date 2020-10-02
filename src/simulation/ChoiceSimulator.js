@@ -65,7 +65,7 @@ class ChoiceSimulator extends Simulator {
     this.contract.events.allEvents({
       fromBlock: 'latest'
     }).on('data', data => {
-      console.log(this.config.name, 'Event:', data.event, '|', 'RESULT', data.returnValues);
+      console.log(this.config.name, 'Event:', data.event, '|', 'RESULT', JSON.stringify(data.returnValues));
     }).on('error', console.error);
 
     return this.contract.options.address;

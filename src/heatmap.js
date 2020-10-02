@@ -37,7 +37,7 @@ function cellColor(p) {
 
 async function run() {
   // Load the data from a previous experiment run
-  const csv = (await fs.readFile('results_1601622596012.csv')).toString('utf8');
+  const csv = (await fs.readFile('results_1601651633549.csv')).toString('utf8');
   const json = await json2csv.csv2jsonAsync(csv);
 
   // Calculate cost sums
@@ -69,9 +69,7 @@ async function run() {
     ticksY.push(row.counts[y]);
   }
   ticksX = [...new Set(ticksX)].sort((a, b) => a - b);
-  ticksY = [...new Set(ticksY)].sort((a, b) => b - a);
-
-  console.log(ticksX, ticksY);
+  ticksY = [...new Set(ticksY)].sort((a, b) => a - b);
 
   const minZ = Math.min(...json.map(row => row[z]));
   const maxZ = Math.max(...json.map(row => row[z]));
@@ -95,8 +93,14 @@ async function run() {
       return [cx, cy, cz, color];
     });
 
-    const tikz = '{' + cells.map(cell => cell.join('/')).join(',') + '}';
-    console.log(`\\subfloat[${name}]{\\heatmap{${tikz}}\\label{subfig:${name}}}`)
+    const tikz = '{' +  + '}';
+    console.log(`\\subfloat[${name}]{\\heatmap{{${
+      ticksX.join(',')
+    }}}{{${
+      ticksY.join(',')
+    }}}{{${
+      cells.map(cell => cell.join('/')).join(',')
+    }}}\\label{subfig:${name}}}`);
 
     // Write chart to file
     //await fs.outputFile('chart' + name + '.svg', svg);

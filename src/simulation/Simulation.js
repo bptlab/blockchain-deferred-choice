@@ -42,6 +42,7 @@ class Simulation {
 
     // Only start gathering statistics when all transactions finished
     console.log("Wait for pending transactions...");
+    await new Promise(resolve => setTimeout(resolve, 1000 * scaling));
     await util.waitForPending();
 
     console.log("Start preparing statistics...");

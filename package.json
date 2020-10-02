@@ -5,7 +5,8 @@
   "scripts": {
     "test": "node src/test.js",
     "generator": "node src/generator.js",
-    "chart": "node src/chart.js"
+    "chart": "node src/chart.js",
+    "heatmap": "node src/heatmap.js"
   },
   "dependencies": {
     "fs-extra": "^9.0.1",

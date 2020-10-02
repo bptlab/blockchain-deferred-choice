@@ -36,10 +36,10 @@ class OracleSimulator extends Simulator {
     await util.wrapTx(
       this.config.name,
       'deploy',
+      this.receipts,
       this.contract.deploy().send({
         nonce: util.getNonce(this.config.account)
       }).on('receipt', receipt => {
-        this.receipts.push(receipt);
         this.contract.options.address = receipt.contractAddress;
       })
     );

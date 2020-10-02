@@ -51,12 +51,12 @@ class ChoiceSimulator extends Simulator {
     await util.wrapTx(
       this.config.name,
       'deploy',
+      this.receipts,
       this.contract.deploy({
         arguments: [ payload ]
       }).send({
         nonce: util.getNonce(this.config.account)
       }).on('receipt', receipt => {
-        this.receipts.push(receipt);
         this.contract.options.address = receipt.contractAddress;
       })
     );
@@ -78,11 +78,10 @@ class ChoiceSimulator extends Simulator {
       util.wrapTx(
         this.config.name,
         'activate',
+        this.receipts,
         this.contract.methods.activate(context.target).send({
           nonce: util.getNonce(this.config.account),
           ...util.defaultOptions
-        }).on('receipt', receipt => {
-          this.receipts.push(receipt);
         })
       );
     } else {
@@ -90,11 +89,10 @@ class ChoiceSimulator extends Simulator {
       util.wrapTx(
         this.config.name,
         'trigger',
+        this.receipts,
         this.contract.methods.trigger(context.target).send({
           nonce: util.getNonce(this.config.account),
           ...util.defaultOptions
-        }).on('receipt', receipt => {
-          this.receipts.push(receipt);
         })
       );
     }

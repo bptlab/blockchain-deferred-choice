@@ -12,11 +12,10 @@ class PastSyncCondProvider extends BaseProvider {
     util.wrapTx(
       this.name,
       'set',
+      this.receipts,
       this.contract.methods.set(value).send({
         nonce: util.getNonce(this.account),
         ...util.defaultOptions
-      }).on('receipt', receipt => {
-        this.receipts.push(receipt);
       })
     );
   }

@@ -124,16 +124,20 @@ exports.augmentSimulationConfig = function(config) {
 };
 
 let pending = 0;
-exports.wrapTx = function(name, info, tx) {
+exports.wrapTx = function(name, label, receipts, tx) {
   pending++;
   return tx.on('transactionHash', hash => {
-    console.log(name, info, '|', 'HASH', hash);
+    console.log(name, label, '|', 'HASH', hash);
   }).on('receipt', receipt => {
     pending--;
-    console.log(name, info, '|', 'RECEIPT, BLOCK#', receipt.blockNumber);
+    receipts.push(receipt);
+    console.log(name, label, '|', 'RECEIPT, BLOCK#', receipt.blockNumber);
   }).on('error', error => {
     pending--;
-    console.log(name, info, '|', 'FAILED', error.message.split('\n', 1)[0]);
+    if (error.receipt) {
+      receipts.push(error.receipt);
+    }
+    console.log(name, label, '|', 'FAILED', error.message.split('\n', 1)[0]);
   });
 }
 

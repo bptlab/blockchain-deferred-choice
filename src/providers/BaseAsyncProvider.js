@@ -34,6 +34,7 @@ const util = require('./../util.js');
     util.wrapTx(
       this.name,
       'oracleCallback',
+      this.receipts,
       new util.web3.eth.Contract(
         util.getSpec('OracleConsumer').abi,
         sender
@@ -44,8 +45,6 @@ const util = require('./../util.js');
         from: util.getAccount(this.account),
         nonce: util.getNonce(this.account),
         ...util.defaultOptions
-      }).on('receipt', receipt => {
-        this.receipts.push(receipt);
       })
     );
   }

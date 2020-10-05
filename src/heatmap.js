@@ -13,6 +13,11 @@ function sum(obj, start) {
     .reduce((sum, [_, value]) => sum + (value ? value : 0), 0);
 }
 
+/**
+ * Return a color on the spectrum of the heatmap-palette by wistia
+ * (https://github.com/wistia/heatmap-palette) based on the percentage given.
+ * Output will be a pgf list literal for use in LaTeX.
+ */
 function cellColor(p) {
   const steps = [
     [228,255,122],
@@ -35,9 +40,12 @@ function cellColor(p) {
   return `{rgb,255:red,${col[0]};green,${col[1]};blue,${col[2]}}`;
 }
 
+/**
+ * Main generation function for the heatmaps.
+ */
 async function run() {
   // Load the data from a previous experiment run
-  const csv = (await fs.readFile('results_1601651633549.csv')).toString('utf8');
+  const csv = (await fs.readFile('results_1601679201976.csv')).toString('utf8');
   const json = await json2csv.csv2jsonAsync(csv);
 
   // Calculate cost sums
@@ -93,7 +101,7 @@ async function run() {
       return [cx, cy, cz, color];
     });
 
-    const tikz = '{' +  + '}';
+    // Output TikZ code on console
     console.log(`\\subfloat[${name}]{\\heatmap{{${
       ticksX.join(',')
     }}}{{${
@@ -101,9 +109,6 @@ async function run() {
     }}}{{${
       cells.map(cell => cell.join('/')).join(',')
     }}}\\label{subfig:${name}}}`);
-
-    // Write chart to file
-    //await fs.outputFile('chart' + name + '.svg', svg);
   }
 
   process.exit();

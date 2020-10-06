@@ -1,7 +1,18 @@
 const json2csv = require('json-2-csv');
 const fs = require('fs-extra');
 
-const util = require('./util.js');
+const orderCaption = {
+  PresentSync: '\\Storage',
+  PresentAsync: '\\Req',
+  PastSync: 'On-chain \\history',
+  PastAsync: 'Off-chain \\history',
+  FutureAsync: '\\Pub',
+  PresentSyncCond: '\\Storage, cond.',
+  PresentAsyncCond: '\\Req, cond.',
+  PastSyncCond: 'On-chain \\history, cond.',
+  PastAsyncCond: 'Off-chain \\history, cond.',
+  FutureAsyncCond: '\\Pub, cond.'
+}
 
 /**
  * Calculate the sum of all object values whose keys start with the specified
@@ -45,7 +56,7 @@ function cellColor(p) {
  */
 async function run() {
   // Load the data from a previous experiment run
-  const csv = (await fs.readFile('results_1601679201976.csv')).toString('utf8');
+  const csv = (await fs.readFile('results_1601935674602.csv')).toString('utf8');
   const json = await json2csv.csv2jsonAsync(csv);
 
   // Calculate cost sums
@@ -83,8 +94,7 @@ async function run() {
   const maxZ = Math.max(...json.map(row => row[z]));
 
   // Create heatmap data for each provider
-  for (const provider of util.getProviders()) {
-    const name = provider.getContractPrefix();
+  for (const name of Object.keys(orderCaption)) {
 
     // Get relevant rows
     const rows = json.filter(row => row.clazz == name);
@@ -101,14 +111,21 @@ async function run() {
       return [cx, cy, cz, color];
     });
 
+    // Create axis labels
+    const lx = ticksX.slice();
+    const ly = ticksY.slice();
+    lx[lx.length - 1] += `\\makebox[0pt][l]{~~\\emph{${ x }}}`;
+    ly[ly.length - 1] = `\\makebox[0pt][r]{\\emph{${ y }}~~}` + ly[ly.length - 1];
+
     // Output TikZ code on console
-    console.log(`\\subfloat[${name}]{\\heatmap{{${
-      ticksX.join(',')
+    console.log();
+    console.log(`\\subfloat[${ orderCaption[name] }]{\\heatmap{{${
+      lx.join(',')
     }}}{{${
-      ticksY.join(',')
+      ly.join(',')
     }}}{{${
       cells.map(cell => cell.join('/')).join(',')
-    }}}\\label{subfig:${name}}}`);
+    }}}\\label{subfig:${ name }}}`);
   }
 
   process.exit();

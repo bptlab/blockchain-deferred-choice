@@ -1,12 +1,9 @@
-const seedrandom = require('seedrandom');
 const json2csv = require('json-2-csv');
 const fs = require('fs-extra');
 
 const util = require('./util.js');
 
 const Simulation = require('./simulation/Simulation.js');
-
-var rng = seedrandom('oracle');
 
 const et = 0;
 const ew = 1;
@@ -21,6 +18,11 @@ function generateConfig(info, target, first = [], second = []) {
 
   let config = {
     name: info + '_' + target + '_' + first.join(':') + '_' + second.join(':'),
+    parameters: {
+      target,
+      first,
+      second
+    },
     choices: [{
       name: 'RunningExample',
       account: 0,
@@ -73,30 +75,34 @@ function generateConfig(info, target, first = [], second = []) {
   }
 
   // Explicit events
-  if (first.includes(et)) {
-    config.choices[0].timeline.push({
-      at: 1, context: { target: et }
-    });
-  } else if (second.includes(et)) {
-    config.choices[0].timeline.push({
-      at: 2, context: { target: et }
-    });
+  if (et == target) {
+    if (first.includes(et)) {
+      config.choices[0].timeline.push({
+        at: 1, context: { target: et }
+      });
+    } else if (second.includes(et)) {
+      config.choices[0].timeline.push({
+        at: 2, context: { target: et }
+      });
+    }
   }
-  if (first.includes(ec)) {
-    config.choices[0].timeline.push({
-      at: 1, context: { target: ec }
-    });
-  } else if (second.includes(ec)) {
-    config.choices[0].timeline.push({
-      at: 2, context: { target: ec }
-    });
+  if (ec == target) {
+    if (first.includes(ec)) {
+      config.choices[0].timeline.push({
+        at: 1, context: { target: ec }
+      });
+    } else if (second.includes(ec)) {
+      config.choices[0].timeline.push({
+        at: 2, context: { target: ec }
+      });
+    }
   }
 
   // If implicit then trigger afterwards
   if (target == ed || target == ew) {
-    let at = 1 + (first.length == 0 ? 1 : 0) + (second.length == 0 ? 1 : 0);
+    let at = 1 + Math.min(first.length, 1) + Math.min(second.length, 1);
     config.choices[0].timeline.push({
-      at, context: { target: target }
+      at, context: { target }
     });
   }
 
@@ -109,7 +115,7 @@ async function run() {
   let jsonBuffer = 'results_' + Date.now() + '.txt';
   let outputs = [];
   let configs = [];
-  const scaling = 10;
+  const scaling = 15;
 
   const all = [et, ew, ed, ec];
   for (const e of all) {

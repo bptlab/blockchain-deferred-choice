@@ -5,7 +5,6 @@
   "scripts": {
     "test": "node src/test.js",
     "generator": "node src/generator.js",
-    "chart": "node src/chart.js",
     "heatmap": "node src/heatmap.js",
     "correctness": "node src/correctness.js"
   },
@@ -13,8 +12,6 @@
     "fs-extra": "^9.0.1",
     "glob": "^7.1.6",
     "json-2-csv": "^3.7.5",
-    "node-chartist": "^1.0.5",
-    "seedrandom": "^3.0.5",
     "solc": "^0.7.1",
     "web3": "^1.2.9"
   }

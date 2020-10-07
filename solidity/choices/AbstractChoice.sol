@@ -8,8 +8,9 @@ abstract contract AbstractChoice is Choice, Base {
   // Events
   event Winner(uint8 winner);
   // #ifdef DEBUG
-  event Debug(string text);
-  event DebugUint(uint256 value);
+  event Debug(string);
+  event DebugUint(uint256);
+  event DebugBool(bool);
   // #endif
 
   // Enumerations
@@ -34,13 +35,15 @@ abstract contract AbstractChoice is Choice, Base {
   mapping(uint8 => uint256) public evals;
   int8 public winner = -1;
   uint8 public target = type(uint8).max;
+  bool useTransactionDriven;
 
-  constructor(Event[] memory specs) {
+  constructor(Event[] memory specs, bool transactionDriven) {
     // We have to copy the specs array manually since Solidity does not yet
     // support copying whole memory arrays into storage arrays.
     for (uint8 i = 0; i < specs.length; i++) {
       events.push() = specs[i];
     }
+    useTransactionDriven = transactionDriven;
   }
 
   function activate(uint8 targetEvent) public virtual override {
@@ -182,30 +185,51 @@ abstract contract AbstractChoice is Choice, Base {
    * or aborting the target event.
    */
   function tryCompleteTrigger() internal virtual {
-    // Find minimum evaluation timestamp of any implicit event
-    uint256 min = TOP_TIMESTAMP;
-    uint8 minIndex = 0;
-    for (uint8 i = 0; i < events.length; i++) {
-      if (events[i].definition != EventDefinition.EXPLICIT) {
-        if (evals[i] < min) {
-          min = evals[i];
-          minIndex = i;
-        }
-      }
-    }
-
-    // At this point, we should have an evaluation (maybe TOP_TIMESTAMP) for
-    // each implicit event. If not, something internal went wrong.
-    assert(min > 0);
+    // #ifdef DEBUG
+    emit Debug("Try complete trigger");
+    emit DebugUint(target);
+    emit DebugBool(useTransactionDriven);
+    // #endif
 
     uint8 toTrigger = uint8(events.length);
 
-    // Check if the target can be triggered
-    if (target < events.length && evals[target] <= min && evals[target] < TOP_TIMESTAMP) {
-      toTrigger = target;
-    } else if (min < TOP_TIMESTAMP) {
-      // Otherwise, fire the implicit one with the lowest timestamp if there is one
-      toTrigger = minIndex;
+    if (useTransactionDriven) {
+      // Find minimum evaluation timestamp of any implicit event
+      uint256 min = TOP_TIMESTAMP;
+      uint8 minIndex = 0;
+      for (uint8 i = 0; i < events.length; i++) {
+        if (events[i].definition != EventDefinition.EXPLICIT) {
+          if (evals[i] < min) {
+            min = evals[i];
+            minIndex = i;
+          }
+        }
+      }
+
+      // At this point, we should have an evaluation (maybe TOP_TIMESTAMP) for
+      // each implicit event. If not, something internal went wrong.
+      assert(min > 0);
+
+      // Check if the target can be triggered
+      if (target < events.length && evals[target] <= min && evals[target] < TOP_TIMESTAMP) {
+        toTrigger = target;
+      } else if (min < TOP_TIMESTAMP) {
+        // Otherwise, fire the implicit one with the lowest timestamp if there is one
+        toTrigger = minIndex;
+      }
+    } else {
+      // Check if we can trigger the target
+      if (target < events.length && evals[target] < TOP_TIMESTAMP) {
+        toTrigger = target;
+      } else {
+        // If not, get the first event that can trigger
+        for (uint8 i = 0; i < events.length; i++) {
+          if (evals[i] < TOP_TIMESTAMP) {
+            toTrigger = i;
+            break;
+          }
+        }
+      }
     }
 
     // Change the states of events according to the observations

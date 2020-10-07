@@ -6,7 +6,7 @@ import "./AbstractChoice.sol";
 
 abstract contract AbstractAsyncChoice is AbstractChoice, OracleConsumer {
 
-  constructor(Event[] memory specs) AbstractChoice(specs) {
+  constructor(Event[] memory specs, bool transactionDriven) AbstractChoice(specs, transactionDriven) {
   }
 
   function tryCompleteTrigger() internal override {

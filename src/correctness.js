@@ -5,106 +5,72 @@ const util = require('./util.js');
 
 const Simulation = require('./simulation/Simulation.js');
 
-const et = 0;
-const ew = 1;
-const ed = 2;
-const ec = 3;
+function generateConfig(id, n) {
+  // 0: timer event that never occurs
+  // 1-n: random events that occur at i
+  
+  // 0: activate
+  // i: occurence of event i
+  // n + 1: trigger attempt of event 1
+  // expected result: event 1 wins
 
-function generateConfig(info, target, first = [], second = []) {
-  // activate
-  // implicit events A occur
-  // implicit events B occur
-  // trigger target if implicit
-
+  // Base config
   let config = {
-    name: info + '_' + target + '_' + first.join(':') + '_' + second.join(':'),
-    parameters: {
-      target,
-      first,
-      second
-    },
+    name: 'Random' + id,
+    n,
     choices: [{
-      name: 'RunningExample',
+      name: 'SomeChoice',
       account: 0,
       events: [{
-        // (0) e_t, train departed
-        type: 'EXPLICIT'
-      }, {
-        // (1) e_w, severe weather warning issued
-        type: 'CONDITIONAL',
-        oracleName: 'WeatherWarning',
-        operator: 'GREATER_EQUAL',
-        value: 2
-      }, {
-        // (2) e_d, discount card expired
         type: 'TIMER',
-        timer: 10
-      },  {
-        // (3) e_c, ticket cancelled
-        type: 'EXPLICIT'
+        timer: 10000
       }],
       timeline: [
-        { at: 0, context: { target: ew }}
+        { at: 0, context: { target: 0 }}
       ]
     }],
-    oracles: [{
-      name: 'WeatherWarning',
-      account: 1,
-      timeline: [
-        { at: 0, context: { value: 0 }}
-      ]
-    }]
+    oracles: []
   };
 
-  // Implicit timer event
-  if (first.includes(ed)) {
-    config.choices[0].events[ed].timer = 1;
-  } else if (second.includes(ed)) {
-    config.choices[0].events[ed].timer = 2;
-  }
+  // Generate events
+  for (let i = 1; i <= n; i++) {
+    let event = {};
+    const rnd = Math.floor(Math.random() * 3);
+    if (rnd == 0) {
+      event.type = 'TIMER';
+      event.timer = i;
+    } else if (rnd == 1) {
+      const oracle = {
+        name: 'Oracle' + i,
+        account: i,
+        timeline: [
+          { at: 0, context: { value: 0 }},
+          { at: i, context: { value: 1 }}
+        ]
+      }
+      config.oracles.push(oracle);
 
-  // Implicit conditional event
-  if (first.includes(ew)) {
-    config.oracles[0].timeline.push({
-      at: 1, context: { value: 3 }
-    });
-  } else if (second.includes(ew)) {
-    config.oracles[0].timeline.push({
-      at: 2, context: { value: 3 }
-    });
-  }
-
-  // Explicit events
-  if (et == target) {
-    if (first.includes(et)) {
-      config.choices[0].timeline.push({
-        at: 1, context: { target: et }
-      });
-    } else if (second.includes(et)) {
-      config.choices[0].timeline.push({
-        at: 2, context: { target: et }
-      });
+      event.type = 'CONDITIONAL';
+      event.oracleName = 'Oracle' + i;
+      event.operator = 'EQUAL';
+      event.value = 1;
+    } else if (rnd == 2) {
+      event.type = 'EXPLICIT';
+      config.choices[0].timeline.push({ at: i, context: { target: i }});
     }
-  }
-  if (ec == target) {
-    if (first.includes(ec)) {
-      config.choices[0].timeline.push({
-        at: 1, context: { target: ec }
-      });
-    } else if (second.includes(ec)) {
-      config.choices[0].timeline.push({
-        at: 2, context: { target: ec }
-      });
-    }
+    config.choices[0].events.push(event);
   }
 
-  // If implicit then trigger afterwards
-  if (target == ed || target == ew) {
-    let at = 1 + Math.min(first.length, 1) + Math.min(second.length, 1);
-    config.choices[0].timeline.push({
-      at, context: { target }
-    });
-  }
+  // Trigger attempt
+  const target = Math.ceil(Math.random() * n);
+  config.choices[0].timeline.push({ at: n + 1, context: { target }});
+
+  config.info = {
+    n,
+    target,
+    targetType: config.choices[0].events[1].type,
+    allTypes: config.choices[0].events.map(event => event.type).join(':')
+  };
 
   return config;
 }
@@ -115,16 +81,16 @@ async function run() {
   let jsonBuffer = 'results_' + Date.now() + '.txt';
   let outputs = [];
   let configs = [];
-  const scaling = 15;
+  const scaling = 10;
 
-  const all = [et, ew, ed, ec];
-  for (const e of all) {
-    const others = all.slice();
-    others.splice(e, 1);
+  for (let i = 0; i < 36; i++) {
+    const config = generateConfig(i, 5);
+    configs.push(config);
+  }
 
-    configs.push(generateConfig('(1)', e, [e]));
-    configs.push(generateConfig('(2)', e, [e], others));
-    configs.push(generateConfig('(3)', e, others, [e]));
+  for (let i = 0; i < 18; i++) {
+    const config = generateConfig(i, 10);
+    configs.push(config);
   }
 
   const start = Date.now();
@@ -138,9 +104,15 @@ async function run() {
       console.log('Name:', config.name);
       console.log();
 
+      if (provider.getContractPrefix().startsWith('Present')) {
+        config.choices[0].useTransactionDriven = false;
+      } else {
+        config.choices[0].useTransactionDriven = true;
+      }
+
       const simulation = new Simulation(config, provider);
       const result = await simulation.perform(scaling);
-      result.counts = config.counts;
+      result.info = config.info;
       outputs.push(result);
       await fs.appendFile(jsonBuffer, JSON.stringify(result) + ',');
     }

@@ -5,7 +5,7 @@ pragma experimental ABIEncoderV2;
 import "./AbstractAsyncChoice.sol";
 
 contract FutureAsyncChoice is AbstractAsyncChoice {
-  constructor(Event[] memory specs) AbstractAsyncChoice(specs) {
+  constructor(Event[] memory specs, bool transactionDriven) AbstractAsyncChoice(specs, transactionDriven) {
   }
 
   function activateEvent(uint8 index) internal override {

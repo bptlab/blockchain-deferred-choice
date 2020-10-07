@@ -3,7 +3,6 @@
   "description": "",
   "version": "0.1.0",
   "scripts": {
-    "test": "node src/test.js",
     "generator": "node src/generator.js",
     "heatmap": "node src/heatmap.js",
     "correctness": "node src/correctness.js"

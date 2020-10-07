@@ -112,17 +112,6 @@ exports.enums = {
   }
 };
 
-exports.augmentSimulationConfig = function(config) {
-  config.oracles.forEach(c => {
-    oracleConfig = require('./configs/oracles/' + c.name + '.json');
-    Object.assign(c, oracleConfig);
-  });
-  config.choices.forEach(c => {
-    choiceConfig = require('./configs/choices/' + c.name + '.json');
-    Object.assign(c, choiceConfig);
-  });
-};
-
 let pending = 0;
 exports.wrapTx = function(name, label, receipts, tx) {
   pending++;

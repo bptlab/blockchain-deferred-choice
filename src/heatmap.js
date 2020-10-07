@@ -56,7 +56,7 @@ function cellColor(p) {
  */
 async function run() {
   // Load the data from a previous experiment run
-  const csv = (await fs.readFile('results_1601935674602.csv')).toString('utf8');
+  const csv = (await fs.readFile('results/cost.csv')).toString('utf8');
   const json = await json2csv.csv2jsonAsync(csv);
 
   // Calculate cost sums

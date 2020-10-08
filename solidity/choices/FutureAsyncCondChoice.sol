@@ -19,25 +19,18 @@ contract FutureAsyncCondChoice is AbstractAsyncChoice {
     super.activateEvent(index);
   }
 
-  function oracleCallback(uint16 correlation, bytes calldata) external override {
-    // Do nothing if we have already finished
-    if (winner >= 0) {
-      return;
-    }
+  function oracleCallback(uint16 correlation, bytes calldata result) public override {
+    super.oracleCallback(correlation, result);
 
     uint8 index = uint8(correlation);
 
     // Do nothing if the event this oracle belongs to has been evaluated already
     // (this filters out duplicate callbacks, or late pub/sub calls)
     if (evals[index] > 0 && evals[index] < TOP_TIMESTAMP) {
-      return;
+      revert();
     }
 
-    if (evals[index] == 0) {
-      evals[index] = activationTime;
-    } else {
-      evals[index] = block.timestamp;
-    }
+    evals[index] = block.timestamp;
 
     // Additionally, re-evaluate all timer events since they may have become true
     // by now. We have to do this here since oracle callbacks are independent of any

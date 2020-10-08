@@ -81,17 +81,17 @@ async function run() {
   let jsonBuffer = 'results_' + Date.now() + '.txt';
   let outputs = [];
   let configs = [];
-  const scaling = 10;
+  const scaling = 20;
 
-  for (let i = 0; i < 36; i++) {
+  for (let i = 0; i < 30; i++) {
     const config = generateConfig(i, 5);
     configs.push(config);
   }
 
-  for (let i = 0; i < 18; i++) {
-    const config = generateConfig(i, 10);
-    configs.push(config);
-  }
+  // for (let i = 0; i < 18; i++) {
+  //   const config = generateConfig(i, 10);
+  //   configs.push(config);
+  // }
 
   const start = Date.now();
 

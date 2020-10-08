@@ -10,6 +10,7 @@ abstract contract AbstractChoice is Choice, Base {
   // #ifdef DEBUG
   event Debug(string);
   event DebugUint(uint256);
+  event DebugLabeledUint(string, uint256);
   event DebugBool(bool);
   // #endif
 
@@ -73,13 +74,16 @@ abstract contract AbstractChoice is Choice, Base {
       // delay of the choice instances.
       if (events[i].definition == EventDefinition.TIMER) {
         events[i].timer += activationTime;
+        // #ifdef DEBUG
+        emit DebugUint(events[i].timer);
+        // #endif
       }
 
       activateEvent(i);
     }
 
     // #ifdef DEBUG
-    emit Debug("Activated");
+    emit DebugLabeledUint("Activated", activationTime);
     // #endif
 
     // Try to complete the triggering of this event
@@ -186,9 +190,7 @@ abstract contract AbstractChoice is Choice, Base {
    */
   function tryCompleteTrigger() internal virtual {
     // #ifdef DEBUG
-    emit Debug("Try complete trigger");
-    emit DebugUint(target);
-    emit DebugBool(useTransactionDriven);
+    emit DebugLabeledUint("Try complete trigger", target);
     // #endif
 
     uint8 toTrigger = uint8(events.length);

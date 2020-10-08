@@ -19,18 +19,15 @@ contract FutureAsyncChoice is AbstractAsyncChoice {
     super.activateEvent(index);
   }
 
-  function oracleCallback(uint16 correlation, bytes calldata result) external override {
-    // Do nothing if we have already finished
-    if (winner >= 0) {
-      return;
-    }
+  function oracleCallback(uint16 correlation, bytes calldata result) public override {
+    super.oracleCallback(correlation, result);
 
     uint8 index = uint8(correlation);
 
     // Do nothing if the event this oracle belongs to has been evaluated already
     // (this filters out duplicate callbacks, or late pub/sub calls)
     if (evals[index] > 0 && evals[index] < TOP_TIMESTAMP) {
-      return;
+      revert();
     }
 
     // Check the conditional event this oracle belongs to

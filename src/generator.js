@@ -1,4 +1,3 @@
-const seedrandom = require('seedrandom');
 const json2csv = require('json-2-csv');
 const fs = require('fs-extra');
 
@@ -6,7 +5,7 @@ const util = require('./util.js');
 
 const Simulation = require('./simulation/Simulation.js');
 
-var rng = seedrandom('oracle');
+require('log-timestamp');
 
 // Experiment 1:
 // One oracle instance

@@ -73,6 +73,7 @@ class ChoiceSimulator extends Simulator {
 
   onAction(index, context) {
     super.onAction(index, context);
+    console.log(this.config.name, 'Action at', this.timeline[this.index].at, '|', JSON.stringify(context));
     if (index == 0) {
       // Activate the choice
       util.wrapTx(

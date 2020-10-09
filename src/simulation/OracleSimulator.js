@@ -52,6 +52,7 @@ class OracleSimulator extends Simulator {
 
   onAction(index, context) {
     super.onAction(index, context);
+    console.log(this.config.name, 'Action at', this.timeline[this.index].at, '|', JSON.stringify(context));
     this.provider.onDataUpdate(context.value);
   }
 }

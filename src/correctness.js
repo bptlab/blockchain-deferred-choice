@@ -5,6 +5,8 @@ const util = require('./util.js');
 
 const Simulation = require('./simulation/Simulation.js');
 
+require('log-timestamp');
+
 function generateConfig(id, n) {
   // 0: timer event that never occurs
   // 1-n: random events that occur at i

@@ -11,7 +11,7 @@
     "ethash": {}
   },
   "difficulty": "1",
-  "gasLimit": "8000000",
+  "gasLimit": "10000000",
   "alloc": {
     "Cfd7D177988076F99759c7814BC7f2603036C563": { "balance": "400000000000000000000000" },
     "fa1E79eCb16E03499fF3E0dD8c9dD5342A5A9dE8": { "balance": "400000000000000000000000" },

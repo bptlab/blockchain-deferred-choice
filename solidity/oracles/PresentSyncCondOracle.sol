@@ -7,8 +7,8 @@ import "./../Interfaces.sol";
 contract PresentSyncCondOracle is SyncOracle {
   uint256 value;
 
-  function set(uint256 newValue) external override {
-    value = newValue;
+  function set(bytes memory newValue) external override {
+    value = abi.decode(newValue, (uint256));
   }
 
   function query(bytes memory parameters) public view override returns (bytes memory result) {

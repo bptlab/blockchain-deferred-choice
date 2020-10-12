@@ -44,7 +44,7 @@ abstract contract Choice {
 }
 
 abstract contract SyncOracle is Base {
-  function set(uint256 newValue)
+  function set(bytes memory newValue)
       external virtual;
   function query(bytes memory parameters)
       public view virtual returns (bytes memory result);

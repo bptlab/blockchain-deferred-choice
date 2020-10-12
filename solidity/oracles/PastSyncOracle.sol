@@ -7,9 +7,9 @@ import "./../Interfaces.sol";
 contract PastSyncOracle is SyncOracle {
   uint256[] public values;
 
-  function set(uint256 newValue) external override {
+  function set(bytes memory newValue) external override {
     values.push() = block.timestamp;
-    values.push() = newValue;
+    values.push() = abi.decode(newValue, (uint256));
   }
 
   function query(bytes memory parameters) public view override returns (bytes memory result) {

@@ -1,11 +1,14 @@
 const json2csv = require('json-2-csv');
 const fs = require('fs-extra');
+const seedrandom = require('seedrandom');
 
 const util = require('./util.js');
 
 const Simulation = require('./simulation/Simulation.js');
 
 require('log-timestamp');
+
+let rng = seedrandom('Oracles');
 
 function generateConfig(id, n) {
   // 0: timer event that never occurs
@@ -37,7 +40,7 @@ function generateConfig(id, n) {
   // Generate events
   for (let i = 1; i <= n; i++) {
     let event = {};
-    const rnd = Math.floor(Math.random() * 3);
+    const rnd = Math.floor(rng() * 3);
     if (rnd == 0) {
       event.type = 'TIMER';
       event.timer = i;
@@ -64,7 +67,7 @@ function generateConfig(id, n) {
   }
 
   // Trigger attempt
-  const target = Math.ceil(Math.random() * n);
+  const target = Math.ceil(rng() * n);
   config.choices[0].timeline.push({ at: n + 1, context: { target }});
 
   config.info = {

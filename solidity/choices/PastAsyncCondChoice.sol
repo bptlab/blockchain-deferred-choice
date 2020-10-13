@@ -6,7 +6,7 @@ import "./AbstractAsyncChoice.sol";
 
 contract PastAsyncCondChoice is AbstractAsyncChoice {
 
-  constructor(Event[] memory specs, bool transactionDriven) AbstractAsyncChoice(specs, transactionDriven) {
+  constructor(Event[] memory specs) AbstractAsyncChoice(specs, true) {
   }
 
   function oracleCallback(uint16 correlation, bytes calldata result) public override {

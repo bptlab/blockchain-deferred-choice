@@ -106,12 +106,6 @@ async function run() {
       console.log('Name:', config.name);
       console.log();
 
-      if (provider.getContractPrefix().startsWith('Present')) {
-        config.choices[0].useTransactionDriven = false;
-      } else {
-        config.choices[0].useTransactionDriven = true;
-      }
-
       const simulation = new Simulation(config, provider);
       const result = await simulation.perform(scaling);
       result.info = config.info;

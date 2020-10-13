@@ -5,7 +5,7 @@ pragma experimental ABIEncoderV2;
 import "./AbstractSyncChoice.sol";
 
 contract PresentSyncChoice is AbstractSyncChoice {
-  constructor(Event[] memory specs, bool transactionDriven) AbstractSyncChoice(specs, transactionDriven) {
+  constructor(Event[] memory specs) AbstractSyncChoice(specs, false) {
   }
 
   function evaluateEvent(uint8 index) internal override {

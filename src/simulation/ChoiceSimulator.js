@@ -53,7 +53,7 @@ class ChoiceSimulator extends Simulator {
       'deploy',
       this.receipts,
       this.contract.deploy({
-        arguments: [ payload, this.config.useTransactionDriven ]
+        arguments: [ payload ]
       }).send({
         nonce: util.getNonce(this.config.account)
       }).on('receipt', receipt => {

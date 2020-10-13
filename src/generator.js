@@ -41,7 +41,6 @@ function generateConfig(oracles, choices, updates, triggerInterval) {
     "choices": Array(choices).fill().map((_, c) => ({
       "name": "Choice" + c,
       "account": c,
-      "useTransactionDriven": true,
       "events": Array(oracles).fill().map((_, o) => ({
         "type": "CONDITIONAL",
         "oracleName": "Oracle" + o,

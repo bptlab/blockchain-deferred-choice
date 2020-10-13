@@ -8,7 +8,7 @@ contract PresentAsyncChoice is AbstractAsyncChoice {
 
   uint256 triggerTime;
 
-  constructor(Event[] memory specs, bool transactionDriven) AbstractAsyncChoice(specs, transactionDriven) {
+  constructor(Event[] memory specs) AbstractAsyncChoice(specs, false) {
   }
 
   function activate(uint8 targetEvent) public override {

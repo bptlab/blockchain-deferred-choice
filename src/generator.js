@@ -7,14 +7,6 @@ const Simulation = require('./simulation/Simulation.js');
 
 require('log-timestamp');
 
-// Experiment 1:
-// One oracle instance
-// In this experiment, the triggering behavior of the choice is irrelevant. We assume a worst-case, that is, nothing ever fires.
-
-// Experiment 2:
-// One choice instance
-// In this experiment, the triggering behavior of the choice is irrelevant. We assume a worst-case, that is, nothing ever fires.
-
 function generateConfig(oracles, choices, updates, triggerInterval) {
   const name = "o"  + oracles +
                "c"  + choices +
@@ -82,29 +74,14 @@ async function run() {
   let jsonBuffer = 'results_' + Date.now() + '.txt';
   let outputs = [];
   let configs;
-  const scaling = 10;
+  const scaling = 30;
 
-  // Experiment 1
   configs = generateConfigs(
     [1], // oracles
-    [5,10,15,20], // choices
-    [1,5,10,25], // updates
+    [5,10,20], // choices
+    [1,10,20,30], // updates
     5 // trigger interval
   );
-  // configs = generateConfigs(
-  //   [1], // oracles
-  //   [1, 5, 10, 25, 50], // choices
-  //   [1, 5, 10, 25, 50], // updates
-  //   5 // trigger interval
-  // );
-
-  // Experiment 2
-  // configs = generateConfigs(
-  //   [1, 2, 3, 4, 5], // oracles
-  //   [1], // choices
-  //   [1, 5, 10, 25, 50], // updates
-  //   5 // trigger interval
-  // );
 
   const start = Date.now();
 

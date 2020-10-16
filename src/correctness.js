@@ -78,9 +78,9 @@ async function run() {
   let configs = [];
   const scaling = 60;
 
-  for (let i = 0; i < 2; i++) {
+  for (let i = 0; i < 10; i++) {
     configs.push(generateConfig(i, 5));
-    // configs.push(generateConfig(i, 10));
+    configs.push(generateConfig(i, 10));
   }
 
   const start = Date.now();

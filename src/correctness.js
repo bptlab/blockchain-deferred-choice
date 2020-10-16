@@ -11,14 +11,6 @@ require('log-timestamp');
 let rng = seedrandom('Oracles');
 
 function generateConfig(id, n) {
-  // 0: timer event that never occurs
-  // 1-n: random events that occur at i
-  
-  // 0: activate
-  // i: occurence of event i
-  // n + 1: trigger attempt of event 1
-  // expected result: event 1 wins
-
   // Base config
   let config = {
     name: 'Random' + id,
@@ -26,30 +18,24 @@ function generateConfig(id, n) {
     choices: [{
       name: 'SomeChoice',
       account: 0,
-      events: [{
-        type: 'TIMER',
-        timer: 10000
-      }],
-      timeline: [
-        { at: 0, context: { target: 0 }}
-      ]
+      events: [],
+      timeline: []
     }],
     oracles: []
   };
 
   // Generate events
-  for (let i = 1; i <= n; i++) {
+  for (let i = 0; i < n; i++) {
     let event = {};
     const rnd = Math.floor(rng() * 3);
     if (rnd == 0) {
       event.type = 'TIMER';
       event.timer = i;
     } else if (rnd == 1) {
-      const oracle = {
+      let oracle = {
         name: 'Oracle' + i,
-        account: i,
+        account: i + 1,
         timeline: [
-          { at: 0, context: { value: 0 }},
           { at: i, context: { value: 1 }}
         ]
       }
@@ -68,12 +54,12 @@ function generateConfig(id, n) {
 
   // Trigger attempt
   const target = Math.ceil(rng() * n);
-  config.choices[0].timeline.push({ at: n + 1, context: { target }});
+  config.choices[0].timeline.push({ at: n, context: { target }});
 
   config.info = {
     n,
     target,
-    targetType: config.choices[0].events[1].type,
+    targetType: config.choices[0].events[0].type,
     allTypes: config.choices[0].events.map(event => event.type).join(':')
   };
 
@@ -86,17 +72,12 @@ async function run() {
   let jsonBuffer = 'results_' + Date.now() + '.txt';
   let outputs = [];
   let configs = [];
-  const scaling = 20;
+  const scaling = 60;
 
-  for (let i = 0; i < 30; i++) {
-    const config = generateConfig(i, 5);
-    configs.push(config);
+  for (let i = 0; i < 2; i++) {
+    configs.push(generateConfig(i, 5));
+    // configs.push(generateConfig(i, 10));
   }
-
-  // for (let i = 0; i < 18; i++) {
-  //   const config = generateConfig(i, 10);
-  //   configs.push(config);
-  // }
 
   const start = Date.now();
 
@@ -107,6 +88,8 @@ async function run() {
       console.log('Starting config', i + 1, '/', configs.length);
       console.log('Using provider', j + 1, '/', util.getProviders().length, provider.getContractPrefix());
       console.log('Name:', config.name);
+      console.log();
+      console.dir(config, {depth: null});
       console.log();
 
       const simulation = new Simulation(config, provider);

@@ -20,7 +20,7 @@ function generateConfig(id, n) {
       account: 0,
       events: [],
       timeline: [
-        { at: 0, context: { target: 0 }}
+        { at: 0, context: { target: n }}
       ]
     }],
     oracles: []
@@ -51,6 +51,8 @@ function generateConfig(id, n) {
       event.type = 'EXPLICIT';
       if (i > 0) {
         config.choices[0].timeline.push({ at: i, context: { target: i }});
+      } else {
+        config.choices[0].timeline[0].context.target = 0;
       }
     }
     config.choices[0].events.push(event);

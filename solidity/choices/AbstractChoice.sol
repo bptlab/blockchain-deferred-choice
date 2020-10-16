@@ -55,13 +55,6 @@ abstract contract AbstractChoice is Choice, Base {
         // #endif
       );
     }
-    if (targetEvent >= events.length) {
-      revert(
-        // #ifdef DEBUG
-        "Event with target index does not exist"
-        // #endif
-      );
-    }
     target = targetEvent;
 
     // Remember the time of activation
@@ -161,13 +154,6 @@ abstract contract AbstractChoice is Choice, Base {
       revert(
         // #ifdef DEBUG
         "Choice has already finished"
-        // #endif
-      );
-    }
-    if (targetEvent >= events.length) {
-      revert(
-        // #ifdef DEBUG
-        "Event with target index does not exist"
         // #endif
       );
     }

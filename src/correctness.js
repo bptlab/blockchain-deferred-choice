@@ -18,7 +18,9 @@ function generateConfig(id, n) {
     choices: [{
       name: 'SomeChoice',
       account: 0,
-      events: [],
+      events: [
+        { at: 0, context: { target: 0 }}
+      ],
       timeline: []
     }],
     oracles: []
@@ -47,7 +49,9 @@ function generateConfig(id, n) {
       event.value = 1;
     } else if (rnd == 2) {
       event.type = 'EXPLICIT';
-      config.choices[0].timeline.push({ at: i, context: { target: i }});
+      if (i > 0) {
+        config.choices[0].timeline.push({ at: i, context: { target: i }});
+      }
     }
     config.choices[0].events.push(event);
   }

@@ -18,10 +18,10 @@ function generateConfig(id, n) {
     choices: [{
       name: 'SomeChoice',
       account: 0,
-      events: [
+      events: [],
+      timeline: [
         { at: 0, context: { target: 0 }}
-      ],
-      timeline: []
+      ]
     }],
     oracles: []
   };

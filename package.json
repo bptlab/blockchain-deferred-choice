@@ -1,11 +1,15 @@
 {
-  "name": "deferred-choice",
+  "name": "blockchain-deferred-choice",
   "description": "",
   "version": "0.1.0",
+  "author": {
+    "name": "Jan Ladleif",
+    "url": "https://github.com/jan-ladleif"
+  },
   "scripts": {
-    "generator": "node src/generator.js",
-    "heatmap": "node src/heatmap.js",
-    "correctness": "node src/correctness.js"
+    "cost": "node src/cost.js",
+    "correctness": "node src/correctness.js",
+    "heatmap": "node src/heatmap.js"
   },
   "dependencies": {
     "fs-extra": "^9.0.1",

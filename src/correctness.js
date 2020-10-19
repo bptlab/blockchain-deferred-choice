@@ -20,6 +20,7 @@ function generateConfig(id, n) {
       account: 0,
       events: [],
       timeline: [
+        // Activate at 0 with non-existing target (no preference)
         { at: 0, context: { target: n }}
       ]
     }],
@@ -27,7 +28,7 @@ function generateConfig(id, n) {
   };
 
   // Generate events
-  for (let i = 0; i < n; i++) {
+  for (let i = 1; i <= n; i++) {
     let event = {};
     const rnd = Math.floor(rng() * 3);
     if (rnd == 0) {
@@ -36,7 +37,7 @@ function generateConfig(id, n) {
     } else if (rnd == 1) {
       let oracle = {
         name: 'Oracle' + i,
-        account: i + 1,
+        account: i,
         timeline: [
           { at: i, context: { value: 1 }}
         ]
@@ -49,18 +50,14 @@ function generateConfig(id, n) {
       event.value = 1;
     } else if (rnd == 2) {
       event.type = 'EXPLICIT';
-      if (i > 0) {
-        config.choices[0].timeline.push({ at: i, context: { target: i }});
-      } else {
-        config.choices[0].timeline[0].context.target = 0;
-      }
+      config.choices[0].timeline.push({ at: i, context: { target: i - 1 }});
     }
     config.choices[0].events.push(event);
   }
 
-  // Trigger attempt
-  const target = Math.ceil(rng() * n);
-  config.choices[0].timeline.push({ at: n, context: { target }});
+  // Trigger attempt after all events would have been detected
+  const target = Math.floor(rng() * n);
+  config.choices[0].timeline.push({ at: n + 1, context: { target }});
 
   config.info = {
     n,

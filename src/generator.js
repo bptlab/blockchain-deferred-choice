@@ -7,6 +7,16 @@ const Simulation = require('./simulation/Simulation.js');
 
 require('log-timestamp');
 
+/**
+ * Generate a simulation configuration with the given number of interconnected
+ * oracles, choices, and updates. Each choice will send a trigger attempt after
+ * each triggerInterval updates.
+ *
+ * @param {number} oracles 
+ * @param {number} choices 
+ * @param {number} updates 
+ * @param {number} triggerInterval 
+ */
 function generateConfig(oracles, choices, updates, triggerInterval) {
   const name = "o"  + oracles +
                "c"  + choices +

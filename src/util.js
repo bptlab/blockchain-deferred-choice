@@ -3,8 +3,10 @@ const solc = require('solc');
 const Web3 = require('web3');
 const glob = require("glob");
 
+// Load the private keys of the pre-funded Ethereum accounts
 const KEYS = require('./keys/private.json');
 
+// Load all providers
 const PastAsyncProvider = require('./providers/PastAsyncProvider.js');
 const PastAsyncCondProvider = require('./providers/PastAsyncCondProvider.js');
 const PastSyncProvider = require('./providers/PastSyncProvider.js');
@@ -16,32 +18,60 @@ const PresentSyncCondProvider = require('./providers/PresentSyncCondProvider.js'
 const FutureAsyncProvider = require('./providers/FutureAsyncProvider.js');
 const FutureAsyncCondProvider = require('./providers/FutureAsyncCondProvider.js');
 
-// Connect to blockchain
-const web3 = new Web3(new Web3.providers.WebsocketProvider(
-  //'wss://ropsten.infura.io/ws/v3/ac8b7480996843d18ee89a61c6d0d673' // Infura
-  //'ws://localhost:8545' // ganache
-  'ws://localhost:8546' // geth
-));
+// Connect to local geth node
+const web3 = new Web3(new Web3.providers.WebsocketProvider('ws://localhost:8546'));
 web3.eth.transactionBlockTimeout = 1000;
+exports.web3 = web3;
 
+// Shared variables
 let specs;
 let accounts;
 let nonces;
-
-exports.web3 = web3;
+let pending = 0;
 
 // Top timestamp used in contracts, equal to type(uint256).max
 exports.TOP_TIMESTAMP = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
 
+// Default options of all blockchain transactions
+exports.defaultOptions = {
+  gas: 5000000,
+  gasPrice: '100000000000' // 100 gwei
+}
+
+// Solidity expression struct
+exports.expressionType = {
+  'Expression': {
+    'operator': 'uint8',
+    'value': 'uint256'
+  }
+};
+
+// Solidity enumerations
+exports.enums = {
+  EventDefinition: {
+    TIMER: 0,
+    CONDITIONAL: 1,
+    EXPLICIT: 2
+  },
+  Operator: {
+    GREATER: 0,
+    GREATER_EQUAL: 1,
+    EQUAL: 2,
+    LESS_EQUAL: 3,
+    LESS: 4
+  }
+};
+
+/**
+ * Initialize the blockchain connection and smart contracts.
+ */
 exports.init = async function() {
   // Setup a very simple precompiler which removes DEBUG instructions
-  const PRE_OPTIONS = {
-    DEBUG: false
-  };
+  const preOptions = { DEBUG: false };
   const prePattern = new RegExp('// #ifdef ([A-Z]+)\\s*$([\\S\\s]*?)// #endif\\s*$', 'ugm');
-  const preReplace = (_, p1, p2) => PRE_OPTIONS[p1] ? p2 : '';
+  const preReplace = (_, p1, p2) => preOptions[p1] ? p2 : '';
 
-  // Compile contracts
+  // Load and precompile contracts
   const files = glob.sync('./solidity/**/*.sol');
   const sources = Object.assign({}, ...files.map(file => {
     file = file.replace('./solidity/', '');
@@ -53,6 +83,7 @@ exports.init = async function() {
     };
   }));
 
+  // Compile contracts
   const compilerIn = {
     language: 'Solidity',
     sources,
@@ -67,7 +98,6 @@ exports.init = async function() {
       }
     }
   };
-
   const compilerOut = JSON.parse(solc.compile(JSON.stringify(compilerIn)));
   console.log(compilerOut);
   specs = Object.assign({}, ...Object.values(compilerOut.contracts));
@@ -85,34 +115,15 @@ exports.init = async function() {
   ));
 }
 
-exports.defaultOptions = {
-  gas: 5000000,
-  gasPrice: '100000000000' // 100 gwei
-}
-
-exports.expressionType = {
-  'Expression': {
-    'operator': 'uint8',
-    'value': 'uint256'
-  }
-};
-
-exports.enums = {
-  EventDefinition: {
-    TIMER: 0,
-    CONDITIONAL: 1,
-    EXPLICIT: 2
-  },
-  Operator: {
-    GREATER: 0,
-    GREATER_EQUAL: 1,
-    EQUAL: 2,
-    LESS_EQUAL: 3,
-    LESS: 4
-  }
-};
-
-let pending = 0;
+/**
+ * This function wraps around an Ethereum transaction and manages console output
+ * and receipt collection.
+ *
+ * @param {string} name Contract name to add to debug output
+ * @param {string} label Label to add to debug output
+ * @param {Array} receipts Array to add receipt to
+ * @param {Object} tx Transaction object
+ */
 exports.wrapTx = function(name, label, receipts, tx) {
   pending++;
   return tx.on('transactionHash', hash => {
@@ -130,12 +141,19 @@ exports.wrapTx = function(name, label, receipts, tx) {
   });
 }
 
+/**
+ * Busy-wait for all pending transactions to finish.
+ */
 exports.waitForPending = async function() {
   while (pending > 0) {
     await new Promise(resolve => setTimeout(resolve, 1000));
   }
 }
 
+/**
+ * @param {Expression} expression Expression to check
+ * @param {number} value Value to check against
+ */
 exports.checkExpression = function(expression, value) {
   const operator = expression.operator;
   if (operator == this.enums.Operator.GREATER) {

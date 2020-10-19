@@ -11,6 +11,7 @@ class ChoiceSimulator extends Simulator {
     super(config.timeline);
     this.config = config;
 
+    // Prepare the contract object
     const spec = util.getSpec(ProviderClazz.getContractPrefix() + 'Choice');
     this.contract = new util.web3.eth.Contract(spec.abi, undefined, {
       from: util.getAccount(this.config.account),
@@ -31,7 +32,7 @@ class ChoiceSimulator extends Simulator {
   async deploy(oracleAddresses, scaling = 1) {
     // Convert the events to Ethereum struct encoding
     const payload = this.config.events.map(event => {
-      // Perform timer scaling. We add the current time to absolute timers, so
+      // Perform timer scaling: we add the current time to absolute timers, so
       // they are not static to a single date
       let timer = (event.timer || 0) * scaling;
 
@@ -48,6 +49,7 @@ class ChoiceSimulator extends Simulator {
       ];
     });
 
+    // Deploy the contract
     await util.wrapTx(
       this.config.name,
       'deploy',

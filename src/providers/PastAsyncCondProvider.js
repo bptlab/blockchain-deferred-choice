@@ -1,24 +1,14 @@
-const BaseAsyncProvider = require('./BaseAsyncProvider.js');
+const PastAsyncProvider = require('./PastAsyncProvider.js');
 
 const util = require('./../util.js');
 
-class PastAsyncCondProvider extends BaseAsyncProvider {
-  values = [0, 0];
-
+class PastAsyncCondProvider extends PastAsyncProvider {
   static getContractPrefix() {
     return 'PastAsyncCond';
   }
 
   getQueryParameterTypes() {
     return [ util.expressionType, 'uint256' ];
-  }
-
-  onDataUpdate(value) {
-    super.onDataUpdate(value);
-    this.values.push(
-      Math.ceil(Date.now() / 1000),
-      value
-    );
   }
 
   onQuery(sender, correlation, expression, from) {

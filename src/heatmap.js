@@ -93,6 +93,8 @@ async function run() {
   const minZ = Math.min(...json.map(row => row[z]));
   const maxZ = Math.max(...json.map(row => row[z]));
 
+  console.log(minZ, maxZ);
+
   // Create heatmap data for each provider
   for (const name of Object.keys(orderCaption)) {
 

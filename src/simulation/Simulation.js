@@ -3,6 +3,10 @@ const ChoiceSimulator = require('./ChoiceSimulator.js');
 
 const util = require('../util.js');
 
+/**
+ * A simulation contains and manages a set of Simulators.
+ * In our case, these are oracles and deferred choices.
+ */
 class Simulation {
   config;
   ProviderClazz;
@@ -12,6 +16,11 @@ class Simulation {
     this.ProviderClazz = ProviderClazz;
   }
 
+  /**
+   * Start the simulation.
+   *
+   * @param {number} scaling Scaling factor in seconds
+   */
   async perform(scaling) {
     const oracles = this.config.oracles.map(c => new OracleSimulator(c, this.ProviderClazz));
     const choices = this.config.choices.map(c => new ChoiceSimulator(c, this.ProviderClazz));
@@ -51,16 +60,19 @@ class Simulation {
       clazz: this.ProviderClazz.getContractPrefix()
     };
 
+    // Extract winning events
     const winners = await Promise.all(choices.map(choice => choice.contract.methods.winner().call()));
     output.w = Object.assign({}, ...winners.map(
       (winner, i) => ({ ['w' + i]: winner })
     ));
 
+    // Extract activation times
     const actTimes = await Promise.all(choices.map(choice => choice.contract.methods.activationTime().call()));
     output.a = Object.assign({}, ...actTimes.map(
       (actTime, i) => ({ ['a' + i]: actTime })
     ));
 
+    // Extract evaluation timestamps
     const choiceEvals = await Promise.all(choices.map(async choice => {
       const evals = await Promise.all(choice.config.events.map(
         (_, i) => choice.contract.methods.evals(i).call()
@@ -71,18 +83,21 @@ class Simulation {
       (choiceEval, i) => ({ ['c' + i]: choiceEval })
     ));
 
+    // Extract deployment costs
     output.gd = Object.assign(
       {},
       ...oracles.map((oracle, i) => ({ ['o' + i]: oracle.receipts[0].gasUsed })),
       ...choices.map((choice, i) => ({ ['c' + i]: choice.receipts[0].gasUsed }))
     );
 
+    // Extract transaction costs (minus deployment)
     output.gt = Object.assign(
       {},
       ...oracles.map((oracle, i) => ({ ['o' + i]: oracle.getGasUsed() - oracle.receipts[0].gasUsed })),
       ...choices.map((choice, i) => ({ ['c' + i]: choice.getGasUsed() - choice.receipts[0].gasUsed }))
     );
 
+    // Extract transaction counts
     output.tx = Object.assign(
       {},
       ...oracles.map((oracle, i) => ({ ['o' + i]: oracle.getTxCount() })),

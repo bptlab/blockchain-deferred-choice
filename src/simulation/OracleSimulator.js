@@ -14,6 +14,7 @@ class OracleSimulator extends Simulator {
     this.config = config;
     this.ProviderClazz = ProviderClazz;
 
+    // Prepare the contract object
     const spec = util.getSpec(ProviderClazz.getContractPrefix() + 'Oracle');
     this.contract = new util.web3.eth.Contract(spec.abi, undefined, {
       from: util.getAccount(this.config.account),
@@ -24,7 +25,9 @@ class OracleSimulator extends Simulator {
   }
 
   getGasUsed() {
-    return this.receipts.concat(this.provider.receipts).reduce((gas, receipt) => gas + receipt.gasUsed, 0);
+    return this.receipts
+      .concat(this.provider.receipts)
+      .reduce((gas, receipt) => gas + receipt.gasUsed, 0);
   }
 
   getTxCount() {
@@ -32,7 +35,7 @@ class OracleSimulator extends Simulator {
   }
 
   async deploy() {
-    // Create contract
+    // Deploy contract
     await util.wrapTx(
       this.config.name,
       'deploy',
@@ -45,7 +48,11 @@ class OracleSimulator extends Simulator {
     );
 
     // Wrap contract in provider
-    this.provider = new this.ProviderClazz(this.config.name, this.contract, this.config.account);
+    this.provider = new this.ProviderClazz(
+      this.config.name,
+      this.contract,
+      this.config.account
+    );
 
     return this.contract.options.address;
   }

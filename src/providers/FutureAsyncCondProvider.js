@@ -1,11 +1,8 @@
-const BaseAsyncProvider = require('./BaseAsyncProvider.js');
+const FutureAsyncProvider = require('./FutureAsyncProvider.js');
 
 const util = require('./../util.js');
 
-class FutureAsyncCondProvider extends BaseAsyncProvider {
-  subscribers = [];
-  currentValue = 0;
-
+class FutureAsyncCondProvider extends FutureAsyncProvider {
   static getContractPrefix() {
     return 'FutureAsyncCond';
   }
@@ -23,14 +20,6 @@ class FutureAsyncCondProvider extends BaseAsyncProvider {
       subscriber.unsubscribed = true;
       this.sendConsumer(subscriber.sender, subscriber.correlation);
     }
-  }
-
-  onDataUpdate(value) {
-    super.onDataUpdate(value);
-    this.currentValue = value;
-    this.subscribers.forEach(sub => {
-      this.doCallback(sub);
-    });
   }
 
   onQuery(sender, correlation, expression) {

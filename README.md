@@ -17,6 +17,13 @@ The repository is structured as follows:
   - `/providers`: Off-chain oracle provider code
   - `/simulation`: Simulation logic
 
+## Oracle Naming
+The oracles and deferred choice smart contracts follow a common naming scheme:
+
+The prefix `Future` refers to publish-subscribe oracles, the prefix `Present` refers to storage and request-response oracles, and the prefix `Past` refers to history oracles.
+`Sync` and `Async` refer to synchronous on-chain and asynchronous off-chain oracles, respectively.
+Lastly, `Cond` designates conditional variants of oracles.
+
 ## Running the Simulations
 
 ### Installation
